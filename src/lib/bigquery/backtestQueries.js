@@ -215,7 +215,7 @@ export async function fetchBacktestData({
       FROM cycle_spots cs
     )
 
-    -- Step 5: Pull option premiums for ATM ± 2 strikes on both entry and expiry day
+    -- Step 5: Pull option premiums for ATM ± 10 strikes on both entry and expiry day
     SELECT
       a.expiry_date,
       a.entry_date,
@@ -228,8 +228,8 @@ export async function fetchBacktestData({
       e_opt.ltp        AS entry_ltp,
       e_opt.iv         AS entry_iv,
       e_opt.oi         AS entry_oi,
-      -- Exit: use settle_pr on expiry day (official NSE settlement), fallback to ltp
-      COALESCE(x_opt.settle_pr, x_opt.ltp, 0) AS exit_price,
+      -- Exit: use close/ltp on expiry day (settle_pr is the *underlying* settlement, not option price)
+      COALESCE(x_opt.close, x_opt.ltp, 0) AS exit_price,
       x_opt.oi         AS exit_oi
     FROM atm_strikes a
     -- Entry day options
@@ -237,8 +237,8 @@ export async function fetchBacktestData({
       ON  e_opt.underlying  = @underlying
       AND e_opt.expiry_date = a.expiry_date
       AND e_opt.trade_date  = a.entry_date
-      AND e_opt.strike BETWEEN a.atm_strike - (@strikeInterval * 4)
-                            AND a.atm_strike + (@strikeInterval * 4)
+      AND e_opt.strike BETWEEN a.atm_strike - (@strikeInterval * 10)
+                            AND a.atm_strike + (@strikeInterval * 10)
     -- Expiry day settlement options
     LEFT JOIN \`${PROJECT_ID}.${DATASET}.options_eod\` x_opt
       ON  x_opt.underlying  = @underlying
@@ -293,8 +293,8 @@ export function computeBacktest(rows, strategyLegs, opts) {
       };
     }
 
-    // Key: "17500_CE"
-    const key = `${row.strike}_${row.option_type}`;
+    // Key: "17500_CE" — normalize float strike from BigQuery to integer
+    const key = `${Math.round(parseFloat(row.strike))}_${row.option_type}`;
     byExpiry[expiry].options[key] = {
       strike: parseFloat(row.strike),
       option_type: row.option_type,
