@@ -95,9 +95,10 @@ function DashboardContent() {
   const { currentUser, userProfile } = useAuth();
 
   // ── Live market indices ───────────────────────────────────────────────────
-  const [indices, setIndices]       = useState(null);
+  const [indices, setIndices]           = useState(null);
   const [indicesLoading, setIndicesLoading] = useState(true);
   const [indicesError, setIndicesError]     = useState(false);
+  const [indicesErrKind, setIndicesErrKind] = useState(null); // "auth_error" | "rate_limited" | "error"
 
   // ── Activity log ─────────────────────────────────────────────────────────
   const [activities, setActivities] = useState([]);
@@ -109,68 +110,93 @@ function DashboardContent() {
   const firstName = currentUser?.displayName?.split(" ")[0] || currentUser?.email?.split("@")[0] || "Trader";
 
   // Load market indices from real Dhan API
+  // NOTE: Using cancelled-flag pattern (not AbortController) because:
+  //   - This is a one-shot load on mount, not a repeatable query
+  //   - AbortController + bare async call in StrictMode creates an
+  //     orphaned rejected Promise that surfaces as unhandledRejection
+  //   - The cancelled flag simply ignores results from the stale call
   useEffect(() => {
-    const controller = new AbortController();
+    let cancelled = false;
+
     async function loadIndices() {
       try {
-        const res = await fetch("/api/indices", { signal: controller.signal });
-        if (!res.ok) throw new Error("API error");
+        const res  = await fetch("/api/indices");
         const data = await res.json();
-        if (data.source === "unavailable" || !data.indices?.length) {
-          setIndices(null); // creds not set — show dashes, not error
-        } else {
-          // Convert array → keyed map { NIFTY: item, BANKNIFTY: item, ... }
-          const keyMap = {};
-          for (const item of data.indices) {
-            const key = item.name.replace(" ", "").replace("50", "").replace("NIFTY", "NIFTY").trim();
-            // Map display names back to symbol keys
-            if (item.name === "NIFTY 50")   keyMap.NIFTY     = item;
-            if (item.name === "BANK NIFTY") keyMap.BANKNIFTY = item;
-            if (item.name === "FIN NIFTY")  keyMap.FINNIFTY  = item;
-          }
-          setIndices(keyMap);
+
+        if (cancelled) return;
+
+        const { source, indices: list = [] } = data;
+
+        // Non-data sources — surface the right message, don't set error state
+        if (source === "no_credentials" || source === "unavailable") {
+          setIndices(null);
+          setIndicesError(false);
+          return;
         }
+        if (source === "auth_error") {
+          setIndicesError(true);
+          setIndicesErrKind("auth_error");
+          return;
+        }
+        if (source === "rate_limited") {
+          // rate-limited but no stale cache — show dashes quietly
+          setIndices(null);
+          setIndicesError(false);
+          return;
+        }
+
+        // Build keyed map from the array
+        const keyMap = {};
+        for (const item of list) {
+          if (item.name === "NIFTY 50")   keyMap.NIFTY     = item;
+          if (item.name === "BANK NIFTY") keyMap.BANKNIFTY = item;
+          if (item.name === "FIN NIFTY")  keyMap.FINNIFTY  = item;
+        }
+        setIndices(Object.keys(keyMap).length ? keyMap : null);
         setIndicesError(false);
-      } catch (err) {
-        if (err.name === "AbortError") return;
-        setIndicesError(true);
+        setIndicesErrKind(null);
+
+      } catch {
+        if (!cancelled) {
+          setIndicesError(true);
+          setIndicesErrKind("error");
+        }
       } finally {
-        setIndicesLoading(false);
+        if (!cancelled) setIndicesLoading(false);
       }
     }
-    loadIndices();
-    return () => controller.abort();
+
+    // Attach .catch() so an unhandled rejection never reaches the console
+    loadIndices().catch(() => {});
+    return () => { cancelled = true; };
   }, []);
 
   // Load real activity logs from Firestore
   useEffect(() => {
     if (!currentUser?.uid) return;
+    let cancelled = false;
     async function loadActivity() {
       try {
         const logsRef = collection(db, "users", currentUser.uid, "activity_logs");
         const q = query(logsRef, orderBy("timestamp", "desc"), limit(20));
         const snap = await getDocs(q);
+        if (cancelled) return;
 
         const rawLogs = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-
-        // Filter to meaningful events only
         const meaningful = rawLogs
           .map((log) => ({ ...log, label: activityLabel(log.action, log) }))
           .filter((log) => log.label !== null);
 
         setActivities(meaningful.slice(0, 8));
-
-        // FTU: never ran a backtest = first-time user
-        const hasBacktest = rawLogs.some((l) => l.action === "SIMULATION_RUN");
-        setIsFTU(!hasBacktest);
+        setIsFTU(!rawLogs.some((l) => l.action === "SIMULATION_RUN"));
       } catch {
-        setActivities([]);
-        setIsFTU(true);
+        if (!cancelled) { setActivities([]); setIsFTU(true); }
       } finally {
-        setActLoading(false);
+        if (!cancelled) setActLoading(false);
       }
     }
-    loadActivity();
+    loadActivity().catch(() => {});
+    return () => { cancelled = true; };
   }, [currentUser?.uid]);
 
   const isPro = userProfile?.plan && userProfile.plan !== "free";
@@ -270,7 +296,9 @@ function DashboardContent() {
                   ) : !item ? (
                     <>
                       <p className="text-xl font-bold text-slate-600">—</p>
-                      <p className="text-xs text-slate-600 mt-1">{indicesError ? "Error" : "Add Dhan creds"}</p>
+                      <p className="text-xs text-slate-600 mt-1">
+                        {indicesErrKind === "auth_error" ? "Bad Dhan token" : "Unavailable"}
+                      </p>
                     </>
                   ) : (
                     <>
