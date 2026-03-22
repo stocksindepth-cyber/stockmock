@@ -58,19 +58,25 @@ export function generatePayoffData(legs, spotPrice, rangePercent = 10, points = 
   let maxLoss = Infinity;
 
   const legsWithIV = legs.map(leg => {
-    let iv = 0.2;
-    if (daysToExpiry > 0.01 && spotPrice) {
+    // If leg already has a stored entry IV (set at simulation start), use it directly.
+    // This is critical: re-deriving IV from the same entry premium at a smaller DTE
+    // produces a higher IV that perfectly cancels theta decay — making P&L look flat.
+    if (leg.iv > 0 && !isNaN(leg.iv)) {
+      return { ...leg };
+    }
+    // Fallback: derive IV from premium — only valid at the moment of entry
+    let iv = 0.18; // 18% default (NIFTY typical)
+    if (daysToExpiry > 0.01 && spotPrice && leg.strike && Number(leg.premium) > 0) {
       const type = leg.type === "PE" ? "PE" : "CE";
-      // impliedVolatility(price, S, K, T, r, type) — K (strike) must be passed
-      iv = impliedVolatility(
-        Number(leg.premium) || 0.1,
+      const computed = impliedVolatility(
+        Number(leg.premium),
         Number(spotPrice),
         Number(leg.strike),
         daysToExpiry / 365,
         0.07,
         type
       );
-      if (isNaN(iv) || iv <= 0) iv = 0.2;
+      if (!isNaN(computed) && computed > 0.01 && computed < 5) iv = computed;
     }
     return { ...leg, iv };
   });

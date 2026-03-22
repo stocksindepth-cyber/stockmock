@@ -64,37 +64,42 @@ export function generateCampaignFromRealCloses(realDays) {
 }
 
 /**
- * Brownian bridge from `start` to `end` over `steps` points.
- * The path starts at `start` and ends exactly at `end`, with
- * realistic intraday noise scaled to the magnitude of the move.
+ * Brownian bridge from `start` to `end` over `steps` minute-ticks.
+ *
+ * Vol model: NIFTY/BANKNIFTY realised daily vol ≈ 0.9% of spot (≈15% ann / √252).
+ * Per-minute vol = dailyVol / √375 ≈ 10 pts for NIFTY at 22 000.
+ * Noise is capped at ±2σ so the path stays smooth and realistic.
  */
 function brownianBridge(start, end, steps) {
-  const move      = end - start;
-  const dailyVol  = Math.abs(move) * 0.6 + Math.abs(start) * 0.004; // vol ~ 0.4% of spot/day
-  const stepVol   = dailyVol / Math.sqrt(steps);
+  // Use the larger of start/end as the spot level for vol scaling
+  const spotLevel = Math.max(Math.abs(start), Math.abs(end), 1);
+  const dailyVol  = spotLevel * 0.009;           // 0.9% of spot per day
+  const stepVol   = dailyVol / Math.sqrt(steps); // per-minute vol
 
   const raw = new Float64Array(steps);
   raw[0] = start;
 
   for (let i = 1; i < steps - 1; i++) {
-    const prev       = raw[i - 1];
-    const timeLeft   = steps - i;
-    // Pull toward the final value proportionally — Brownian bridge mean reversion
-    const pullToEnd  = (end - prev) / timeLeft;
-    const noise      = gaussianNoise() * stepVol;
-    raw[i]           = prev + pullToEnd + noise;
+    const prev      = raw[i - 1];
+    const timeLeft  = steps - i;
+    // Brownian bridge: pull proportionally toward the known end point
+    const pullToEnd = (end - prev) / timeLeft;
+    // Capped Gaussian noise — prevents rare extreme jumps
+    const noise     = cappedGaussian(2.0) * stepVol;
+    raw[i]          = prev + pullToEnd + noise;
   }
 
   raw[steps - 1] = end; // Force exact close
   return Array.from(raw).map((v) => parseFloat(v.toFixed(2)));
 }
 
-/** Box-Muller transform for Gaussian random noise */
-function gaussianNoise() {
+/** Box-Muller Gaussian, capped at ±maxSigma for smooth realistic paths */
+function cappedGaussian(maxSigma) {
   let u = 0, v = 0;
   while (u === 0) u = Math.random();
   while (v === 0) v = Math.random();
-  return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  const g = Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+  return Math.max(-maxSigma, Math.min(maxSigma, g));
 }
 
 /** Convert 0-375 minute index to "HH:MM" string (09:15 → 15:30) */
@@ -128,8 +133,8 @@ export function generateHistoricalCampaign(startDateStr, days = 5, baseSpot = 22
 
     for (let i = 0; i <= MINUTES_PER_DAY; i++) {
       const timeCode = minuteIndexToTime(i);
-      const drift    = trend * (Math.random() * 2);
-      const shock    = (Math.random() - 0.5) * 0.0015 * currentSpot;
+      const drift    = trend * 0.5;
+      const shock    = cappedGaussian(2.0) * currentSpot * 0.0004; // ~0.04% per minute
       currentSpot    = parseFloat((currentSpot + drift + shock).toFixed(2));
 
       stream.push({

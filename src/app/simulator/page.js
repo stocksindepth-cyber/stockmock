@@ -11,7 +11,7 @@ import AdjustmentLedger from "@/components/AdjustmentLedger";
 import AIMonitorModal from "@/components/AIMonitorModal";
 import UpgradeBanner from "@/components/UpgradeBanner";
 import { generatePayoffData, netPremium, calculatePOP } from "@/lib/options/payoff";
-// blackScholesPrice / impliedVolatility no longer used here — livePnl derives from payoffResult directly
+import { impliedVolatility } from "@/lib/options/greeks";
 import { getAllTemplates, generateStrategyLegs } from "@/lib/options/strategies";
 import { generateCampaignFromRealCloses, generateHistoricalCampaign } from "@/lib/data/historicalStreamer";
 import { useAuth } from "@/context/AuthContext";
@@ -34,7 +34,30 @@ const SENTIMENT_EMOJI = {
   "Mildly Bullish": "↗️",
 };
 
-// ─── Helper ───────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+/**
+ * Lock IV on each leg at the moment of entry.
+ * entrySpot + entryDTE must be exactly what will be used as T=0 in payoff.js.
+ * Storing IV prevents the "IV drift" bug: re-deriving IV from the same premium
+ * at a smaller DTE produces a higher sigma that exactly cancels theta decay.
+ */
+function stampEntryIV(legs, entrySpot, entryDTEdays) {
+  const T = Math.max(entryDTEdays, 0.5) / 365;
+  return legs.map((leg) => {
+    const type = leg.type === "PE" ? "PE" : "CE";
+    let iv = impliedVolatility(
+      Number(leg.premium) || 0.1,
+      Number(entrySpot),
+      Number(leg.strike),
+      T,
+      0.07,
+      type
+    );
+    if (isNaN(iv) || iv <= 0.01 || iv > 5) iv = 0.18; // 18% NIFTY default
+    return { ...leg, iv };
+  });
+}
 
 function calcExpiryPnL(legsArray, finalSpot) {
   return legsArray.reduce((pnl, leg) => {
@@ -131,28 +154,31 @@ function SimulatorContent() {
 
       if (json.dataSource === "real" && json.days?.length > 0) {
         campaignData   = generateCampaignFromRealCloses(json.days);
-        resolvedAtm    = json.atmStrike || Math.round(json.days[0].close / 50) * 50;
+        const entryClose = json.days[0].close;
+        resolvedAtm    = json.atmStrike || Math.round(entryClose / 50) * 50;
         resolvedSource = "real";
 
-        // Seed strategy legs with real NSE premiums if available
-        if (json.options?.length > 0) {
-          const optMap = {};
-          for (const o of json.options) optMap[`${o.strike}_${o.type}`] = o;
+        // Seed legs: use real NSE premiums, then lock in entry IV
+        const optMap = {};
+        for (const o of (json.options || [])) optMap[`${o.strike}_${o.type}`] = o;
 
-          const rawLegs = generateStrategyLegs("iron-condor", resolvedAtm);
-          const realLegs = rawLegs.map((leg) => {
-            const key  = `${leg.strike}_${leg.type}`;
-            const real = optMap[key];
-            return {
-              ...leg,
-              lotSize: underlying === "BANKNIFTY" ? 30 : underlying === "FINNIFTY" ? 65 : 75,
-              premium: real ? parseFloat(real.ltp.toFixed(2)) : leg.premium,
-              expiry:  expiryDate,
-            };
-          });
-          setLegs(realLegs);
-          setInitialLegs(realLegs);
-        }
+        const lotSize  = underlying === "BANKNIFTY" ? 30 : underlying === "FINNIFTY" ? 65 : 75;
+        const rawLegs  = generateStrategyLegs("iron-condor", resolvedAtm);
+        const seeded   = rawLegs.map((leg) => {
+          const key  = `${leg.strike}_${leg.type}`;
+          const real = optMap[key];
+          return {
+            ...leg,
+            lotSize,
+            premium: real && real.ltp > 0 ? parseFloat(real.ltp.toFixed(2)) : leg.premium,
+            expiry: expiryDate,
+          };
+        });
+        // entryDTE = trading days in campaign - 1 (today is day 1, expiry is last day)
+        const entryDTE = Math.max(json.days.length - 1, 1);
+        const withIV   = stampEntryIV(seeded, entryClose, entryDTE);
+        setLegs(withIV);
+        setInitialLegs(withIV);
       }
     } catch (_) {
       // Fall through to simulation below
@@ -164,10 +190,11 @@ function SimulatorContent() {
       resolvedAtm    = Math.round(campaignData[0].spot / 50) * 50;
       resolvedSource = "simulation";
 
-      const fallbackLegs = generateStrategyLegs("iron-condor", resolvedAtm)
+      const rawFallback = generateStrategyLegs("iron-condor", resolvedAtm)
         .map((leg) => ({ ...leg, expiry: expiryDate }));
-      setLegs(fallbackLegs);
-      setInitialLegs(fallbackLegs);
+      const withIV = stampEntryIV(rawFallback, campaignData[0].spot, diffDays);
+      setLegs(withIV);
+      setInitialLegs(withIV);
     }
 
     setDataSource(resolvedSource);
