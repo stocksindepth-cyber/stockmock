@@ -11,6 +11,7 @@ import {
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PayoffChart from "@/components/PayoffChart";
 import GreeksPanel from "@/components/GreeksPanel";
+import AppModal from "@/components/AppModal";
 import { useAuth } from "@/context/AuthContext";
 import {
   db,
@@ -262,6 +263,7 @@ function PaperTradeContent() {
   const [activeTab,   setActiveTab]   = useState("trade"); // trade | positions | history
   const [expandedPos, setExpandedPos] = useState(null);   // posId with chart expanded
   const [liveSpotMap, setLiveSpotMap] = useState({});     // posId → current spot price
+  const [modal,       setModal]       = useState(null);   // AppModal state
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const indexMeta     = useMemo(() => INDICES.find((i) => i.id === selIndex) ?? INDICES[0], [selIndex]);
@@ -440,7 +442,20 @@ function PaperTradeContent() {
     const margin    = Math.round(notional * 0.15 + Math.max(0, -netPrem));
 
     if (profile && (profile.capital - margin) < 0) {
-      alert(`Insufficient margin. Required: ${fmtINR(margin)}, Available: ${fmtINR(profile.capital)}`);
+      const shortfall = margin - profile.capital;
+      setModal({
+        type: "warning",
+        title: "Insufficient Margin",
+        message: `You need ${fmtINR(margin)} to place this trade, but your available capital is ${fmtINR(profile.capital)}. Try reducing the number of lots.`,
+        details: [
+          { label: "Required Margin",    value: fmtINR(margin),           highlight: "text-rose-400" },
+          { label: "Available Capital",  value: fmtINR(profile.capital),  highlight: "text-white" },
+          { label: "Shortfall",          value: fmtINR(shortfall),        highlight: "text-amber-400" },
+        ],
+        actions: [
+          { label: "OK", onClick: () => setModal(null), variant: "primary" },
+        ],
+      });
       return;
     }
 
@@ -471,7 +486,12 @@ function PaperTradeContent() {
       setActiveTab("positions");
     } catch (e) {
       console.error("Open position failed", e);
-      alert("Failed to open position. Check console.");
+      setModal({
+        type: "error",
+        title: "Trade Failed",
+        message: "Unable to place the paper trade. Please check your connection and try again.",
+        actions: [{ label: "OK", onClick: () => setModal(null), variant: "primary" }],
+      });
     } finally {
       setSubmitting(false);
     }
@@ -490,11 +510,20 @@ function PaperTradeContent() {
       const data = await res.json();
 
       if (data.error || !data.chain) {
-        alert(
-          data.error === "auth_error"
-            ? "Dhan token expired. Update it at /admin/dhan-token"
-            : "Live prices unavailable. Cannot square off without real prices."
-        );
+        const isDhanExpired = data.error === "auth_error";
+        setModal({
+          type: "warning",
+          title: isDhanExpired ? "Dhan Token Expired" : "Live Prices Unavailable",
+          message: isDhanExpired
+            ? "Your Dhan API token has expired. Square-off requires real-time prices — update the token to continue."
+            : "Could not fetch current option prices. Square-off requires live data to calculate your exact P&L.",
+          actions: isDhanExpired
+            ? [
+                { label: "Cancel",        onClick: () => setModal(null), variant: "ghost" },
+                { label: "Update Token →", onClick: () => { setModal(null); window.location.href = "/admin/dhan-token"; }, variant: "primary" },
+              ]
+            : [{ label: "OK", onClick: () => setModal(null), variant: "primary" }],
+        });
         return;
       }
 
@@ -535,7 +564,12 @@ function PaperTradeContent() {
       await loadData();
     } catch (e) {
       console.error("Close position failed", e);
-      alert("Failed to square off. Please try again.");
+      setModal({
+        type: "error",
+        title: "Square-Off Failed",
+        message: "Could not close the position. Please check your connection and try again.",
+        actions: [{ label: "OK", onClick: () => setModal(null), variant: "primary" }],
+      });
     } finally {
       setClosingId(null);
     }
@@ -1127,6 +1161,9 @@ function PaperTradeContent() {
             )}
           </div>
         )}
+
+        {/* ══════════════════ APP MODAL ══════════════════ */}
+        <AppModal modal={modal} onClose={() => setModal(null)} />
 
         {/* ══════════════════ RESET CONFIRM MODAL ══════════════════ */}
         {resetConfirm && (

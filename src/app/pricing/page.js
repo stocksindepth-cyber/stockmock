@@ -6,6 +6,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { upgradeUserPlan } from "@/lib/firebase/userService";
 import Link from "next/link";
+import AppModal from "@/components/AppModal";
 
 const DHAN_REFERRAL_URL = "https://join.dhan.co/?invite=XDCAS95683";
 
@@ -139,6 +140,7 @@ export default function PricingPage() {
   const [annual, setAnnual] = useState(false);
   const [processingId, setProcessingId] = useState(null);
   const [openFaq, setOpenFaq] = useState(null);
+  const [modal, setModal] = useState(null);
 
   const handleSubscribe = async (plan) => {
     if (plan.id === "free") {
@@ -215,7 +217,23 @@ export default function PricingPage() {
               window.location.href = "/profile?success=true&plan=" + plan.dbPlan;
               resolve();
             } catch (err) {
-              alert("Payment received but activation failed. Contact support@optionsgyani.com with payment ID: " + response.razorpay_payment_id);
+              setModal({
+                type: "warning",
+                title: "Payment Received — Activation Pending",
+                message: "Your payment was successful but plan activation failed. Please contact support and quote your Payment ID.",
+                details: [
+                  { label: "Payment ID", value: response.razorpay_payment_id, highlight: "text-amber-400 font-mono text-xs break-all" },
+                  { label: "Support",    value: "support@optionsgyani.com",   highlight: "text-blue-400" },
+                ],
+                actions: [
+                  {
+                    label: "Copy Payment ID",
+                    onClick: () => { navigator.clipboard?.writeText(response.razorpay_payment_id); },
+                    variant: "ghost",
+                  },
+                  { label: "OK", onClick: () => setModal(null), variant: "primary" },
+                ],
+              });
               reject(err);
             }
           },
@@ -231,7 +249,12 @@ export default function PricingPage() {
     } catch (error) {
       if (error?.message !== "Payment cancelled") {
         console.error("Payment error:", error);
-        alert("Payment could not be completed. Please try again.");
+        setModal({
+          type: "error",
+          title: "Payment Failed",
+          message: "Your payment could not be completed. No amount has been charged. Please try again or use a different payment method.",
+          actions: [{ label: "Try Again", onClick: () => setModal(null), variant: "primary" }],
+        });
       }
       setProcessingId(null);
     }
@@ -493,6 +516,8 @@ export default function PricingPage() {
         </div>
 
       </div>
+
+      <AppModal modal={modal} onClose={() => setModal(null)} />
     </div>
   );
 }
