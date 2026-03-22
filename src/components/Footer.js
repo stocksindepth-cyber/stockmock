@@ -41,10 +41,12 @@ const LINKS = [
   {
     heading: "Company",
     items: [
-      { label: "Features", href: "/features" },
+      { label: "About Us", href: "/about" },
       { label: "Pricing", href: "/pricing" },
+      { label: "Contact Us", href: "/contact" },
       { label: "Terms of Service", href: "/terms" },
       { label: "Privacy Policy", href: "/privacy" },
+      { label: "Refund Policy", href: "/refund" },
     ],
   },
 ];
@@ -122,9 +124,12 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-6 pt-5 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
           <p>© {new Date().getFullYear()} OptionsGyani Analytics. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <a href="/terms" className="hover:text-slate-400 transition-colors">Terms of Service</a>
-            <a href="/privacy" className="hover:text-slate-400 transition-colors">Privacy Policy</a>
+          <div className="flex flex-wrap items-center gap-4">
+            <a href="/about" className="hover:text-slate-400 transition-colors">About</a>
+            <a href="/contact" className="hover:text-slate-400 transition-colors">Contact</a>
+            <a href="/terms" className="hover:text-slate-400 transition-colors">Terms</a>
+            <a href="/privacy" className="hover:text-slate-400 transition-colors">Privacy</a>
+            <a href="/refund" className="hover:text-slate-400 transition-colors">Refund Policy</a>
             <a href="/terms#risk" className="hover:text-slate-400 transition-colors">Risk Disclosure</a>
           </div>
         </div>
