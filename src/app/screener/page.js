@@ -111,12 +111,14 @@ function ScreenerContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
     setLoading(true);
-    fetch(`/api/expiries?symbol=${symbol}`)
+    fetch(`/api/expiries?symbol=${symbol}`, { signal })
       .then((r) => r.json())
       .then((data) => {
         if (data.expiries?.length > 0) {
-          return fetch(`/api/chain?symbol=${symbol}&expiry=${data.expiries[0]}`);
+          return fetch(`/api/chain?symbol=${symbol}&expiry=${data.expiries[0]}`, { signal });
         }
         throw new Error("No expiries found");
       })
@@ -126,10 +128,12 @@ function ScreenerContent() {
         setLoading(false);
       })
       .catch((err) => {
+        if (err.name === "AbortError") return;
         console.error("Failed to load live screening data:", err);
         setChainData(null);
         setLoading(false);
       });
+    return () => controller.abort();
   }, [symbol]);
 
   const results = useMemo(() => {

@@ -33,9 +33,11 @@ export async function GET() {
       return NextResponse.json({ indices, source: "live" });
     } catch (err) {
       console.error("[API /indices] Dhan error:", err.message);
-      return NextResponse.json({ error: "Failed to fetch live data from Dhan API" }, { status: 500 });
+      // Return empty set rather than 500 so the UI can show graceful state without error spam
+      return NextResponse.json({ indices: [], source: "unavailable" });
     }
   } else {
-    return NextResponse.json({ error: "Dhan API credentials missing" }, { status: 500 });
+    // Credentials not configured — return empty payload, not 500
+    return NextResponse.json({ indices: [], source: "unavailable" });
   }
 }

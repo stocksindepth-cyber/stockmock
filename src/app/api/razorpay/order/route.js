@@ -37,7 +37,8 @@ export async function POST(request) {
       body: JSON.stringify({
         amount: amount * 100, // Razorpay expects paise
         currency: "INR",
-        receipt: `receipt_${planId}_${userId.substring(0, 8)}_${Date.now()}`,
+        // Razorpay receipt max = 40 chars: "rcpt_" + 10 uid chars + "_" + base36 timestamp = ~26 chars
+        receipt: `rcpt_${userId.substring(0, 10)}_${Date.now().toString(36)}`,
         notes: {
           userId,
           planId,

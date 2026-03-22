@@ -37,8 +37,9 @@ function ChainContent() {
 
   // Fetch expiries when symbol changes
   useEffect(() => {
+    const controller = new AbortController();
     setLoading(true);
-    fetch(`/api/expiries?symbol=${symbol}`)
+    fetch(`/api/expiries?symbol=${symbol}`, { signal: controller.signal })
       .then((r) => r.json())
       .then((data) => {
         setExpiries(data.expiries || []);
@@ -46,43 +47,50 @@ function ChainContent() {
           setExpiry(data.expiries[0]);
         }
       })
-      .catch(() => {
-        // Clear expiries on error
+      .catch((err) => {
+        if (err.name === "AbortError") return;
         setExpiries([]);
         setExpiry("");
       });
+    return () => controller.abort();
   }, [symbol]);
 
   // Fetch chain data when symbol or expiry changes
   useEffect(() => {
     if (!expiry) return;
+    const controller = new AbortController();
     setLoading(true);
-    fetch(`/api/chain?symbol=${symbol}&expiry=${expiry}`)
+    fetch(`/api/chain?symbol=${symbol}&expiry=${expiry}`, { signal: controller.signal })
       .then((r) => r.json())
       .then((data) => {
         setChainData(data);
         setDataSource(data.source || "live");
         setLoading(false);
       })
-      .catch(() => {
+      .catch((err) => {
+        if (err.name === "AbortError") return;
         setLoading(false);
         setDataSource("error");
       });
+    return () => controller.abort();
   }, [symbol, expiry]);
 
   // Auto-refresh every 30 seconds
   useEffect(() => {
     if (!expiry) return;
+    let refreshController = null;
     const interval = setInterval(() => {
-      fetch(`/api/chain?symbol=${symbol}&expiry=${expiry}`)
+      refreshController?.abort();
+      refreshController = new AbortController();
+      fetch(`/api/chain?symbol=${symbol}&expiry=${expiry}`, { signal: refreshController.signal })
         .then((r) => r.json())
         .then((data) => {
           setChainData(data);
           setDataSource(data.source || "live");
         })
-        .catch(() => {});
+        .catch((err) => { if (err.name !== "AbortError") console.error("[chain refresh]", err); });
     }, 30000);
-    return () => clearInterval(interval);
+    return () => { clearInterval(interval); refreshController?.abort(); };
   }, [symbol, expiry]);
 
   return (

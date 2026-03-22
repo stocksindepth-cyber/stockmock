@@ -110,24 +110,24 @@ function DashboardContent() {
 
   // Load market indices from real Dhan API
   useEffect(() => {
-    let cancelled = false;
+    const controller = new AbortController();
     async function loadIndices() {
       try {
-        const res = await fetch("/api/indices");
+        const res = await fetch("/api/indices", { signal: controller.signal });
         if (!res.ok) throw new Error("API error");
         const data = await res.json();
-        if (!cancelled) {
-          setIndices(data);
-          setIndicesError(false);
-        }
-      } catch {
-        if (!cancelled) setIndicesError(true);
+        // source:"unavailable" means Dhan creds not set — show empty, not error
+        setIndices(data.source === "unavailable" ? null : data);
+        setIndicesError(false);
+      } catch (err) {
+        if (err.name === "AbortError") return;
+        setIndicesError(true);
       } finally {
-        if (!cancelled) setIndicesLoading(false);
+        setIndicesLoading(false);
       }
     }
     loadIndices();
-    return () => { cancelled = true; };
+    return () => controller.abort();
   }, []);
 
   // Load real activity logs from Firestore
