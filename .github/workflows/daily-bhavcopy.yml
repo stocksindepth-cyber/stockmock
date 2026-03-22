@@ -1,18 +1,21 @@
 name: Daily NSE Bhavcopy Ingestion
 
 on:
-  # Runs at 6:30 PM IST (13:00 UTC) every weekday — after NSE closes at 3:30 PM IST
+  # 6:30 PM IST = 13:00 UTC — runs after NSE closes (3:30 PM IST) and data is published
   schedule:
     - cron: "0 13 * * 1-5"
 
-  # Also allow manual trigger from GitHub Actions tab
+  # Manual trigger for backfills or re-runs
   workflow_dispatch:
     inputs:
       start_date:
-        description: "Start date (YYYY-MM-DD). Leave empty for yesterday."
+        description: "Start date (YYYY-MM-DD). Leave empty for yesterday only."
+        required: false
+      end_date:
+        description: "End date (YYYY-MM-DD). Leave empty for today."
         required: false
       dry_run:
-        description: "Dry run (true/false)"
+        description: "Dry run — download & parse but skip BigQuery upload (true/false)"
         required: false
         default: "false"
 
@@ -20,7 +23,7 @@ jobs:
   ingest:
     name: Ingest NSE Bhavcopy → BigQuery
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
@@ -32,7 +35,7 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           pip install \
             google-cloud-bigquery \
@@ -40,16 +43,23 @@ jobs:
             pandas \
             numpy \
             scipy \
-            python-dateutil
+            python-dateutil \
+            pyarrow
+
+      - name: Write BigQuery credentials file
+        run: |
+          echo '${{ secrets.BIGQUERY_CREDENTIALS_JSON }}' > /tmp/bq-sa.json
+          echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/bq-sa.json" >> $GITHUB_ENV
 
       - name: Run incremental ingestion (daily schedule)
         if: github.event_name == 'schedule'
         env:
           BIGQUERY_CREDENTIALS_JSON: ${{ secrets.BIGQUERY_CREDENTIALS_JSON }}
         run: |
+          echo "Running incremental ingestion for yesterday..."
           python scripts/ingest_bhavcopy.py --incremental
 
-      - name: Run custom range ingestion (manual trigger)
+      - name: Run custom ingestion (manual trigger)
         if: github.event_name == 'workflow_dispatch'
         env:
           BIGQUERY_CREDENTIALS_JSON: ${{ secrets.BIGQUERY_CREDENTIALS_JSON }}
@@ -58,12 +68,35 @@ jobs:
           if [ -n "${{ inputs.start_date }}" ]; then
             ARGS="--start ${{ inputs.start_date }}"
           fi
+          if [ -n "${{ inputs.end_date }}" ]; then
+            ARGS="$ARGS --end ${{ inputs.end_date }}"
+          fi
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi
+          echo "Running: python scripts/ingest_bhavcopy.py $ARGS"
           python scripts/ingest_bhavcopy.py $ARGS
+
+      - name: Report BigQuery row count
+        if: success() && inputs.dry_run != 'true'
+        env:
+          BIGQUERY_CREDENTIALS_JSON: ${{ secrets.BIGQUERY_CREDENTIALS_JSON }}
+        run: |
+          python3 - <<'EOF'
+          import os, json
+          from google.cloud import bigquery
+          from google.oauth2 import service_account
+          creds = service_account.Credentials.from_service_account_info(
+            json.loads(os.environ["BIGQUERY_CREDENTIALS_JSON"]))
+          client = bigquery.Client(project="optionsindepth", credentials=creds)
+          for row in client.query("""
+            SELECT COUNT(*) as rows, MIN(trade_date) as earliest, MAX(trade_date) as latest
+            FROM `optionsindepth.optionsgyani.options_eod`
+          """).result():
+            print(f"Total rows: {row.rows:,} | Range: {row.earliest} to {row.latest}")
+          EOF
 
       - name: Notify on failure
         if: failure()
         run: |
-          echo "::error::NSE Bhavcopy ingestion failed. Check logs above."
+          echo "::error::NSE Bhavcopy ingestion FAILED. Check logs above."

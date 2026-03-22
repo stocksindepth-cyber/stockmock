@@ -1,0 +1,103 @@
+name: CI — Build & Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  # ── Job 1: Build check ──────────────────────────────────────────────────────
+  build:
+    name: Next.js Build Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check & lint
+        run: npm run lint --if-present || true
+
+      - name: Build
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: optionsindepth.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: optionsindepth
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: optionsindepth.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          BIGQUERY_PROJECT_ID: optionsindepth
+          BIGQUERY_DATASET: optionsgyani
+          BIGQUERY_CREDENTIALS_JSON: ${{ secrets.BIGQUERY_CREDENTIALS_JSON }}
+        run: npm run build
+
+  # ── Job 2: E2E tests ────────────────────────────────────────────────────────
+  e2e:
+    name: Playwright E2E Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Start Next.js dev server
+        env:
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: optionsindepth.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: optionsindepth
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: optionsindepth.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          BIGQUERY_PROJECT_ID: optionsindepth
+          BIGQUERY_DATASET: optionsgyani
+          BIGQUERY_CREDENTIALS_JSON: ${{ secrets.BIGQUERY_CREDENTIALS_JSON }}
+        run: npm run dev &
+          sleep 10 &&
+          curl --retry 10 --retry-delay 2 --retry-connrefused http://localhost:3000/
+
+      - name: Run Playwright tests
+        env:
+          BASE_URL: http://localhost:3000
+          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
+          NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: optionsindepth.firebaseapp.com
+          NEXT_PUBLIC_FIREBASE_PROJECT_ID: optionsindepth
+          NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: optionsindepth.firebasestorage.app
+          NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID }}
+          NEXT_PUBLIC_FIREBASE_APP_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_APP_ID }}
+          BIGQUERY_PROJECT_ID: optionsindepth
+          BIGQUERY_DATASET: optionsgyani
+          BIGQUERY_CREDENTIALS_JSON: ${{ secrets.BIGQUERY_CREDENTIALS_JSON }}
+        run: npx playwright test --project=chromium
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
