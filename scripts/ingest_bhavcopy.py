@@ -25,6 +25,8 @@ Environment:
     BIGQUERY_CREDENTIALS_JSON='{"type":"service_account",...}'
 """
 
+from __future__ import annotations
+
 import argparse
 import io
 import json
@@ -398,6 +400,29 @@ SPOT_FINAL_COLS = [
 ]
 
 
+_DATE_COLS = {"trade_date", "expiry_date"}
+_TS_COLS = {"ingested_at"}
+
+
+def _load_df_to_bq(client: bigquery.Client, df: pd.DataFrame, table_ref: str) -> list:
+    """Load a DataFrame to BigQuery using a batch load job (no date partition limits, free)."""
+    df = df.copy()
+    # Convert string date columns to datetime.date so pyarrow maps them to BQ DATE
+    for col in _DATE_COLS:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce").dt.date
+    # Convert ISO timestamp strings to tz-aware datetime for BQ TIMESTAMP
+    for col in _TS_COLS:
+        if col in df.columns:
+            df[col] = pd.to_datetime(df[col], errors="coerce", utc=True)
+    job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+    job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
+    job.result()  # Wait for completion
+    if job.errors:
+        return job.errors
+    return []
+
+
 def upload_options(client: bigquery.Client, df: pd.DataFrame, dry_run=False) -> int:
     if df.empty:
         return 0
@@ -414,7 +439,7 @@ def upload_options(client: bigquery.Client, df: pd.DataFrame, dry_run=False) -> 
         return len(df)
 
     table_ref = f"{PROJECT_ID}.{DATASET_ID}.options_eod"
-    errors = client.insert_rows_json(table_ref, df.to_dict("records"))
+    errors = _load_df_to_bq(client, df, table_ref)
     if errors:
         log.error(f"  BigQuery insert errors: {errors[:3]}")
     return len(df)
@@ -439,7 +464,8 @@ def upload_spot(client: bigquery.Client, spot_map: dict, trade_date: date, dry_r
         return len(rows)
 
     table_ref = f"{PROJECT_ID}.{DATASET_ID}.spot_prices"
-    errors = client.insert_rows_json(table_ref, rows)
+    spot_df = pd.DataFrame(rows)
+    errors = _load_df_to_bq(client, spot_df, table_ref)
     if errors:
         log.error(f"  BigQuery spot insert errors: {errors[:3]}")
     return len(rows)
@@ -455,7 +481,8 @@ def log_ingestion(client: bigquery.Client, trade_date: date, status: str,
         "error_msg": error_msg or "",
         "ingested_at": datetime.utcnow().isoformat(),
     }
-    client.insert_rows_json(f"{PROJECT_ID}.{DATASET_ID}.ingestion_log", [row])
+    log_df = pd.DataFrame([row])
+    _load_df_to_bq(client, log_df, f"{PROJECT_ID}.{DATASET_ID}.ingestion_log")
 
 
 def get_already_ingested_dates(client: bigquery.Client) -> set:
