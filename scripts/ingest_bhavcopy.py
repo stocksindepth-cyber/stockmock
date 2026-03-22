@@ -405,7 +405,10 @@ _TS_COLS = {"ingested_at"}
 
 
 def _load_df_to_bq(client: bigquery.Client, df: pd.DataFrame, table_ref: str) -> list:
-    """Load a DataFrame to BigQuery using a batch load job (no date partition limits, free)."""
+    """Load a DataFrame to BigQuery using a batch load job, with exponential-backoff retry on quota errors."""
+    import time
+    from google.api_core.exceptions import Forbidden, ResourceExhausted
+
     df = df.copy()
     # Convert string date columns to datetime.date so pyarrow maps them to BQ DATE
     for col in _DATE_COLS:
@@ -415,12 +418,24 @@ def _load_df_to_bq(client: bigquery.Client, df: pd.DataFrame, table_ref: str) ->
     for col in _TS_COLS:
         if col in df.columns:
             df[col] = pd.to_datetime(df[col], errors="coerce", utc=True)
-    job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
-    job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
-    job.result()  # Wait for completion
-    if job.errors:
-        return job.errors
-    return []
+
+    max_attempts = 6
+    for attempt in range(max_attempts):
+        try:
+            job_config = bigquery.LoadJobConfig(write_disposition="WRITE_APPEND")
+            job = client.load_table_from_dataframe(df, table_ref, job_config=job_config)
+            job.result()  # Wait for completion
+            if job.errors:
+                return job.errors
+            return []
+        except (Forbidden, ResourceExhausted) as e:
+            wait = 2 ** attempt * 30  # 30s, 60s, 120s, 240s, 480s
+            if attempt < max_attempts - 1:
+                log.warning(f"  Quota error on attempt {attempt + 1}/{max_attempts}, retrying in {wait}s: {e}")
+                time.sleep(wait)
+            else:
+                log.error(f"  Quota error after {max_attempts} attempts: {e}")
+                raise
 
 
 def upload_options(client: bigquery.Client, df: pd.DataFrame, dry_run=False) -> int:
@@ -473,16 +488,19 @@ def upload_spot(client: bigquery.Client, spot_map: dict, trade_date: date, dry_r
 
 def log_ingestion(client: bigquery.Client, trade_date: date, status: str,
                   rows_options=0, rows_spot=0, error_msg=None):
+    """Write a single log row via streaming insert — avoids load-job quota (1,000/table/day)."""
     row = {
         "trade_date": trade_date.strftime("%Y-%m-%d"),
         "status": status,
         "rows_options": rows_options,
         "rows_spot": rows_spot,
         "error_msg": error_msg or "",
-        "ingested_at": datetime.utcnow().isoformat(),
+        "ingested_at": datetime.utcnow().isoformat() + "Z",
     }
-    log_df = pd.DataFrame([row])
-    _load_df_to_bq(client, log_df, f"{PROJECT_ID}.{DATASET_ID}.ingestion_log")
+    table_ref = f"{PROJECT_ID}.{DATASET_ID}.ingestion_log"
+    errors = client.insert_rows_json(table_ref, [row])
+    if errors:
+        log.warning(f"  Log streaming insert errors: {errors}")
 
 
 def get_already_ingested_dates(client: bigquery.Client) -> set:

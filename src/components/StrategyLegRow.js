@@ -1,100 +1,112 @@
 "use client";
 
+import { X } from "lucide-react";
+
+/**
+ * StrategyLegRow — compact single-line leg editor.
+ *
+ * Industry-standard table row:
+ *   L#  [B/S]  [CE/PE]  [Strike]  [Prem ₹]  [Lots]  ×N  [✕]
+ *
+ * B/S and CE/PE are click-to-toggle buttons (single click, no dropdown).
+ * Works at any panel width ≥ 320 px.
+ */
+
+const DARK = { colorScheme: "dark" };
+
+const inputCls =
+  "min-w-0 h-7 bg-slate-800 border border-slate-700 rounded " +
+  "px-2 text-xs font-semibold text-white tabular-nums " +
+  "focus:outline-none focus:border-blue-500 focus:bg-slate-700/60 transition-colors";
+
 export default function StrategyLegRow({ leg, index, onChange, onRemove }) {
-  const handleChange = (field, value) => {
-    onChange(index, { ...leg, [field]: value });
-  };
+  const set = (field, value) => onChange(index, { ...leg, [field]: value });
+
+  const isBuy  = leg.action === "BUY";
+  const isCall = leg.type   === "CE";
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-[auto_100px_120px_1fr_1fr_100px_auto] items-center md:items-end gap-3 md:gap-4 p-3 md:p-4 glass-card rounded-xl group transition-all border border-white/5 hover:border-blue-500/30">
-      
-      <div className="hidden md:flex items-center h-[38px]">
-        <span className="text-slate-500 text-sm font-mono font-bold w-6">L{index + 1}</span>
-      </div>
+    <div className="flex items-center gap-1.5 group py-0.5">
 
-      {/* Buy/Sell */}
-      <div className="flex flex-col w-full">
-        <label className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 md:hidden">Action</label>
-        <select
-          value={leg.action}
-          onChange={(e) => handleChange("action", e.target.value)}
-          className={`w-full h-[38px] px-3 rounded-lg text-sm font-semibold border-0 cursor-pointer ${
-            leg.action === "BUY"
-              ? "bg-emerald-500/20 text-emerald-400"
-              : "bg-rose-500/20 text-rose-400"
-          }`}
-        >
-          <option value="BUY">BUY</option>
-          <option value="SELL">SELL</option>
-        </select>
-      </div>
+      {/* L# */}
+      <span className="shrink-0 w-5 text-center text-[10px] font-bold text-slate-600 font-mono select-none">
+        L{index + 1}
+      </span>
 
-      {/* CE/PE */}
-      <div className="flex flex-col w-full">
-        <label className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 md:hidden">Option Type</label>
-        <select
-          value={leg.type}
-          onChange={(e) => handleChange("type", e.target.value)}
-          className={`w-full h-[38px] px-3 rounded-lg text-sm font-semibold border-0 cursor-pointer ${
-            leg.type === "CE"
-              ? "bg-blue-500/20 text-blue-400"
-              : "bg-amber-500/20 text-amber-400"
-          }`}
-        >
-          <option value="CE">CALL (CE)</option>
-          <option value="PE">PUT (PE)</option>
-        </select>
-      </div>
+      {/* BUY / SELL — click to toggle */}
+      <button
+        onClick={() => set("action", isBuy ? "SELL" : "BUY")}
+        title={isBuy ? "Click to SELL" : "Click to BUY"}
+        className={`shrink-0 w-7 h-7 rounded font-black text-[11px] tracking-tight transition-colors ${
+          isBuy
+            ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+            : "bg-rose-500/20   text-rose-400   hover:bg-rose-500/30"
+        }`}
+      >
+        {isBuy ? "B" : "S"}
+      </button>
+
+      {/* CE / PE — click to toggle */}
+      <button
+        onClick={() => set("type", isCall ? "PE" : "CE")}
+        title={isCall ? "Click for PUT" : "Click for CALL"}
+        className={`shrink-0 w-9 h-7 rounded font-bold text-[11px] transition-colors ${
+          isCall
+            ? "bg-blue-500/20  text-blue-400  hover:bg-blue-500/30"
+            : "bg-amber-500/20 text-amber-400 hover:bg-amber-500/30"
+        }`}
+      >
+        {isCall ? "CE" : "PE"}
+      </button>
 
       {/* Strike */}
-      <div className="flex flex-col w-full">
-        <label className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Strike</label>
-        <input
-          type="number"
-          value={leg.strike}
-          onChange={(e) => handleChange("strike", Number(e.target.value))}
-          className="w-full h-[38px] bg-[#0A0E17] border border-white/10 rounded-lg px-3 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
-          step={50}
-        />
-      </div>
+      <input
+        type="number"
+        value={leg.strike}
+        onChange={(e) => set("strike", Number(e.target.value))}
+        step={50}
+        style={DARK}
+        className={`flex-[2] ${inputCls}`}
+      />
 
       {/* Premium */}
-      <div className="flex flex-col w-full">
-        <label className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Premium (₹)</label>
-        <input
-          type="number"
-          value={leg.premium}
-          onChange={(e) => handleChange("premium", Number(e.target.value))}
-          className="w-full h-[38px] bg-[#0A0E17] border border-white/10 rounded-lg px-3 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
-          step={1}
-          min={0}
-        />
-      </div>
+      <input
+        type="number"
+        value={leg.premium}
+        onChange={(e) => set("premium", Number(e.target.value))}
+        step={0.5}
+        min={0}
+        style={DARK}
+        className={`flex-[1.5] ${inputCls}`}
+      />
 
       {/* Lots */}
-      <div className="flex flex-col w-full">
-        <label className="text-[10px] text-slate-500 uppercase tracking-wider mb-1">Lots</label>
-        <div className="relative w-full">
-          <input
-            type="number"
-            value={leg.lots}
-            onChange={(e) => handleChange("lots", Math.max(1, Number(e.target.value)))}
-            className="w-full h-[38px] bg-[#0A0E17] border border-white/10 rounded-lg pl-3 pr-8 text-sm text-white focus:outline-none focus:border-blue-500 transition-colors"
-            min={1}
-          />
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-slate-500 pointer-events-none">x{leg.lotSize}</span>
-        </div>
-      </div>
+      <input
+        type="number"
+        value={leg.lots}
+        onChange={(e) => set("lots", Math.max(1, Number(e.target.value)))}
+        min={1}
+        style={DARK}
+        className={`shrink-0 w-10 h-7 bg-slate-800 border border-slate-700 rounded
+                    px-1.5 text-xs font-semibold text-white tabular-nums text-center
+                    focus:outline-none focus:border-blue-500 focus:bg-slate-700/60 transition-colors`}
+      />
 
-      {/* Remove */}
-      <div className="col-span-2 md:col-span-1 flex justify-end md:h-[38px] mt-2 md:mt-0">
-        <button
-          onClick={() => onRemove(index)}
-          className="text-rose-400 hover:text-white text-sm px-4 py-1.5 rounded-lg hover:bg-rose-500 transition-all font-medium border border-rose-500/20 hover:border-rose-500 flex items-center justify-center w-full md:w-auto md:opacity-0 md:group-hover:opacity-100"
-        >
-          ✕ Remove
-        </button>
-      </div>
+      {/* Lot-size badge */}
+      <span className="shrink-0 text-[10px] font-medium text-slate-500 whitespace-nowrap">
+        ×{leg.lotSize}
+      </span>
+
+      {/* Remove — hover reveal */}
+      <button
+        onClick={() => onRemove(index)}
+        title="Remove leg"
+        className="shrink-0 w-6 h-6 flex items-center justify-center rounded
+                   text-slate-700 hover:text-rose-400 hover:bg-rose-500/10
+                   opacity-0 group-hover:opacity-100 transition-all ml-auto"
+      >
+        <X className="w-3 h-3" />
+      </button>
     </div>
   );
 }
