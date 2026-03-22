@@ -2,6 +2,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Script from "next/script";
+import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 
 export const metadata = {
@@ -61,6 +62,9 @@ export default function RootLayout({ children }) {
           {children}
           <Footer />
         </AuthProvider>
+
+        {/* Google Analytics 4 — tracks page views on every client-side navigation */}
+        <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID} />
 
         {/* Microsoft Clarity — loads after page is interactive, never blocks render */}
         <Script id="clarity-init" strategy="afterInteractive">
