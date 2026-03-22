@@ -6,6 +6,7 @@ export const metadata = {
   title: "Calendar Spread NIFTY — Volatility Expansion Trading | OptionsGyani",
   description: "Learn to trade Calendar Spreads on NIFTY index options. Structure multi-expiry positions to profit from Theta disparities.",
   keywords: "calendar spread nifty, horizontal spread options, nifty multi expiry options, volatility expansion strategy, long calendar spread",
+  alternates: { canonical: "https://optionsgyani.com/strategies/calendar-spread-nifty" },
   openGraph: {
     title: "Calendar Spread NIFTY — Playbook & Data | OptionsGyani",
     description: "Verified historical win rate 64.3%. Cash in on differing time decay curves.",

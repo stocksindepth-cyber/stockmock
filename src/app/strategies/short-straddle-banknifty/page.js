@@ -6,6 +6,7 @@ export const metadata = {
   title: "Short Straddle BANKNIFTY — Weekly Expiry Backtest Data | OptionsGyani",
   description: "Complete Short Straddle guide for BANKNIFTY weekly expiry — entry rules, strike selection, stop loss, and verified historical backtest data from 2016–2024.",
   keywords: "short straddle banknifty, banknifty straddle strategy, sell straddle banknifty weekly, banknifty options premium selling, short straddle backtest india, banknifty expiry strategy",
+  alternates: { canonical: "https://optionsgyani.com/strategies/short-straddle-banknifty" },
   openGraph: {
     title: "Short Straddle BANKNIFTY Weekly — Strategy & Backtest Data | OptionsGyani",
     description: "Verified historical win rate 62.1%, avg 4.1% monthly. Real NSE tick-level backtest.",

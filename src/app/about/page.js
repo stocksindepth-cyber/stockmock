@@ -2,6 +2,7 @@ import { Target, Database, TrendingUp, Shield, Zap, Users } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
+  alternates: { canonical: "https://optionsgyani.com/about" },
   title: "About Us | OptionsGyani",
   description: "OptionsGyani is India's free options analytics platform built for retail derivatives traders. Learn about our mission, data sources, and team.",
 };

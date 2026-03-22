@@ -15,6 +15,13 @@ export async function generateMetadata({ params }) {
   return {
     title: `${guide.title} | OptionsGyani`,
     description: guide.meta,
+    alternates: { canonical: `https://optionsgyani.com/learn/${slug}` },
+    openGraph: {
+      title: `${guide.title} | OptionsGyani`,
+      description: guide.meta,
+      url: `https://optionsgyani.com/learn/${slug}`,
+      type: "article",
+    },
   };
 }
 

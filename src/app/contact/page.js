@@ -1,6 +1,7 @@
 import { Mail, MessageSquare, Clock, MapPin } from "lucide-react";
 
 export const metadata = {
+  alternates: { canonical: "https://optionsgyani.com/contact" },
   title: "Contact Us | OptionsGyani",
   description: "Get in touch with the OptionsGyani team for support, feedback, or partnership enquiries.",
 };

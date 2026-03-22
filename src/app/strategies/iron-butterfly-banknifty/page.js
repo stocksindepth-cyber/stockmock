@@ -6,6 +6,7 @@ export const metadata = {
   title: "Iron Butterfly BANKNIFTY — Capped Risk Straddle Backtest | OptionsGyani",
   description: "Complete guide to trading the Iron Butterfly on BANKNIFTY. Cap your straddle risk with outer wings. Verified historical backtest data.",
   keywords: "iron butterfly banknifty, banknifty option selling strictly defined risk, expiry day option strategy, sell straddle banknifty safe, delta neutral strategy india",
+  alternates: { canonical: "https://optionsgyani.com/strategies/iron-butterfly-banknifty" },
   openGraph: {
     title: "Iron Butterfly BANKNIFTY Strategy & Backtest Data | OptionsGyani",
     description: "Verified historical win rate 58.2%, avg 5.5% monthly ROI. Sleep peacefully holding overnight straddles by capping risk.",

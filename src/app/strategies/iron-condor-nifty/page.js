@@ -6,6 +6,7 @@ export const metadata = {
   title: "Iron Condor NIFTY — Backtest Results 2016–2024 | OptionsGyani",
   description: "Complete Iron Condor strategy guide for NIFTY — entry rules, expiry selection, strike selection, stop loss, and backtested P&L results. Free backtest tool included.",
   keywords: "iron condor nifty strategy, nifty iron condor backtest, iron condor weekly expiry india, best iron condor strike selection nifty, nifty options range strategy",
+  alternates: { canonical: "https://optionsgyani.com/strategies/iron-condor-nifty" },
   openGraph: {
     title: "Iron Condor NIFTY — Backtest (2016–2024) | OptionsGyani",
     description: "Historical win rate 68.4%, average 2.8% monthly return. Real NSE data backtest for Iron Condor on NIFTY.",

@@ -6,6 +6,7 @@ export const metadata = {
   title: "Bull Call Spread NIFTY — Verified Pre-Event Strategy & Backtest Data | OptionsGyani",
   description: "Complete Bull Call Spread guide for NIFTY — entry rules, strike selection, payoff calculation, and real tick-level backtest data for Union Budget and RBI policy.",
   keywords: "bull call spread nifty, bull call spread strategy india, debit spread nifty, nifty call spread strategy, directional options strategy nse, pre event options strategy india",
+  alternates: { canonical: "https://optionsgyani.com/strategies/bull-call-spread-nifty" },
   openGraph: {
     title: "Bull Call Spread NIFTY — Pre-Event Backtest Data | OptionsGyani",
     description: "Verified historical win rate 54.2%, avg 8.3% ROI per trade. Real NSE tick-level backtest on pre-event setups.",

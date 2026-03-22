@@ -6,6 +6,7 @@ export const metadata = {
   title: "Bear Put Spread NIFTY — Directional Downside Edge | OptionsGyani",
   description: "Learn how to execute a Bear Put Spread on NIFTY index options. Cap your downside risk while participating in market corrections.",
   keywords: "bear put spread nifty, bear put spread india, defined risk bearish option strategy, nifty options selling, debit spread nifty",
+  alternates: { canonical: "https://optionsgyani.com/strategies/bear-put-spread-nifty" },
   openGraph: {
     title: "Bear Put Spread NIFTY — Strategy & Backtest | OptionsGyani",
     description: "Verified historical win rate 51.8%, avg 5.1% ROI per trade. Safely short NIFTY without huge margins.",

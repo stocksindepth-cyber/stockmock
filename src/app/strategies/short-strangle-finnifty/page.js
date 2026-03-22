@@ -6,6 +6,7 @@ export const metadata = {
   title: "Short Strangle FINNIFTY — Tuesday Expiry Premium Harvesting | OptionsGyani",
   description: "Complete guide to trading Short Strangles on FINNIFTY. Historical data on win rates, strike selection, and delta-hedging strategies to maximize Tuesday decay.",
   keywords: "short strangle finnifty, finnifty expiry strategy, sell strangle finnifty tuesday, option premium harvesting india, delta neutral strategy finnifty",
+  alternates: { canonical: "https://optionsgyani.com/strategies/short-strangle-finnifty" },
   openGraph: {
     title: "Short Strangle FINNIFTY — Tuesday Expiry Backtest | OptionsGyani",
     description: "Verified historical win rate 72.5%, avg 3.2% monthly ROI. Sell wings and collect Theta.",
