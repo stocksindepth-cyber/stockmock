@@ -62,29 +62,27 @@ function OIAnalysisContent() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const controller = new AbortController();
-    const { signal } = controller;
+    let cancelled = false;
     setLoading(true);
-    fetch(`/api/expiries?symbol=${symbol}`, { signal })
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.expiries?.length > 0) {
-          return fetch(`/api/chain?symbol=${symbol}&expiry=${data.expiries[0]}`, { signal });
-        }
-        throw new Error("No expiries found");
-      })
-      .then((r) => r.json())
-      .then((data) => {
+    async function load() {
+      try {
+        const expData = await fetch(`/api/expiries?symbol=${symbol}`).then((r) => r.json());
+        if (cancelled) return;
+        if (!expData.expiries?.length) throw new Error("No expiries found");
+        const data = await fetch(`/api/chain?symbol=${symbol}&expiry=${expData.expiries[0]}`).then((r) => r.json());
+        if (cancelled) return;
         setChainData(data);
         setLoading(false);
-      })
-      .catch((err) => {
-        if (err.name === "AbortError") return;
-        console.error("Failed to load live OI data:", err);
-        setChainData(null);
-        setLoading(false);
-      });
-    return () => controller.abort();
+      } catch (err) {
+        if (!cancelled) {
+          console.error("Failed to load live OI data:", err);
+          setChainData(null);
+          setLoading(false);
+        }
+      }
+    }
+    load().catch(() => {});
+    return () => { cancelled = true; };
   }, [symbol]);
 
   const analytics = useMemo(() => {

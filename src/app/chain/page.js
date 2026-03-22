@@ -37,42 +37,41 @@ function ChainContent() {
 
   // Fetch expiries when symbol changes
   useEffect(() => {
-    const controller = new AbortController();
+    let cancelled = false;
     setLoading(true);
-    fetch(`/api/expiries?symbol=${symbol}`, { signal: controller.signal })
-      .then((r) => r.json())
-      .then((data) => {
+    async function load() {
+      try {
+        const data = await fetch(`/api/expiries?symbol=${symbol}`).then((r) => r.json());
+        if (cancelled) return;
         setExpiries(data.expiries || []);
-        if (data.expiries?.length > 0) {
-          setExpiry(data.expiries[0]);
-        }
-      })
-      .catch((err) => {
-        if (err.name === "AbortError") return;
-        setExpiries([]);
-        setExpiry("");
-      });
-    return () => controller.abort();
+        if (data.expiries?.length > 0) setExpiry(data.expiries[0]);
+        else { setExpiries([]); setExpiry(""); }
+      } catch {
+        if (!cancelled) { setExpiries([]); setExpiry(""); }
+      }
+    }
+    load().catch(() => {});
+    return () => { cancelled = true; };
   }, [symbol]);
 
   // Fetch chain data when symbol or expiry changes
   useEffect(() => {
     if (!expiry) return;
-    const controller = new AbortController();
+    let cancelled = false;
     setLoading(true);
-    fetch(`/api/chain?symbol=${symbol}&expiry=${expiry}`, { signal: controller.signal })
-      .then((r) => r.json())
-      .then((data) => {
+    async function load() {
+      try {
+        const data = await fetch(`/api/chain?symbol=${symbol}&expiry=${expiry}`).then((r) => r.json());
+        if (cancelled) return;
         setChainData(data);
         setDataSource(data.source || "live");
         setLoading(false);
-      })
-      .catch((err) => {
-        if (err.name === "AbortError") return;
-        setLoading(false);
-        setDataSource("error");
-      });
-    return () => controller.abort();
+      } catch {
+        if (!cancelled) { setLoading(false); setDataSource("error"); }
+      }
+    }
+    load().catch(() => {});
+    return () => { cancelled = true; };
   }, [symbol, expiry]);
 
   // Auto-refresh every 30 seconds

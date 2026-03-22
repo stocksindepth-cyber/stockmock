@@ -1,24 +1,37 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can only read/write their own profile
-    match /users/{userId} {
+
+    // ── User document + ALL subcollections ────────────────────────────────
+    // Covers: users/{uid}, users/{uid}/paperTrades/*, users/{uid}/paperTradeProfile/*,
+    //         users/{uid}/activity_logs/*, and any future subcollections.
+    // The {document=**} wildcard matches the root doc AND every nested path.
+    match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
-    // Backtest results — user owns their own
+
+    // ── Backtest results ─────────────────────────────────────────────────
     match /backtests/{backtestId} {
       allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow create:      if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
-    // Paper trades — user owns their own
-    match /paperTrades/{tradeId} {
-      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+
+    // ── Payment transactions (created server-side; client can read own) ──
+    match /transactions/{txId} {
+      allow read:   if request.auth != null && request.auth.uid == resource.data.userId;
       allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+      allow update, delete: if false; // server-side (Admin SDK) only
     }
-    // Public read for pricing/plans
+
+    // ── Plans — public read, no client writes ────────────────────────────
     match /plans/{planId} {
-      allow read: if true;
+      allow read:  if true;
       allow write: if false;
+    }
+
+    // ── Admin config (Dhan token etc.) — server-side only ────────────────
+    match /admin/{docId} {
+      allow read, write: if false; // Admin SDK bypasses rules
     }
   }
 }
