@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
 import { GUIDE_CONTENT } from "./guideContent";
+import DhanReferralBanner from "@/components/DhanReferralBanner";
 
 export function generateStaticParams() {
   return Object.keys(GUIDE_CONTENT).map((slug) => ({ slug }));
@@ -71,6 +72,11 @@ export default async function GuidePage({ params }) {
               Try Paper Trading
             </Link>
           </div>
+        </div>
+
+        {/* Dhan referral — bottom of every lesson */}
+        <div className="mt-8">
+          <DhanReferralBanner variant="card" context="learn" />
         </div>
       </main>
     </div>

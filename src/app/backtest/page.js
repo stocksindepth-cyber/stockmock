@@ -14,6 +14,7 @@ import { useAuth } from "@/context/AuthContext";
 import { checkAndIncrementSimulationLimit } from "@/lib/firebase/userService";
 import UpgradeBanner from "@/components/UpgradeBanner";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import DhanReferralBanner from "@/components/DhanReferralBanner";
 
 // ─── Tooltips ────────────────────────────────────────────────────────────────
 
@@ -728,6 +729,9 @@ function BacktestContent() {
                 )}
               </div>
             )}
+
+            {/* Dhan referral — shown after backtest results */}
+            <DhanReferralBanner variant="banner" context="backtest" className="mt-6 rounded-xl" />
           </>
         )}
       </main>

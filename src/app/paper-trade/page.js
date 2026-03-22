@@ -14,6 +14,7 @@ function generateRandomPriceMove(spot, volatility = 0.15) {
 }
 
 import ProtectedRoute from "@/components/ProtectedRoute";
+import DhanReferralBanner from "@/components/DhanReferralBanner";
 
 export default function PaperTradePage() {
   return (
@@ -235,6 +236,11 @@ function PaperTradeContent() {
             </div>
           </div>
         )}
+
+        {/* Dhan referral — contextual prompt to go live */}
+        <div className="px-4 pb-8 max-w-5xl mx-auto">
+          <DhanReferralBanner variant="card" context="paper-trade" />
+        </div>
       </main>
     </div>
   );
