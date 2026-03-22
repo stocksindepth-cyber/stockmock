@@ -11,7 +11,7 @@ import AdjustmentLedger from "@/components/AdjustmentLedger";
 import AIMonitorModal from "@/components/AIMonitorModal";
 import UpgradeBanner from "@/components/UpgradeBanner";
 import { generatePayoffData, netPremium, calculatePOP } from "@/lib/options/payoff";
-import { blackScholesPrice, impliedVolatility } from "@/lib/options/greeks";
+// blackScholesPrice / impliedVolatility no longer used here — livePnl derives from payoffResult directly
 import { getAllTemplates, generateStrategyLegs } from "@/lib/options/strategies";
 import { generateCampaignFromRealCloses, generateHistoricalCampaign } from "@/lib/data/historicalStreamer";
 import { useAuth } from "@/context/AuthContext";
@@ -265,28 +265,24 @@ function SimulatorContent() {
     return Math.max(0.01, dte + intraDay);
   }, [currentTick]);
 
+  // Derive live P&L directly from the payoff chart data — single source of truth,
+  // guarantees the top-card number is always in sync with the chart.
   const livePnl = useMemo(() => {
-    let pnl = 0;
-    if (daysToExpiry > 0.01) {
-      for (const leg of legs) {
-        const S0   = Number(initialSpot) || 22500;
-        const S    = Number(liveSpot)    || S0;
-        const K    = Number(leg.strike);
-        const prem = Number(leg.premium) || 0.1;
-        const T    = Number(daysToExpiry) / 365;
-        const type = leg.type === "PE" ? "PE" : "CE";
-        let iv = impliedVolatility(prem, S0, K, T, 0.07, type);
-        if (isNaN(iv) || iv <= 0) iv = 0.2;
-        let newPrice = blackScholesPrice(S, K, T, 0.07, iv, type);
-        if (isNaN(newPrice)) newPrice = prem;
-        const mult = leg.action === "BUY" ? 1 : -1;
-        pnl += (newPrice - prem) * mult * (leg.lots ?? 1) * (leg.lotSize ?? 50);
-      }
-    } else {
-      pnl = calcExpiryPnL(legs, liveSpot);
+    if (!payoffResult.data || payoffResult.data.length === 0) return 0;
+    // Find the data point whose price is closest to liveSpot
+    let closest = payoffResult.data[0];
+    let minDiff = Math.abs(liveSpot - closest.price);
+    for (const point of payoffResult.data) {
+      const diff = Math.abs(liveSpot - point.price);
+      if (diff < minDiff) { minDiff = diff; closest = point; }
     }
-    return isNaN(Math.round(pnl)) ? 0 : Math.round(pnl);
-  }, [legs, liveSpot, daysToExpiry, initialSpot]);
+    // Use t0Pnl (current mark-to-market with time value) when DTE > 0,
+    // fall back to expiry pnl at expiry.
+    const val = daysToExpiry > 0.01
+      ? (closest.t0Pnl ?? closest.pnl)
+      : closest.pnl;
+    return isNaN(val) ? 0 : val;
+  }, [payoffResult.data, liveSpot, daysToExpiry]);
 
   const payoffResult = useMemo(
     () => generatePayoffData(legs, initialSpot, 10, 200, daysToExpiry),

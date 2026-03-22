@@ -61,7 +61,15 @@ export function generatePayoffData(legs, spotPrice, rangePercent = 10, points = 
     let iv = 0.2;
     if (daysToExpiry > 0.01 && spotPrice) {
       const type = leg.type === "PE" ? "PE" : "CE";
-      iv = impliedVolatility(Number(leg.premium) || 0.1, Number(spotPrice), daysToExpiry / 365, 0.07, type);
+      // impliedVolatility(price, S, K, T, r, type) — K (strike) must be passed
+      iv = impliedVolatility(
+        Number(leg.premium) || 0.1,
+        Number(spotPrice),
+        Number(leg.strike),
+        daysToExpiry / 365,
+        0.07,
+        type
+      );
       if (isNaN(iv) || iv <= 0) iv = 0.2;
     }
     return { ...leg, iv };
