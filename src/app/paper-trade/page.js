@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import {
   Wallet, TrendingUp, TrendingDown, Clock, Plus, X, RefreshCw,
@@ -9,6 +9,8 @@ import {
   IndianRupee, Layers, ShieldCheck,
 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import PayoffChart from "@/components/PayoffChart";
+import GreeksPanel from "@/components/GreeksPanel";
 import { useAuth } from "@/context/AuthContext";
 import {
   db,
@@ -18,6 +20,7 @@ import {
   query, orderBy, serverTimestamp, writeBatch, getDocs,
 } from "firebase/firestore";
 import { getAllTemplates, generateStrategyLegs } from "@/lib/options/strategies";
+import { generatePayoffData, calculatePOP } from "@/lib/options/payoff";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -82,6 +85,36 @@ function fmtINR(n, digits = 0) {
 
 function sign(n) { return n >= 0 ? "+" : "−"; }
 
+// ─── Payoff helpers ───────────────────────────────────────────────────────────
+
+/** Days to expiry from an ISO date string (0 at expiry) */
+function calcDTE(expiryStr) {
+  if (!expiryStr) return 0;
+  return Math.max(0, (new Date(expiryStr) - new Date()) / (1000 * 60 * 60 * 24));
+}
+
+/**
+ * Map stored legs (entryPremium) → payoff-lib format (premium).
+ * The payoff library expects `premium` field; stored positions use `entryPremium`.
+ */
+function toPayoffLegs(legs) {
+  return (legs ?? []).map((l) => ({ ...l, premium: l.entryPremium ?? l.premium ?? 0 }));
+}
+
+/**
+ * Compute payoff curve + key metrics for a set of priced legs.
+ * Returns { data, maxProfit, maxLoss, breakevens, pop } or null on error.
+ */
+function computePayoff(legs, spotPrice, expiryStr) {
+  if (!legs?.length || !spotPrice) return null;
+  try {
+    const dte    = calcDTE(expiryStr);
+    const result = generatePayoffData(toPayoffLegs(legs), spotPrice, 10, 200, dte);
+    const pop    = calculatePOP(result.data, spotPrice, dte);
+    return { ...result, pop, dte };
+  } catch { return null; }
+}
+
 // ─── Option-chain price lookup ────────────────────────────────────────────────
 
 /** Extract LTP for a given strike and option type from a chain array */
@@ -120,6 +153,66 @@ function calcMTM(position, chainData) {
     mtm += mult * (leg.entryPremium - currLTP) * leg.lots * leg.lotSize;
   }
   return Math.round(mtm);
+}
+
+// ─── Trade metrics summary bar (reused in preview + positions) ───────────────
+
+function TradeMetricsBar({ payoff, compact = false }) {
+  if (!payoff) return null;
+  const { maxProfit, maxLoss, pop } = payoff;
+  const rr = maxLoss !== 0 ? Math.abs(maxProfit / maxLoss).toFixed(2) : "∞";
+  const isUnlimited = (v) => !isFinite(v) || Math.abs(v) > 500_000;
+
+  const items = [
+    {
+      label: "Max Profit",
+      value: isUnlimited(maxProfit) ? "Unlimited" : `₹${Math.abs(maxProfit).toLocaleString("en-IN")}`,
+      color: "text-emerald-400",
+      bg: "bg-emerald-500/10 border-emerald-500/20",
+    },
+    {
+      label: "Max Loss",
+      value: isUnlimited(maxLoss) ? "Unlimited" : `₹${Math.abs(maxLoss).toLocaleString("en-IN")}`,
+      color: "text-rose-400",
+      bg: "bg-rose-500/10 border-rose-500/20",
+    },
+    {
+      label: "Risk : Reward",
+      value: `1 : ${rr}`,
+      color: "text-slate-300",
+      bg: "bg-white/5 border-white/10",
+    },
+    {
+      label: "POP",
+      value: `${pop?.toFixed(1) ?? "—"}%`,
+      color: (pop ?? 0) >= 50 ? "text-emerald-400" : "text-amber-400",
+      bg: "bg-white/5 border-white/10",
+    },
+  ];
+
+  if (compact) {
+    return (
+      <div className="grid grid-cols-4 gap-2 mt-3">
+        {items.map(({ label, value, color, bg }) => (
+          <div key={label} className={`rounded-lg px-2 py-2 border text-center ${bg}`}>
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-0.5">{label}</p>
+            <p className={`text-xs font-black tabular-nums ${color}`}>{value}</p>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+      {items.map(({ label, value, color, bg }) => (
+        <div key={label} className={`rounded-xl p-3 border text-center ${bg}`}>
+          <p className="text-[11px] text-slate-500 uppercase tracking-widest mb-1">{label}</p>
+          <p className={`text-lg font-black tabular-nums ${color}`}>{value}</p>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 // ─── Page shell ───────────────────────────────────────────────────────────────
@@ -167,6 +260,8 @@ function PaperTradeContent() {
   const [istTime,     setIstTime]     = useState("");
   const [marketOpen,  setMarketOpen]  = useState(false);
   const [activeTab,   setActiveTab]   = useState("trade"); // trade | positions | history
+  const [expandedPos, setExpandedPos] = useState(null);   // posId with chart expanded
+  const [liveSpotMap, setLiveSpotMap] = useState({});     // posId → current spot price
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const indexMeta     = useMemo(() => INDICES.find((i) => i.id === selIndex) ?? INDICES[0], [selIndex]);
@@ -187,6 +282,23 @@ function PaperTradeContent() {
     }));
     return priceLegs(raw, previewChain);
   }, [previewChain, selStrategy, selLots, indexMeta]);
+
+  // Payoff curve + metrics for the order preview panel
+  const previewPayoff = useMemo(
+    () => previewLegs?.pricedLegs
+      ? computePayoff(previewLegs.pricedLegs, previewChain?.spot, selExpiry)
+      : null,
+    [previewLegs, previewChain, selExpiry]
+  );
+
+  // Payoff metrics for every open position (computed at entry values)
+  const positionPayoffs = useMemo(() => {
+    const map = {};
+    for (const pos of openPositions) {
+      map[pos.id] = computePayoff(pos.legs, pos.entrySpot, pos.expiry);
+    }
+    return map;
+  }, [openPositions]);
 
   // ── IST clock ─────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -287,7 +399,8 @@ function PaperTradeContent() {
       if (!grouped[key]) grouped[key] = { symbol: pos.indexKey, expiry: pos.expiry, positions: [] };
       grouped[key].positions.push(pos);
     }
-    const newMap = {};
+    const newMtm = {};
+    const newSpots = {};
     await Promise.allSettled(
       Object.values(grouped).map(async ({ symbol, expiry, positions: grpPos }) => {
         try {
@@ -295,13 +408,15 @@ function PaperTradeContent() {
           const data = await res.json();
           if (data.chain) {
             for (const pos of grpPos) {
-              newMap[pos.id] = calcMTM(pos, data);
+              newMtm[pos.id]   = calcMTM(pos, data);
+              if (data.spot) newSpots[pos.id] = data.spot;
             }
           }
         } catch { /* keep previous MTM for this group */ }
       })
     );
-    setMtmMap((prev) => ({ ...prev, ...newMap }));
+    setMtmMap((prev) => ({ ...prev, ...newMtm }));
+    setLiveSpotMap((prev) => ({ ...prev, ...newSpots }));
     setMtmUpdated(new Date());
     setMtmLoading(false);
   }, []);
@@ -584,7 +699,7 @@ function PaperTradeContent() {
 
         {/* ══════════════════ NEW TRADE TAB ══════════════════ */}
         {activeTab === "trade" && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-5">
 
             {/* Left: form */}
             <div className="lg:col-span-2 space-y-5">
@@ -690,9 +805,11 @@ function PaperTradeContent() {
               </div>
             </div>
 
-            {/* Right: order preview */}
-            <div className="lg:col-span-1">
-              <div className="sticky top-20 bg-white/3 border border-white/10 rounded-2xl p-5">
+            {/* Right: order preview + payoff */}
+            <div className="lg:col-span-3 space-y-4">
+
+              {/* ── Order preview card (sticky) ── */}
+              <div className="bg-white/3 border border-white/10 rounded-2xl p-5">
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                   <ShieldCheck className="w-3.5 h-3.5" /> Order Preview
                 </p>
@@ -716,9 +833,9 @@ function PaperTradeContent() {
                     </div>
 
                     {/* Legs */}
-                    <div className="space-y-2 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
                       {previewLegs.pricedLegs.map((leg, i) => (
-                        <div key={i} className="flex items-center justify-between text-xs">
+                        <div key={i} className="flex items-center justify-between bg-white/3 rounded-lg px-3 py-2 text-xs">
                           <div className="flex items-center gap-1.5">
                             <span className={`px-1.5 py-0.5 rounded font-bold ${leg.action === "SELL" ? "bg-rose-500/20 text-rose-400" : "bg-emerald-500/20 text-emerald-400"}`}>
                               {leg.action}
@@ -726,7 +843,7 @@ function PaperTradeContent() {
                             <span className={`px-1.5 py-0.5 rounded font-bold ${leg.type === "CE" ? "bg-blue-500/20 text-blue-400" : "bg-orange-500/20 text-orange-400"}`}>
                               {leg.type}
                             </span>
-                            <span className="text-slate-300 font-mono">{leg.strike}</span>
+                            <span className="text-slate-300 font-mono font-semibold">{leg.strike}</span>
                           </div>
                           <div className="text-right">
                             <span className="text-white font-semibold tabular-nums">₹{leg.entryPremium?.toFixed(2)}</span>
@@ -736,33 +853,32 @@ function PaperTradeContent() {
                       ))}
                     </div>
 
-                    {/* Net premium */}
-                    <div className={`flex justify-between text-sm font-bold py-2.5 px-3 rounded-lg mb-4 ${
-                      previewLegs.netPremium >= 0
-                        ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                        : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
-                    }`}>
-                      <span>{previewLegs.netPremium >= 0 ? "Net Credit" : "Net Debit"}</span>
-                      <span className="tabular-nums">{fmtINR(previewLegs.netPremium)}</span>
+                    {/* Net premium + Margin + Place button */}
+                    <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+                      <div className={`flex-1 flex justify-between text-sm font-bold py-2.5 px-3 rounded-lg ${
+                        previewLegs.netPremium >= 0
+                          ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                          : "bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                      }`}>
+                        <span>{previewLegs.netPremium >= 0 ? "Net Credit" : "Net Debit"}</span>
+                        <span className="tabular-nums">{fmtINR(previewLegs.netPremium)}</span>
+                      </div>
+                      <div className="flex-1 flex justify-between text-xs text-slate-400 bg-white/3 border border-white/10 rounded-lg px-3 py-2.5">
+                        <span>Est. Margin</span>
+                        <span className="text-white font-semibold tabular-nums">
+                          {profile ? fmtINR(Math.round((previewLegs.spotPrice ?? 24500) * indexMeta.lotSize * selLots * 0.15 + Math.max(0, -previewLegs.netPremium))) : "—"}
+                        </span>
+                      </div>
+                      <button
+                        onClick={handleOpenPosition}
+                        disabled={submitting || !previewLegs}
+                        className="sm:flex-1 flex items-center justify-center gap-2 py-2.5 px-5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-900/30 active:scale-[0.98] text-sm whitespace-nowrap"
+                      >
+                        {submitting
+                          ? <><RefreshCw className="w-4 h-4 animate-spin" /> Placing…</>
+                          : <><Plus className="w-4 h-4" /> Place Trade</>}
+                      </button>
                     </div>
-
-                    {/* Margin */}
-                    <div className="flex justify-between text-xs text-slate-400 mb-5">
-                      <span>Est. Margin Required</span>
-                      <span className="text-white font-semibold tabular-nums">
-                        {profile ? fmtINR(Math.round((previewLegs.spotPrice ?? 24500) * indexMeta.lotSize * selLots * 0.15 + Math.max(0, -previewLegs.netPremium))) : "—"}
-                      </span>
-                    </div>
-
-                    <button
-                      onClick={handleOpenPosition}
-                      disabled={submitting || !previewLegs}
-                      className="w-full flex items-center justify-center gap-2 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all shadow-lg shadow-blue-900/30 active:scale-[0.98]"
-                    >
-                      {submitting
-                        ? <><RefreshCw className="w-4 h-4 animate-spin" /> Placing…</>
-                        : <><Plus className="w-4 h-4" /> Place Paper Trade</>}
-                    </button>
                   </>
                 ) : (
                   <p className="text-xs text-slate-500 text-center py-4">
@@ -770,6 +886,29 @@ function PaperTradeContent() {
                   </p>
                 )}
               </div>
+
+              {/* ── Trade metrics ── */}
+              {previewPayoff && <TradeMetricsBar payoff={previewPayoff} />}
+
+              {/* ── Payoff chart ── */}
+              {previewPayoff?.data && (
+                <PayoffChart
+                  data={previewPayoff.data}
+                  breakevens={previewPayoff.breakevens}
+                  spotPrice={previewLegs?.spotPrice}
+                />
+              )}
+
+              {/* ── Live Position Greeks ── */}
+              {previewLegs?.pricedLegs?.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <Zap className="w-3 h-3" /> Live Position Greeks
+                  </p>
+                  <GreeksPanel legs={previewLegs.pricedLegs} spotPrice={previewLegs.spotPrice ?? 24500} />
+                </div>
+              )}
+
             </div>
           </div>
         )}
@@ -859,7 +998,7 @@ function PaperTradeContent() {
                       </div>
 
                       {/* Legs breakdown */}
-                      <div className="px-5 pb-4">
+                      <div className="px-5 pb-3">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
                           {pos.legs?.map((leg, i) => (
                             <div key={i} className="flex items-center justify-between bg-white/3 rounded-lg px-3 py-2 text-xs">
@@ -875,6 +1014,45 @@ function PaperTradeContent() {
                           ))}
                         </div>
                       </div>
+
+                      {/* Trade metrics summary (always visible) */}
+                      {positionPayoffs[pos.id] && (
+                        <div className="px-5 pb-3">
+                          <TradeMetricsBar payoff={positionPayoffs[pos.id]} compact />
+                        </div>
+                      )}
+
+                      {/* Payoff chart toggle */}
+                      <div className="px-5 pb-4">
+                        <button
+                          onClick={() => setExpandedPos(expandedPos === pos.id ? null : pos.id)}
+                          className="flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-blue-400 transition-colors"
+                        >
+                          <BarChart2 className="w-3.5 h-3.5" />
+                          {expandedPos === pos.id ? "Hide Payoff Chart ▲" : "Show Payoff Chart ▼"}
+                        </button>
+                      </div>
+
+                      {/* Expandable payoff chart + Greeks */}
+                      {expandedPos === pos.id && positionPayoffs[pos.id] && (
+                        <div className="border-t border-white/8 px-5 pt-4 pb-5 space-y-4">
+                          <PayoffChart
+                            data={positionPayoffs[pos.id].data}
+                            breakevens={positionPayoffs[pos.id].breakevens}
+                            spotPrice={pos.entrySpot}
+                            liveSpot={liveSpotMap[pos.id] ?? undefined}
+                          />
+                          <div>
+                            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                              <Zap className="w-3 h-3" /> Position Greeks
+                            </p>
+                            <GreeksPanel
+                              legs={toPayoffLegs(pos.legs)}
+                              spotPrice={liveSpotMap[pos.id] ?? pos.entrySpot ?? 24500}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
