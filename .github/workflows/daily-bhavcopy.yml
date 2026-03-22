@@ -1,0 +1,69 @@
+name: Daily NSE Bhavcopy Ingestion
+
+on:
+  # Runs at 6:30 PM IST (13:00 UTC) every weekday — after NSE closes at 3:30 PM IST
+  schedule:
+    - cron: "0 13 * * 1-5"
+
+  # Also allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      start_date:
+        description: "Start date (YYYY-MM-DD). Leave empty for yesterday."
+        required: false
+      dry_run:
+        description: "Dry run (true/false)"
+        required: false
+        default: "false"
+
+jobs:
+  ingest:
+    name: Ingest NSE Bhavcopy → BigQuery
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install \
+            google-cloud-bigquery \
+            requests \
+            pandas \
+            numpy \
+            scipy \
+            python-dateutil
+
+      - name: Run incremental ingestion (daily schedule)
+        if: github.event_name == 'schedule'
+        env:
+          BIGQUERY_CREDENTIALS_JSON: ${{ secrets.BIGQUERY_CREDENTIALS_JSON }}
+        run: |
+          python scripts/ingest_bhavcopy.py --incremental
+
+      - name: Run custom range ingestion (manual trigger)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          BIGQUERY_CREDENTIALS_JSON: ${{ secrets.BIGQUERY_CREDENTIALS_JSON }}
+        run: |
+          ARGS="--incremental"
+          if [ -n "${{ inputs.start_date }}" ]; then
+            ARGS="--start ${{ inputs.start_date }}"
+          fi
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            ARGS="$ARGS --dry-run"
+          fi
+          python scripts/ingest_bhavcopy.py $ARGS
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::NSE Bhavcopy ingestion failed. Check logs above."

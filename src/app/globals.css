@@ -1,26 +1,48 @@
 @import "tailwindcss";
 
+@theme {
+  --color-background: #0B0F19; /* Deep Slate/Navy background */
+  --color-foreground: #F8FAFC; /* Light gray text */
+  --color-primary: #8B5CF6; /* Violet */
+  --color-primary-hover: #7C3AED; 
+  --color-accent-green: #10B981; /* Emerald for Profit */
+  --color-accent-red: #EF4444; /* Rose for Loss */
+  --color-surface: #1E293B; /* Slightly lighter surface for cards */
+  --color-surface-hover: #334155;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --background: #0B0F19;
+  --foreground: #F8FAFC;
 }
 
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  antialiased: true;
+}
+
+/* Custom Glassmorphism Utilities */
+@utility glass {
+  background: rgba(30, 41, 59, 0.4);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@utility glass-card {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.6) 0%, rgba(15, 23, 42, 0.2) 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient text */
+@utility text-gradient {
+  background: linear-gradient(to right, #8B5CF6, #3B82F6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
