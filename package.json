@@ -6,7 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:headed": "playwright test --headed",
+    "test:report": "playwright show-report",
+    "test:api": "playwright test tests/e2e/02-api-health.spec.js",
+    "test:pages": "playwright test tests/e2e/01-public-pages.spec.js",
+    "test:razorpay": "playwright test tests/e2e/09-razorpay-compliance.spec.js"
   },
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.1",
@@ -21,6 +28,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "eslint": "^9",
     "eslint-config-next": "16.2.1",
