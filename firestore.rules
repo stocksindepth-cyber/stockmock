@@ -2,36 +2,52 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // ── User document + ALL subcollections ────────────────────────────────
-    // Covers: users/{uid}, users/{uid}/paperTrades/*, users/{uid}/paperTradeProfile/*,
-    //         users/{uid}/activity_logs/*, and any future subcollections.
-    // The {document=**} wildcard matches the root doc AND every nested path.
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    // ── User document ─────────────────────────────────────────────────────────
+    match /users/{userId} {
+      // Read own profile only
+      allow read: if request.auth != null && request.auth.uid == userId;
+
+      // Create own profile
+      allow create: if request.auth != null && request.auth.uid == userId;
+
+      // Update own profile — client can NEVER elevate plan, limits, or expiry;
+      // those fields are written exclusively by the Admin SDK (server-side).
+      allow update: if request.auth != null && request.auth.uid == userId
+        && !request.resource.data.keys().hasAny(['plan', 'simulationsLimit', 'subscriptionExpiry']);
+
+      // No client-side deletes of the user document
+      allow delete: if false;
+
+      // ── User subcollections ────────────────────────────────────────────────
+      // Covers: activity_logs/*, paperTrades/*, paperTradeProfile/*
+      // and any future per-user subcollection (one level deep).
+      match /{subcollection}/{docId} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
     }
 
-    // ── Backtest results ─────────────────────────────────────────────────
+    // ── Backtest results ──────────────────────────────────────────────────────
     match /backtests/{backtestId} {
       allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
       allow create:      if request.auth != null && request.auth.uid == request.resource.data.userId;
     }
 
-    // ── Payment transactions (created server-side; client can read own) ──
-    match /transactions/{txId} {
-      allow read:   if request.auth != null && request.auth.uid == resource.data.userId;
-      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
-      allow update, delete: if false; // server-side (Admin SDK) only
+    // ── Payment transactions (created server-side; client can read/create own) ─
+    match /transactions/{transactionId} {
+      allow read:          if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create:        if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false; // Admin SDK only
     }
 
-    // ── Plans — public read, no client writes ────────────────────────────
+    // ── Plans — public read, no client writes ─────────────────────────────────
     match /plans/{planId} {
       allow read:  if true;
       allow write: if false;
     }
 
-    // ── Admin config (Dhan token etc.) — server-side only ────────────────
+    // ── Admin config (Dhan token etc.) — server-side Admin SDK only ───────────
     match /admin/{docId} {
-      allow read, write: if false; // Admin SDK bypasses rules
+      allow read, write: if false;
     }
   }
 }
