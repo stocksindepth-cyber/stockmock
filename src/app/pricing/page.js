@@ -1,106 +1,165 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Shield, Zap, Target, Loader2 } from "lucide-react";
+import { Check, X, Zap, Target, Loader2, Shield, ExternalLink, Star, TrendingUp, Database, BarChart2, Users } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { upgradeUserPlan } from "@/lib/firebase/userService";
+import Link from "next/link";
 
-const ANALYTICS_PLANS = [
+const DHAN_REFERRAL_URL = "https://join.dhan.co/?invite=XDCAS95683";
+
+// ─── Pricing data ─────────────────────────────────────────────────────────────
+const PLANS = [
   {
-    id: "analytics_starter",
-    dbPlan: "pro", // Upgrades to pro in DB
+    id: "free",
+    name: "Free",
+    monthlyPrice: 0,
+    annualPrice: 0,
+    dbPlan: "free",
+    durationDays: null,
+    badge: null,
+    description: "Start learning. No credit card ever.",
+    cta: "Start Free",
+    ctaVariant: "ghost",
+    highlight: false,
+    features: {
+      backtests: "5 backtests / day",
+      data: "Last 1 year of NSE data",
+      strategies: "Basic strategies (Straddle, Strangle)",
+      optionChain: "Live Option Chain",
+      learn: "Full Options Academy",
+      simulator: "10 paper trades / month",
+      builder: "View-only payoff builder",
+      export: false,
+      api: false,
+      support: "Community forum",
+      dhan: true,
+    },
+  },
+  {
+    id: "pro_monthly",
+    name: "Pro",
+    monthlyPrice: 499,
+    annualPrice: 399,
+    dbPlan: "pro",
     durationDays: 30,
-    name: "Starter",
-    price: "₹349",
-    period: "1 Month (30 Days)",
-    description: "Access unlimited times within Validity",
-    features: ["Simulator Access", "Builder Access", "Advanced Charts", "Data since 1st Jan'21"],
-    popular: false,
+    badge: "Most Popular",
+    description: "Serious traders who want an edge.",
+    cta: "Start Pro",
+    ctaVariant: "primary",
+    highlight: true,
+    features: {
+      backtests: "Unlimited backtests",
+      data: "8+ years of NSE data (2016–today)",
+      strategies: "All 20+ strategies incl. Iron Condor, Jade Lizard",
+      optionChain: "Live Option Chain + Greeks",
+      learn: "Full Options Academy",
+      simulator: "Unlimited paper trading",
+      builder: "Full payoff builder + scenario analysis",
+      export: "CSV export of backtest results",
+      api: false,
+      support: "Priority email support",
+      dhan: true,
+    },
   },
   {
-    id: "analytics_advanced",
-    dbPlan: "pro",
-    durationDays: 180,
-    name: "Advanced",
-    price: "₹1599",
-    period: "6 Months (180 Days)",
-    description: "Access unlimited times within Validity",
-    features: ["Simulator Access", "Builder Access", "Advanced Charts", "Data since 1st Jan'21"],
-    popular: true,
-  },
-  {
-    id: "analytics_pro",
+    id: "elite_monthly",
+    name: "Elite",
+    monthlyPrice: 999,
+    annualPrice: 799,
     dbPlan: "elite",
-    durationDays: 360,
-    name: "Pro",
-    price: "₹2599",
-    period: "1 Year (360 Days)",
-    description: "Access unlimited times within Validity",
-    features: ["Simulator Access", "Builder Access", "Advanced Charts", "Data since 1st Jan'21", "Priority Support"],
-    popular: false,
-  }
+    durationDays: 30,
+    badge: null,
+    description: "Power users, algos, and prop desks.",
+    cta: "Go Elite",
+    ctaVariant: "ghost",
+    highlight: false,
+    features: {
+      backtests: "Unlimited backtests + basket testing",
+      data: "8+ years of NSE data + intraday snapshots",
+      strategies: "All strategies + custom strategy builder",
+      optionChain: "Live Option Chain + Greeks + OI heatmap",
+      learn: "Full Options Academy + live webinars",
+      simulator: "Unlimited paper trading + P&L analytics",
+      builder: "Full builder + multi-leg strategy scanner",
+      export: "CSV + JSON export + scheduled reports",
+      api: "REST API access (100k calls/month)",
+      support: "Dedicated WhatsApp support",
+      dhan: true,
+    },
+  },
 ];
 
-const BACKTESTING_PLANS = [
-  {
-    id: "backtest_starter",
-    dbPlan: "pro",
-    durationDays: 7,
-    name: "Starter",
-    originalPrice: "₹599",
-    price: "₹449",
-    period: "7 Days",
-    description: "Unlimited Backtesting on Home and Basket Tab",
-    features: ["Unlimited Automated Backtesting", "Banknifty data from 2017", "Nifty data from 2019", "Sensex data from 2023"],
-    popular: false,
-  },
-  {
-    id: "backtest_advanced",
-    dbPlan: "pro",
-    durationDays: 28,
-    name: "Advanced",
-    originalPrice: "₹1699",
-    price: "₹1299",
-    period: "28 Days",
-    description: "Unlimited Backtesting on Home and Basket Tab",
-    features: ["Unlimited Automated Backtesting", "Banknifty data from 2017", "Nifty data from 2019", "Sensex data from 2023"],
-    popular: true,
-  },
-  {
-    id: "backtest_pro",
-    dbPlan: "elite",
-    durationDays: 84,
-    name: "Pro",
-    originalPrice: "₹3999",
-    price: "₹2999",
-    period: "84 Days",
-    description: "Unlimited Backtesting on Home and Basket Tab",
-    features: ["Unlimited Automated Backtesting", "Banknifty data from 2017", "Nifty data from 2019", "Sensex data from 2023", "Priority Support"],
-    popular: false,
-  }
+// ─── Feature comparison rows ───────────────────────────────────────────────────
+const COMPARISON = [
+  { label: "Daily Backtests", free: "5 / day", pro: "Unlimited", elite: "Unlimited" },
+  { label: "Historical Data", free: "Last 1 year", pro: "2016 – today", elite: "2016 – today + intraday" },
+  { label: "Strategy Templates", free: "2 basic", pro: "20+ strategies", elite: "20+ + custom" },
+  { label: "Option Chain", free: "✓ Live", pro: "✓ Live + Greeks", elite: "✓ Live + OI Heatmap" },
+  { label: "Paper Trading", free: "10 / month", pro: "Unlimited", elite: "Unlimited + P&L analytics" },
+  { label: "Payoff Builder", free: "View only", pro: "Full access", elite: "Full + scanner" },
+  { label: "Options Academy", free: "✓ Full", pro: "✓ Full", elite: "✓ Full + webinars" },
+  { label: "CSV Export", free: "✗", pro: "✓", elite: "✓ + JSON + scheduled" },
+  { label: "API Access", free: "✗", pro: "✗", elite: "✓ 100k calls/mo" },
+  { label: "Support", free: "Forum", pro: "Priority email", elite: "WhatsApp" },
 ];
 
+const FAQ = [
+  {
+    q: "Is the free plan really free forever?",
+    a: "Yes. No credit card, no trial expiry. The free plan is permanently free with 5 backtests/day and the last 1 year of NSE data. You can use OptionsGyani to learn, paper trade, and explore — for free, forever.",
+  },
+  {
+    q: "What NSE data do paid plans cover?",
+    a: "Pro and Elite plans cover NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY, SENSEX, and BANKEX options data from January 2016 to today. Our daily GitHub Actions pipeline ingests new NSE Bhavcopy data every evening at 6:30 PM IST on trading days.",
+  },
+  {
+    q: "Can I cancel anytime?",
+    a: "Yes. Plans are subscription-based and you can cancel before the next billing cycle. There are no refunds for current billing periods — please test the free tier before upgrading.",
+  },
+  {
+    q: "How is this different from Sensibull or Opstra?",
+    a: "Sensibull starts at ₹2,499/month. Opstra's backtest data is limited. We give you 8+ years of real NSE Bhavcopy data, unlimited backtests, and a simpler UX — starting at ₹499/month. No compromise.",
+  },
+  {
+    q: "What is the Dhan referral?",
+    a: "We have a referral partnership with Dhan. If you open a Dhan demat account through our link, we earn a small commission at no cost to you. Dhan offers ₹0 AMC for lifetime, free demat, and ₹20/order — genuinely one of the best brokers for options traders.",
+  },
+  {
+    q: "Is GST included?",
+    a: "Prices shown are exclusive of GST. 18% GST is applicable and will be added at checkout.",
+  },
+];
+
+// ─── Component ────────────────────────────────────────────────────────────────
 export default function PricingPage() {
-  const { currentUser, userProfile } = useAuth();
+  const { currentUser } = useAuth();
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("analytics");
+  const [annual, setAnnual] = useState(false);
   const [processingId, setProcessingId] = useState(null);
+  const [openFaq, setOpenFaq] = useState(null);
 
   const handleSubscribe = async (plan) => {
+    if (plan.id === "free") {
+      router.push(currentUser ? "/backtest" : "/signup");
+      return;
+    }
     if (!currentUser) {
       router.push("/login?redirect=/pricing");
       return;
     }
 
     setProcessingId(plan.id);
+    const price = annual ? plan.annualPrice : plan.monthlyPrice;
+    const durationDays = annual ? 365 : plan.durationDays;
+
     try {
-      // Step 1: Create Razorpay order via our API
       const orderRes = await fetch("/api/razorpay/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: parseInt(plan.price.replace(/[^0-9]/g, "")), // Strip ₹
+          amount: price,
           planId: plan.id,
           planName: plan.name,
           userId: currentUser.uid,
@@ -109,14 +168,11 @@ export default function PricingPage() {
       const order = await orderRes.json();
 
       if (order.mock) {
-        // Development fallback: mock payment without Razorpay keys
-        console.log("[Dev Mode] Mock payment for plan:", plan.id);
-        await upgradeUserPlan(currentUser.uid, plan.dbPlan, plan.durationDays);
+        await upgradeUserPlan(currentUser.uid, plan.dbPlan, durationDays);
         window.location.href = "/profile?success=true";
         return;
       }
 
-      // Step 2: Load Razorpay JS SDK dynamically
       await new Promise((resolve, reject) => {
         if (window.Razorpay) return resolve();
         const script = document.createElement("script");
@@ -126,7 +182,6 @@ export default function PricingPage() {
         document.head.appendChild(script);
       });
 
-      // Step 3: Open Razorpay checkout popup
       await new Promise((resolve, reject) => {
         const rzp = new window.Razorpay({
           key: order.keyId,
@@ -134,22 +189,17 @@ export default function PricingPage() {
           currency: "INR",
           order_id: order.orderId,
           name: "OptionsGyani",
-          description: `${plan.name} Plan — ${plan.period}`,
+          description: `${plan.name} Plan — ${annual ? "Annual" : "Monthly"}`,
           image: "/favicon.ico",
-          prefill: {
-            email: currentUser.email,
-            name: currentUser.displayName || "",
-          },
-          theme: { color: "#3B82F6" },
+          prefill: { email: currentUser.email, name: currentUser.displayName || "" },
+          theme: { color: "#6366F1" },
           handler: async (response) => {
-            // Step 4: Payment successful — upgrade in Firestore
             try {
-              await upgradeUserPlan(currentUser.uid, plan.dbPlan, plan.durationDays);
+              await upgradeUserPlan(currentUser.uid, plan.dbPlan, durationDays);
               window.location.href = "/profile?success=true";
               resolve();
             } catch (err) {
-              console.error("Firestore upgrade failed after payment:", err);
-              alert("Payment successful but plan activation failed. Please contact support@optionsgyani.in with your payment ID: " + response.razorpay_payment_id);
+              alert("Payment successful but activation failed. Contact support@optionsgyani.in with payment ID: " + response.razorpay_payment_id);
               reject(err);
             }
           },
@@ -171,132 +221,288 @@ export default function PricingPage() {
     }
   };
 
-  const currentPlans = activeTab === "analytics" ? ANALYTICS_PLANS : BACKTESTING_PLANS;
-
   return (
-    <div className="min-h-screen bg-[#080C16] pt-24 pb-20 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none" />
-      
-      <div className="max-w-7xl mx-auto relative z-10">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">
-            Transparent Pricing for <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-400">Serious Traders</span>
+    <div className="min-h-screen bg-[#080C16] pt-24 pb-20 relative overflow-hidden">
+      {/* Ambient glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-indigo-500/8 blur-[140px] rounded-full pointer-events-none" />
+      <div className="absolute top-60 left-10 w-[400px] h-[400px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+
+        {/* ── Header ── */}
+        <div className="text-center max-w-3xl mx-auto mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-4">
+            <Database className="w-3 h-3" /> 8+ Years Real NSE Data · No Synthetic Prices
+          </div>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
+            Start Free. Upgrade When<br className="hidden md:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400"> You're Ready.</span>
           </h1>
           <p className="text-lg text-slate-400">
-            Scale your options trading with unlimited historical replay, millisecond-accurate pay-offs, and dynamic campaign modeling.
+            OptionsGyani is free to learn and explore. Upgrade for unlimited backtesting on real Bhavcopy data — at a fraction of what Sensibull charges.
           </p>
         </div>
 
-        {/* Tab Selector */}
-        <div className="flex justify-center mb-12">
-          <div className="glass-card p-1 rounded-full inline-flex relative overflow-hidden flex-col sm:flex-row gap-2 sm:gap-0 bg-[#0A101C] border border-white/5">
+        {/* ── Competitor callout ── */}
+        <div className="flex justify-center mb-8">
+          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-400">
+            <TrendingUp className="w-4 h-4" />
+            <span>Sensibull: ₹2,499/mo · Quantsapp: ₹999/mo · <strong>OptionsGyani Pro: ₹499/mo</strong></span>
+          </div>
+        </div>
+
+        {/* ── Annual / Monthly toggle ── */}
+        <div className="flex justify-center mb-10">
+          <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-full px-2 py-1">
             <button
-              onClick={() => setActiveTab("analytics")}
-              className={`relative px-6 sm:px-8 py-3 rounded-full text-sm font-semibold transition-all duration-300 z-10 w-full sm:w-auto ${
-                activeTab === "analytics" ? "text-white bg-slate-800 shadow-lg" : "text-slate-400 hover:text-white"
-              }`}
+              onClick={() => setAnnual(false)}
+              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${!annual ? "bg-slate-700 text-white" : "text-slate-400 hover:text-white"}`}
             >
-              Analytics Plans
-              <div className="text-xs text-slate-500 font-normal mt-0.5">Simulator & Builder</div>
+              Monthly
             </button>
             <button
-              onClick={() => setActiveTab("backtest")}
-              className={`relative px-6 sm:px-8 py-3 rounded-full text-sm font-semibold transition-all duration-300 z-10 w-full sm:w-auto ${
-                activeTab === "backtest" ? "text-white bg-slate-800 shadow-lg" : "text-slate-400 hover:text-white"
-              }`}
+              onClick={() => setAnnual(true)}
+              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${annual ? "bg-slate-700 text-white" : "text-slate-400 hover:text-white"}`}
             >
-              Backtesting Plans
-              <div className="text-xs text-slate-500 font-normal mt-0.5">Home & Basket Auto-testing</div>
+              Annual
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                SAVE 20%
+              </span>
             </button>
           </div>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {currentPlans.map((plan) => (
-            <div 
-              key={plan.id}
-              className={`relative glass-card rounded-2xl p-8 flex flex-col transition-transform hover:-translate-y-2 duration-300 border bg-[#0C1221] ${
-                plan.popular ? 'border-blue-500/50 shadow-[0_0_30px_rgba(59,130,246,0.15)] ring-1 ring-blue-500/20' : 'border-white/10'
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-blue-500 to-indigo-500 text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-[0.2em] flex items-center gap-1.5 shadow-lg shadow-blue-500/30 whitespace-nowrap">
-                  <Zap className="w-3.5 h-3.5 fill-white" /> Most Popular
-                </div>
-              )}
+        {/* ── Pricing cards ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          {PLANS.map((plan) => {
+            const displayPrice = annual ? plan.annualPrice : plan.monthlyPrice;
+            const isProcessing = processingId === plan.id;
 
-              <div className="mb-8 mt-2">
-                <h3 className="text-xl font-bold text-white mb-3">{plan.name}</h3>
-                <div className="flex items-baseline gap-3 mb-2">
-                  {plan.originalPrice && (
-                    <span className="text-lg text-slate-500 line-through decoration-rose-500/50">{plan.originalPrice}</span>
-                  )}
-                  <span className="text-5xl font-extrabold text-white tracking-tight">{plan.price}</span>
-                </div>
-                <div className="text-sm font-medium text-blue-400 mb-4 bg-blue-500/10 inline-block px-3 py-1 rounded-full border border-blue-500/20">{plan.period}</div>
-                <p className="text-sm text-slate-400 min-h-[40px] leading-relaxed">{plan.description}</p>
-              </div>
-
-              <div className="flex-grow space-y-4 mb-8">
-                {plan.features.map((feature, idx) => (
-                  <div key={idx} className="flex items-start gap-3 bg-white/[0.02] p-2.5 rounded-lg border border-white/[0.03]">
-                    <div className="bg-emerald-500/20 p-0.5 rounded-full mt-0.5 shrink-0">
-                      <Check className="w-4 h-4 text-emerald-400" />
-                    </div>
-                    <span className="text-sm text-slate-300 leading-snug">{feature}</span>
-                  </div>
-                ))}
-              </div>
-
-              <button
-                onClick={() => handleSubscribe(plan)}
-                disabled={processingId !== null}
-                className={`w-full py-3.5 rounded-xl font-semibold flex items-center justify-center gap-2 transition-all duration-300 ${
-                  plan.popular 
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-lg shadow-blue-500/25 border border-white/10' 
-                    : 'bg-white/5 hover:bg-white/10 border border-white/10 text-white hover:border-white/20'
-                } disabled:opacity-50 disabled:cursor-not-allowed group`}
+            return (
+              <div
+                key={plan.id}
+                className={`relative rounded-2xl flex flex-col transition-transform hover:-translate-y-1 duration-300 border ${
+                  plan.highlight
+                    ? "bg-gradient-to-b from-indigo-950/60 to-[#0C1221] border-indigo-500/40 shadow-[0_0_40px_rgba(99,102,241,0.12)] ring-1 ring-indigo-500/20"
+                    : "bg-[#0C1221] border-slate-800"
+                } p-7`}
               >
-                {processingId === plan.id ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    Processing Payment...
-                  </>
-                ) : (
-                  <>
-                    <Shield className="w-5 h-5 group-hover:scale-110 transition-transform" />
-                    Subscribe Now
-                  </>
+                {plan.badge && (
+                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-[0.15em] flex items-center gap-1.5 shadow-lg whitespace-nowrap">
+                    <Zap className="w-3 h-3 fill-white" /> {plan.badge}
+                  </div>
                 )}
-              </button>
-              <div className="text-center mt-4 text-xs font-medium text-slate-500 bg-black/20 py-2 rounded-lg border border-white/5">+ 18% GST Applicable on checkout</div>
+
+                {/* Plan name + price */}
+                <div className="mb-6 mt-2">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-lg font-bold text-white">{plan.name}</h3>
+                    {plan.id === "free" && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 border border-slate-600">FREE FOREVER</span>
+                    )}
+                  </div>
+                  <div className="flex items-end gap-1 mb-1">
+                    {displayPrice === 0 ? (
+                      <span className="text-5xl font-extrabold text-white">₹0</span>
+                    ) : (
+                      <>
+                        <span className="text-5xl font-extrabold text-white">₹{displayPrice}</span>
+                        <span className="text-slate-500 mb-2 text-sm">/mo</span>
+                      </>
+                    )}
+                  </div>
+                  {annual && displayPrice > 0 && (
+                    <p className="text-xs text-slate-500">Billed annually · ₹{displayPrice * 12}/year</p>
+                  )}
+                  {!annual && displayPrice > 0 && (
+                    <p className="text-xs text-slate-500">Billed monthly · +18% GST at checkout</p>
+                  )}
+                  {displayPrice === 0 && (
+                    <p className="text-xs text-slate-500">No credit card ever required</p>
+                  )}
+                  <p className="text-sm text-slate-400 mt-2">{plan.description}</p>
+                </div>
+
+                {/* CTA */}
+                <button
+                  onClick={() => handleSubscribe(plan)}
+                  disabled={isProcessing}
+                  className={`w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200 mb-6 ${
+                    plan.ctaVariant === "primary"
+                      ? "bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
+                      : "bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white"
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                >
+                  {isProcessing ? (
+                    <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>
+                  ) : (
+                    <><Shield className="w-4 h-4" /> {plan.cta}</>
+                  )}
+                </button>
+
+                {/* Features */}
+                <div className="space-y-3 flex-grow">
+                  <FeatureRow text={plan.features.backtests} />
+                  <FeatureRow text={plan.features.data} highlight={plan.highlight} />
+                  <FeatureRow text={plan.features.strategies} />
+                  <FeatureRow text={plan.features.optionChain} />
+                  <FeatureRow text={plan.features.simulator} />
+                  <FeatureRow text={plan.features.builder} />
+                  <FeatureRow text={plan.features.learn} />
+                  {plan.features.export ? (
+                    <FeatureRow text={plan.features.export} />
+                  ) : (
+                    <FeatureRowNo text="CSV Export" />
+                  )}
+                  {plan.features.api ? (
+                    <FeatureRow text={plan.features.api} />
+                  ) : (
+                    <FeatureRowNo text="API Access" />
+                  )}
+                  <FeatureRow text={plan.features.support} />
+                </div>
+
+                {/* Dhan referral — in every plan */}
+                {plan.features.dhan && (
+                  <div className="mt-6 pt-4 border-t border-slate-800">
+                    <a
+                      href={DHAN_REFERRAL_URL}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-start gap-3 group"
+                    >
+                      <div className="w-8 h-8 rounded-lg bg-orange-500/15 border border-orange-500/25 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <TrendingUp className="w-4 h-4 text-orange-400" />
+                      </div>
+                      <div>
+                        <p className="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors flex items-center gap-1">
+                          Open free Dhan account <ExternalLink className="w-3 h-3" />
+                        </p>
+                        <p className="text-[10px] text-slate-500 leading-snug mt-0.5">₹0 AMC lifetime · Free Demat · ₹20/order</p>
+                      </div>
+                    </a>
+                    <p className="text-[9px] text-slate-700 mt-2">Referral partnership · we may earn a commission</p>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* ── Social proof strip ── */}
+        <div className="grid grid-cols-3 gap-4 mb-16 max-w-2xl mx-auto">
+          {[
+            { icon: <Users className="w-4 h-4" />, label: "Free to start", sub: "No card needed" },
+            { icon: <Database className="w-4 h-4" />, label: "8+ years data", sub: "Real NSE Bhavcopy" },
+            { icon: <BarChart2 className="w-4 h-4" />, label: "Daily updates", sub: "6:30 PM IST" },
+          ].map((s) => (
+            <div key={s.label} className="text-center p-3 rounded-xl border border-slate-800 bg-slate-900/40">
+              <div className="flex justify-center text-indigo-400 mb-1">{s.icon}</div>
+              <p className="text-xs font-bold text-white">{s.label}</p>
+              <p className="text-[10px] text-slate-500">{s.sub}</p>
             </div>
           ))}
         </div>
 
-        {/* FAQ Notes */}
-        <div className="mt-24 max-w-4xl mx-auto glass-card rounded-2xl p-8 border border-white/5 bg-gradient-to-br from-white/[0.02] to-transparent">
-          <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-3">
-            <div className="bg-blue-500/20 p-2 rounded-xl border border-blue-500/30">
-              <Target className="w-6 h-6 text-blue-400" />
-            </div>
-            Important Information Before Upgrading
-          </h3>
-          <div className="grid sm:grid-cols-2 gap-x-8 gap-y-4">
-            <ul className="space-y-4 text-sm text-slate-400 list-disc list-outside ml-4">
-              <li className="pl-2">Builder allows tracking positions in Live Market and checking Payoff graphs.</li>
-              <li className="pl-2">Simulator Data strictly available since 1st Jan 2021 onwards.</li>
-            </ul>
-            <ul className="space-y-4 text-sm text-slate-400 list-disc list-outside ml-4">
-              <li className="pl-2">Payments are securely processed and are non-refundable. Please test free features first.</li>
-              <li className="pl-2">Usually plans activate instantly post-payment (takes max 20 mins for clearing).</li>
-            </ul>
+        {/* ── Feature comparison table ── */}
+        <div className="mb-16">
+          <h2 className="text-2xl font-bold text-white text-center mb-6">Full Feature Comparison</h2>
+          <div className="overflow-x-auto rounded-2xl border border-slate-800">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-slate-800 bg-slate-900/60">
+                  <th className="text-left px-5 py-3.5 text-slate-400 font-semibold w-1/3">Feature</th>
+                  <th className="text-center px-4 py-3.5 text-slate-400 font-semibold">Free</th>
+                  <th className="text-center px-4 py-3.5 text-indigo-400 font-bold bg-indigo-950/30">Pro</th>
+                  <th className="text-center px-4 py-3.5 text-slate-400 font-semibold">Elite</th>
+                </tr>
+              </thead>
+              <tbody>
+                {COMPARISON.map((row, i) => (
+                  <tr key={row.label} className={`border-b border-slate-800/50 ${i % 2 === 0 ? "bg-slate-900/20" : ""}`}>
+                    <td className="px-5 py-3 text-slate-300 font-medium">{row.label}</td>
+                    <td className="px-4 py-3 text-center text-slate-400 text-xs">{row.free}</td>
+                    <td className="px-4 py-3 text-center text-indigo-300 text-xs font-semibold bg-indigo-950/20">{row.pro}</td>
+                    <td className="px-4 py-3 text-center text-slate-300 text-xs">{row.elite}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
 
+        {/* ── Dhan full-width CTA ── */}
+        <div className="mb-16 rounded-2xl border border-orange-500/20 bg-gradient-to-r from-orange-950/30 to-amber-950/20 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <p className="font-bold text-white mb-1">Also trading live? Open a Dhan account free</p>
+            <p className="text-sm text-slate-400">
+              ₹0 AMC for lifetime · Zero brokerage on investing · ₹20/order on F&O · Fast execution · Solid support
+            </p>
+            <p className="text-[10px] text-slate-600 mt-1">Referral partnership — we earn a small commission when you open an account, at no cost to you</p>
+          </div>
+          <a
+            href={DHAN_REFERRAL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-sm font-bold transition-colors whitespace-nowrap flex-shrink-0"
+          >
+            Open Free Account <ExternalLink className="w-4 h-4" />
+          </a>
+        </div>
+
+        {/* ── FAQ ── */}
+        <div className="max-w-2xl mx-auto mb-10">
+          <h2 className="text-2xl font-bold text-white text-center mb-6">Frequently Asked Questions</h2>
+          <div className="space-y-3">
+            {FAQ.map((item, i) => (
+              <div
+                key={i}
+                className="border border-slate-800 rounded-xl overflow-hidden bg-slate-900/30"
+              >
+                <button
+                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  className="w-full flex items-center justify-between px-5 py-4 text-left text-slate-200 font-medium text-sm hover:text-white transition-colors"
+                >
+                  {item.q}
+                  <span className="text-slate-500 ml-3 flex-shrink-0">{openFaq === i ? "−" : "+"}</span>
+                </button>
+                {openFaq === i && (
+                  <div className="px-5 pb-4 text-sm text-slate-400 leading-relaxed border-t border-slate-800 pt-3">
+                    {item.a}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Bottom disclaimer ── */}
+        <p className="text-center text-xs text-slate-600 max-w-lg mx-auto">
+          OptionsGyani is not SEBI registered. Backtested results are for educational purposes only and do not guarantee future returns. Options trading involves significant risk of loss.
+        </p>
       </div>
+    </div>
+  );
+}
+
+function FeatureRow({ text, highlight }) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${highlight ? "bg-indigo-500/20" : "bg-emerald-500/15"}`}>
+        <Check className={`w-2.5 h-2.5 ${highlight ? "text-indigo-400" : "text-emerald-400"}`} />
+      </div>
+      <span className="text-xs text-slate-400 leading-snug">{text}</span>
+    </div>
+  );
+}
+
+function FeatureRowNo({ text }) {
+  return (
+    <div className="flex items-start gap-2.5">
+      <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-slate-800">
+        <X className="w-2.5 h-2.5 text-slate-600" />
+      </div>
+      <span className="text-xs text-slate-600 leading-snug">{text}</span>
     </div>
   );
 }
