@@ -13,7 +13,7 @@ import UpgradeBanner from "@/components/UpgradeBanner";
 import { generatePayoffData, netPremium, calculatePOP } from "@/lib/options/payoff";
 import { blackScholesPrice, impliedVolatility } from "@/lib/options/greeks";
 import { getAllTemplates, generateStrategyLegs } from "@/lib/options/strategies";
-import { generateHistoricalCampaign } from "@/lib/data/historicalStreamer";
+import { generateCampaignFromRealCloses, generateHistoricalCampaign } from "@/lib/data/historicalStreamer";
 import { useAuth } from "@/context/AuthContext";
 import { checkAndIncrementSimulationLimit } from "@/lib/firebase/userService";
 import { useRouter } from "next/navigation";
@@ -60,13 +60,15 @@ export default function SimulatorPage() {
 
 function SimulatorContent() {
   // ── Replay state ──────────────────────────────────────────────────────────
-  const [targetDate,   setTargetDate]   = useState("2024-03-15");
-  const [expiryDate,   setExpiryDate]   = useState("2024-03-21");
+  const [targetDate,   setTargetDate]   = useState("2024-01-15");
+  const [expiryDate,   setExpiryDate]   = useState("2024-01-25");
   const [playbackData, setPlaybackData] = useState([]);
   const [currentMinute, setCurrentMinute] = useState(0);
   const [isPlaying,    setIsPlaying]    = useState(false);
   const [speed,        setSpeed]        = useState(1);
   const [mounted,      setMounted]      = useState(false);
+  const [dataSource,   setDataSource]   = useState("real"); // "real" | "simulation"
+  const [isLoading,    setIsLoading]    = useState(false);
 
   // ── Strategy state ────────────────────────────────────────────────────────
   const [legs,         setLegs]         = useState([]);
@@ -106,28 +108,78 @@ function SimulatorContent() {
 
     setIsPlaying(false);
     setCurrentMinute(0);
+    setIsLoading(true);
 
     let diffDays = Math.ceil((new Date(expiryDate) - new Date(targetDate)) / (1000 * 60 * 60 * 24));
     if (diffDays <= 0) diffDays = 1;
     if (diffDays > 30) diffDays = 30;
 
-    const campaignData = generateHistoricalCampaign(targetDate, diffDays, 22500);
+    // ── Try BigQuery real data first ──────────────────────────────────────────
+    let campaignData = null;
+    let resolvedAtm  = 22500;
+    let resolvedSource = "simulation";
+
+    try {
+      const params = new URLSearchParams({
+        underlying,
+        startDate:  targetDate,
+        endDate:    expiryDate,
+        expiryDate: expiryDate,
+      });
+      const res  = await fetch(`/api/simulator/day?${params}`);
+      const json = await res.json();
+
+      if (json.dataSource === "real" && json.days?.length > 0) {
+        campaignData   = generateCampaignFromRealCloses(json.days);
+        resolvedAtm    = json.atmStrike || Math.round(json.days[0].close / 50) * 50;
+        resolvedSource = "real";
+
+        // Seed strategy legs with real NSE premiums if available
+        if (json.options?.length > 0) {
+          const optMap = {};
+          for (const o of json.options) optMap[`${o.strike}_${o.type}`] = o;
+
+          const rawLegs = generateStrategyLegs("iron-condor", resolvedAtm);
+          const realLegs = rawLegs.map((leg) => {
+            const key  = `${leg.strike}_${leg.type}`;
+            const real = optMap[key];
+            return {
+              ...leg,
+              lotSize: underlying === "BANKNIFTY" ? 30 : underlying === "FINNIFTY" ? 65 : 75,
+              premium: real ? parseFloat(real.ltp.toFixed(2)) : leg.premium,
+              expiry:  expiryDate,
+            };
+          });
+          setLegs(realLegs);
+          setInitialLegs(realLegs);
+        }
+      }
+    } catch (_) {
+      // Fall through to simulation below
+    }
+
+    // ── Fallback: pure GBM simulation ─────────────────────────────────────────
+    if (!campaignData) {
+      campaignData   = generateHistoricalCampaign(targetDate, diffDays, 22500);
+      resolvedAtm    = Math.round(campaignData[0].spot / 50) * 50;
+      resolvedSource = "simulation";
+
+      const fallbackLegs = generateStrategyLegs("iron-condor", resolvedAtm)
+        .map((leg) => ({ ...leg, expiry: expiryDate }));
+      setLegs(fallbackLegs);
+      setInitialLegs(fallbackLegs);
+    }
+
+    setDataSource(resolvedSource);
     setPlaybackData(campaignData);
-
-    const initialSpot = campaignData[0].spot;
-    const atm         = Math.round(initialSpot / 50) * 50;
-    const initialStrat = generateStrategyLegs("iron-condor", atm)
-      .map((leg) => ({ ...leg, expiry: expiryDate }));
-
-    setLegs(initialStrat);
-    setInitialLegs(initialStrat);
+    setIsLoading(false);
     setIsModalOpen(false);
     setAdjustments([{
-      day: 1, time: "09:15", spot: initialSpot,
+      day: 1, time: "09:15", spot: campaignData[0].spot,
       action: "START",
-      message: `Started Simulation ${targetDate} → ${expiryDate}`,
+      message: `${resolvedSource === "real" ? "📊 Real NSE" : "🔬 Simulated"} replay: ${targetDate} → ${expiryDate}`,
     }]);
-  }, [targetDate, expiryDate, currentUser, authLoading, router, userProfile, updateLocalProfile]);
+  }, [targetDate, expiryDate, underlying, currentUser, authLoading, router, userProfile, updateLocalProfile]);
 
   // ── Playback loop ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -281,6 +333,15 @@ function SimulatorContent() {
           </div>
           <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">Options Simulator</h1>
           <p className="text-sm text-slate-400 mt-0.5">Replay historical trading days tick-by-tick and practise strategy adjustments in real time.</p>
+          {hasData && (
+            <span className={`inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest border ${
+              dataSource === "real"
+                ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400"
+                : "bg-amber-500/15 border-amber-500/25 text-amber-400"
+            }`}>
+              {dataSource === "real" ? "📊 Real NSE Bhavcopy Data" : "🔬 GBM Simulation (BigQuery unavailable)"}
+            </span>
+          )}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -412,6 +473,8 @@ function SimulatorContent() {
                   <input
                     type="date"
                     value={targetDate}
+                    min="2016-01-04"
+                    max="2024-06-03"
                     onChange={(e) => setTargetDate(e.target.value)}
                     style={{ colorScheme: "dark" }}
                     className="w-full bg-white/5 border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-blue-500"
@@ -422,18 +485,27 @@ function SimulatorContent() {
                   <input
                     type="date"
                     value={expiryDate}
+                    min="2016-01-04"
+                    max="2024-06-03"
                     onChange={(e) => setExpiryDate(e.target.value)}
                     style={{ colorScheme: "dark" }}
                     className="w-full bg-white/5 border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-blue-500"
                   />
                 </div>
+                <p className="col-span-2 text-[9px] text-slate-600 text-center -mt-1">
+                  Real NSE data: Jan 2016 – Jun 2024
+                </p>
               </div>
 
               <button
                 onClick={loadHistoricalDay}
-                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold rounded-xl transition-all text-sm shadow-lg shadow-blue-900/30 active:scale-[0.98]"
+                disabled={isLoading}
+                className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold rounded-xl transition-all text-sm shadow-lg shadow-blue-900/30 active:scale-[0.98]"
               >
-                <Play className="w-4 h-4" /> Start Simulation
+                {isLoading
+                  ? <><span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> Loading NSE Data…</>
+                  : <><Play className="w-4 h-4" /> Start Simulation</>
+                }
               </button>
 
               {hasData && (
