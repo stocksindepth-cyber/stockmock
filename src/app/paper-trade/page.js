@@ -15,8 +15,7 @@ import {
 } from "@/lib/firebase/config";
 import {
   doc, getDoc, setDoc, updateDoc, collection, addDoc,
-  onSnapshot, query, orderBy, serverTimestamp, writeBatch,
-  getDocs,
+  query, orderBy, serverTimestamp, writeBatch, getDocs,
 } from "firebase/firestore";
 import { getAllTemplates, generateStrategyLegs } from "@/lib/options/strategies";
 
@@ -201,28 +200,33 @@ function PaperTradeContent() {
     return () => clearInterval(id);
   }, []);
 
-  // ── Firestore listeners ───────────────────────────────────────────────────
-  useEffect(() => {
+  // ── Firestore data loader (one-shot reads, no persistent listeners) ───────
+  // Using getDoc/getDocs instead of onSnapshot avoids the Firestore
+  // INTERNAL ASSERTION (ID: ca9 / ve:-1) caused by React StrictMode
+  // rapidly subscribe → unsubscribe → subscribe on the same watch stream.
+  const loadData = useCallback(async () => {
     if (!currentUser) return;
     const profileRef = doc(db, "users", currentUser.uid, "paperTradeProfile", "data");
-    const unsubProfile = onSnapshot(profileRef, async (snap) => {
-      if (snap.exists()) {
-        setProfile(snap.data());
-      } else {
-        const init = { capital: INITIAL_CAPITAL, initialCapital: INITIAL_CAPITAL, realizedPnL: 0 };
-        await setDoc(profileRef, init);
-        setProfile(init);
-      }
-    });
-
+    const profileSnap = await getDoc(profileRef);
+    if (profileSnap.exists()) {
+      setProfile(profileSnap.data());
+    } else {
+      const init = { capital: INITIAL_CAPITAL, initialCapital: INITIAL_CAPITAL, realizedPnL: 0 };
+      await setDoc(profileRef, init);
+      setProfile(init);
+    }
     const tradesRef = collection(db, "users", currentUser.uid, "paperTrades");
     const q = query(tradesRef, orderBy("createdAt", "desc"));
-    const unsubTrades = onSnapshot(q, (snap) => {
-      setTrades(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
-    });
-
-    return () => { unsubProfile(); unsubTrades(); };
+    const tradesSnap = await getDocs(q);
+    setTrades(tradesSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
   }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser) return;
+    let cancelled = false;
+    loadData().catch((e) => { if (!cancelled) console.error("loadData failed", e); });
+    return () => { cancelled = true; };
+  }, [currentUser, loadData]);
 
   // ── Fetch expiry list when index changes ──────────────────────────────────
   useEffect(() => {
@@ -348,6 +352,7 @@ function PaperTradeContent() {
         capital: (profile?.capital ?? INITIAL_CAPITAL) - margin + Math.max(0, netPrem),
       });
 
+      await loadData();
       setActiveTab("positions");
     } catch (e) {
       console.error("Open position failed", e);
@@ -412,6 +417,7 @@ function PaperTradeContent() {
       });
 
       await batch.commit();
+      await loadData();
     } catch (e) {
       console.error("Close position failed", e);
       alert("Failed to square off. Please try again.");
@@ -435,6 +441,7 @@ function PaperTradeContent() {
         capital: INITIAL_CAPITAL, initialCapital: INITIAL_CAPITAL, realizedPnL: 0,
       });
       await batch.commit();
+      await loadData();
       setResetConfirm(false);
       setActiveTab("trade");
     } catch (e) {

@@ -1,6 +1,6 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
-import { initializeFirestore } from "firebase/firestore";
+import { initializeFirestore, getFirestore } from "firebase/firestore";
 
 // Real Firebase config provided by user
 const firebaseConfig = {
@@ -14,11 +14,22 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase only if not already initialized
-const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+const isNew = !getApps().length;
+const app = isNew ? initializeApp(firebaseConfig) : getApp();
 export const auth = getAuth(app);
 
-// Use explicit initialization with long polling to prevent SSR/HMR AbortErrors across Edge nodes.
-// We also explicitly pass the "default" database ID instead of the implied "(default)"
-export const db = initializeFirestore(app, {
-  experimentalForceLongPolling: true,
-}, "optionsindepth");
+// initializeFirestore must only be called once per app instance.
+// On HMR hot-reloads the module re-evaluates but the Firebase app persists,
+// so calling initializeFirestore again would throw "settings can no longer be changed".
+// Guard with try/catch: first load initialises with long-polling; subsequent loads
+// just retrieve the existing instance via getFirestore.
+let db;
+try {
+  db = initializeFirestore(app, {
+    experimentalForceLongPolling: true,
+  }, "optionsindepth");
+} catch {
+  // Already initialised (HMR re-eval) — grab the existing instance
+  db = getFirestore(app, "optionsindepth");
+}
+export { db };
