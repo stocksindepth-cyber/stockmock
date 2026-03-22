@@ -32,8 +32,8 @@ test.describe("Login page", () => {
     await page.goto("/login");
     await page.locator('input[type="email"]').fill("invalid@test.com");
     await page.locator('input[type="password"]').fill("wrongpassword123");
-    // Button text is "Log In" — include "log in" and space-less variants
-    await page.getByRole("button", { name: /sign in|log in|login|continue/i }).click();
+    // Use the submit button specifically — "Continue with Google" also matches /continue/i
+    await page.locator('button[type="submit"]').click();
 
     // Should show error message, not crash
     await expect(
