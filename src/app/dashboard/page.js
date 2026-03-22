@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Layers, BarChart2, TrendingUp, History, BookOpen, Search,
   Activity, ArrowRight, Zap, Target, Sparkles, ChevronRight,
-  CheckCircle2, Circle, RefreshCw,
+  CheckCircle2, Circle, RefreshCw, AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { collection, query, orderBy, limit, getDocs, where } from "firebase/firestore";
@@ -226,6 +226,20 @@ function DashboardContent() {
             {userProfile?.plan ? userProfile.plan.charAt(0).toUpperCase() + userProfile.plan.slice(1) : "Free"} Plan
           </span>
         </div>
+
+        {/* Dhan 401 warning */}
+        {indicesErrKind === "auth_error" && (
+          <div className="mb-6 flex items-center gap-3 px-4 py-3 bg-amber-500/10 border border-amber-500/20 rounded-xl text-sm">
+            <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+            <span className="text-amber-300">
+              Dhan API token expired.{" "}
+              <Link href="/admin/dhan-token" className="underline font-semibold hover:text-amber-200">
+                Update it here
+              </Link>{" "}
+              — takes 30 seconds.
+            </span>
+          </div>
+        )}
 
         {/* ── FTU Onboarding Card ── */}
         {isFTU && (

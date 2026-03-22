@@ -9,26 +9,60 @@
 
 const DHAN_BASE = "https://api.dhan.co/v2";
 
-function headers() {
-  const token = process.env.DHAN_ACCESS_TOKEN;
-  const clientId = process.env.NEXT_PUBLIC_DHAN_CLIENT_ID;
-  if (!token || !clientId) {
-    throw new Error("Dhan API credentials not set. Add DHAN_ACCESS_TOKEN and NEXT_PUBLIC_DHAN_CLIENT_ID to .env.local");
+// ── Token management ─────────────────────────────────────────────────────────
+// Token is read from env var first; if absent, fetched from Firestore admin/dhan
+// This lets you update the token without redeploying.
+let _tokenCache    = null;
+let _tokenCachedAt = 0;
+const TOKEN_CACHE_TTL = 5 * 60 * 1000; // re-read Firestore every 5 min
+
+export function invalidateDhanTokenCache() {
+  _tokenCache    = null;
+  _tokenCachedAt = 0;
+}
+
+async function getToken() {
+  // 1. Env var (local dev / Vercel env)
+  if (process.env.DHAN_ACCESS_TOKEN) return process.env.DHAN_ACCESS_TOKEN;
+
+  // 2. In-memory cache
+  if (_tokenCache && Date.now() - _tokenCachedAt < TOKEN_CACHE_TTL) return _tokenCache;
+
+  // 3. Firestore admin/dhan document
+  try {
+    const { getAdminFirestore } = await import("../firebase/admin.js");
+    const db  = getAdminFirestore();
+    const doc = await db.doc("admin/dhan").get();
+    if (doc.exists && doc.data()?.accessToken) {
+      _tokenCache    = doc.data().accessToken;
+      _tokenCachedAt = Date.now();
+      return _tokenCache;
+    }
+  } catch (err) {
+    console.error("[Dhan] Failed to read token from Firestore:", err.message);
   }
+
+  throw new Error("Dhan access token not configured. Set DHAN_ACCESS_TOKEN or update admin/dhan in Firestore.");
+}
+
+async function headers() {
+  const token    = await getToken();
+  const clientId = process.env.NEXT_PUBLIC_DHAN_CLIENT_ID;
+  if (!clientId) throw new Error("NEXT_PUBLIC_DHAN_CLIENT_ID not set");
   return {
-    "Content-Type": "application/json",
-    "Accept": "application/json",
-    "access-token": token,
-    "client-id": clientId,
+    "Content-Type":  "application/json",
+    "Accept":        "application/json",
+    "access-token":  token,
+    "client-id":     clientId,
   };
 }
 
 async function dhanPost(endpoint, body) {
   const res = await fetch(`${DHAN_BASE}${endpoint}`, {
-    method: "POST",
-    headers: headers(),
-    body: JSON.stringify(body),
-    cache: "no-store",
+    method:  "POST",
+    headers: await headers(),
+    body:    JSON.stringify(body),
+    cache:   "no-store",
   });
   if (!res.ok) {
     const text = await res.text();

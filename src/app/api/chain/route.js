@@ -25,25 +25,19 @@ export async function GET(request) {
   }
 
   // 2. Fetch Live
-  if (process.env.DHAN_ACCESS_TOKEN && process.env.NEXT_PUBLIC_DHAN_CLIENT_ID) {
-    try {
-      const raw = await fetchOptionChain(symbol, expiry);
-      const data = transformChain(raw);
-      
-      // Save to cache
-      chainCache.set(cacheKey, { data, timestamp: now });
-      
-      return NextResponse.json({ ...data, source: "live" });
-    } catch (err) {
-      console.error("[API /chain] Dhan error:", err.message);
-      
-      // If 429 or any error occurs, gracefully fallback to mocked calculations
-      const mockChain = generateMockChain(UNDERLYING[symbol], symbol === "BANKNIFTY" ? 100 : 50, 40);
-      return NextResponse.json({ ...mockChain, source: "mock-fallback" });
-    }
-  } else {
-    // Missing credentials, serve mock
+  try {
+    const raw = await fetchOptionChain(symbol, expiry);
+    const data = transformChain(raw);
+
+    // Save to cache
+    chainCache.set(cacheKey, { data, timestamp: now });
+
+    return NextResponse.json({ ...data, source: "live" });
+  } catch (err) {
+    console.error("[API /chain] Dhan error:", err.message);
+
+    // If any error occurs, gracefully fallback to mocked calculations
     const mockChain = generateMockChain(UNDERLYING[symbol], symbol === "BANKNIFTY" ? 100 : 50, 40);
-    return NextResponse.json({ ...mockChain, source: "mock" });
+    return NextResponse.json({ ...mockChain, source: "mock-fallback" });
   }
 }

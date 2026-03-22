@@ -1,102 +1,69 @@
 import { NextResponse } from "next/server";
-import { fetchOHLC, UNDERLYING } from "@/lib/data/dhanApi";
 
-// ── Server-side cache (module-level, survives requests within the same process) ──
-// Prevents Dhan 429s from rapid successive calls (React StrictMode double-mount,
-// multiple browser tabs, etc.)
-let _cache       = null; // { indices: [...], source: "live" }
-let _cachedAt    = 0;
-let _cacheSource = null; // track the source of the cached response
-const CACHE_TTL  = 60_000; // 60 seconds
+// Yahoo Finance symbols for NSE indices
+const YF_SYMBOLS = [
+  { symbol: "^NSEI",             name: "NIFTY 50",   key: "NIFTY"     },
+  { symbol: "^NSEBANK",          name: "BANK NIFTY",  key: "BANKNIFTY" },
+  { symbol: "NIFTY_FIN_SERVICE.NS", name: "FIN NIFTY", key: "FINNIFTY"  },
+];
 
-function freshCache(indices, source) {
-  _cache       = { indices, source };
-  _cachedAt    = Date.now();
-  _cacheSource = source;
-  return _cache;
+// Server-side cache — 60 s TTL prevents hammering Yahoo on rapid reloads
+let _cache   = null;
+let _cachedAt = 0;
+const CACHE_TTL = 60_000;
+
+async function fetchYahooQuote(yfSymbol) {
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSymbol)}?interval=1m&range=1d`;
+  const res = await fetch(url, {
+    headers: {
+      "User-Agent": "Mozilla/5.0 (compatible; OptionsGyani/1.0)",
+      "Accept": "application/json",
+    },
+    next: { revalidate: 0 }, // never cache at Next.js layer; we manage our own cache
+  });
+  if (!res.ok) throw new Error(`Yahoo ${res.status} for ${yfSymbol}`);
+  const json = await res.json();
+  const meta = json?.chart?.result?.[0]?.meta;
+  if (!meta) throw new Error(`No meta in Yahoo response for ${yfSymbol}`);
+  return meta;
 }
-
-function getCached() {
-  if (_cache && Date.now() - _cachedAt < CACHE_TTL) return _cache;
-  return null;
-}
-
-const INDEX_DISPLAY = {
-  13: "NIFTY 50",
-  25: "BANK NIFTY",
-  27: "FIN NIFTY",
-};
 
 export async function GET() {
-  // ── 1. No credentials ───────────────────────────────────────────────────────
-  if (!process.env.DHAN_ACCESS_TOKEN || !process.env.NEXT_PUBLIC_DHAN_CLIENT_ID) {
-    return NextResponse.json({ indices: [], source: "no_credentials" });
+  // Serve from cache if fresh
+  if (_cache && Date.now() - _cachedAt < CACHE_TTL) {
+    return NextResponse.json({ ..._cache, cached: true });
   }
 
-  // ── 2. Serve from cache if still fresh ──────────────────────────────────────
-  const cached = getCached();
-  if (cached) {
-    return NextResponse.json({ ...cached, cached: true });
-  }
+  // Fetch all three in parallel; allow partial success
+  const results = await Promise.allSettled(
+    YF_SYMBOLS.map(({ symbol, name, key }) =>
+      fetchYahooQuote(symbol).then((meta) => ({
+        key,
+        name,
+        price:         meta.regularMarketPrice   || 0,
+        open:          meta.regularMarketOpen     || 0,
+        high:          meta.regularMarketDayHigh  || 0,
+        low:           meta.regularMarketDayLow   || 0,
+        close:         meta.previousClose         || meta.regularMarketPrice || 0,
+        change:        parseFloat(((meta.regularMarketPrice || 0) - (meta.previousClose || 0)).toFixed(2)),
+        changePercent: meta.previousClose
+          ? `${meta.regularMarketPrice >= meta.previousClose ? "+" : ""}${(((meta.regularMarketPrice - meta.previousClose) / meta.previousClose) * 100).toFixed(2)}%`
+          : "0.00%",
+      }))
+    )
+  );
 
-  // ── 3. Fetch from Dhan ──────────────────────────────────────────────────────
-  try {
-    const symbols = ["NIFTY", "BANKNIFTY", "FINNIFTY"];
-    const ids     = symbols.map((s) => UNDERLYING[s].secId);
-    const ohlcRes = await fetchOHLC({ IDX_I: ids });
+  const indices = results
+    .filter((r) => r.status === "fulfilled")
+    .map((r) => r.value);
 
-    // Dhan shape: { data: { IDX_I: { "13": { last_price, ohlc: {open,high,low,close} } } } }
-    const segData = ohlcRes?.data?.IDX_I || {};
-
-    const indices = symbols.map((sym) => {
-      const secId = UNDERLYING[sym].secId;
-      const item  = segData[String(secId)] || {};
-      const ltp   = item.last_price || 0;
-      const ohlc  = item.ohlc || {};
-      const prev  = ohlc.close || ltp;
-      const change    = parseFloat((ltp - prev).toFixed(2));
-      const changePct = prev
-        ? `${change >= 0 ? "+" : ""}${((change / prev) * 100).toFixed(2)}%`
-        : "0.00%";
-
-      return {
-        name:          INDEX_DISPLAY[secId] || sym,
-        price:         ltp,
-        open:          ohlc.open  || 0,
-        high:          ohlc.high  || 0,
-        low:           ohlc.low   || 0,
-        close:         prev,
-        change,
-        changePercent: changePct,
-      };
-    });
-
-    const payload = freshCache(indices, "live");
-    return NextResponse.json(payload);
-
-  } catch (err) {
-    const msg = err.message || "";
-
-    // ── 4. Distinguish error types ────────────────────────────────────────────
-
-    // 401 — wrong token or client ID
-    if (msg.includes("401")) {
-      console.error("[API /indices] Dhan 401 — token or client ID invalid. Check DHAN_ACCESS_TOKEN and NEXT_PUBLIC_DHAN_CLIENT_ID.");
-      // If we have stale cache, serve it rather than showing an error
-      if (_cache) return NextResponse.json({ ..._cache, source: "cached_stale" });
-      return NextResponse.json({ indices: [], source: "auth_error" });
-    }
-
-    // 429 — rate limited
-    if (msg.includes("429")) {
-      console.warn("[API /indices] Dhan 429 — rate limited. Serving stale cache if available.");
-      if (_cache) return NextResponse.json({ ..._cache, source: "cached_stale" });
-      return NextResponse.json({ indices: [], source: "rate_limited" });
-    }
-
-    // Other errors — serve stale cache if available
-    console.error("[API /indices] Dhan error:", msg);
+  if (indices.length === 0) {
+    console.error("[API /indices] All Yahoo Finance fetches failed");
     if (_cache) return NextResponse.json({ ..._cache, source: "cached_stale" });
     return NextResponse.json({ indices: [], source: "error" });
   }
+
+  _cache   = { indices, source: "live" };
+  _cachedAt = Date.now();
+  return NextResponse.json(_cache);
 }
