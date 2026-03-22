@@ -1,43 +1,53 @@
 import { NextResponse } from "next/server";
-import { fetchLTP, fetchOHLC, INDEX_EQ_IDS } from "@/lib/data/dhanApi";
+import { fetchOHLC, UNDERLYING } from "@/lib/data/dhanApi";
+
+// Map secId → display name
+const INDEX_DISPLAY = {
+  13: "NIFTY 50",
+  25: "BANK NIFTY",
+  27: "FIN NIFTY",
+};
 
 export async function GET() {
-  if (process.env.DHAN_ACCESS_TOKEN && process.env.NEXT_PUBLIC_DHAN_CLIENT_ID) {
-    try {
-      // Fetch LTP & OHLC for NIFTY, BANKNIFTY, FINNIFTY
-      const ids = Object.values(INDEX_EQ_IDS);
-      const segMap = { IDX_I: ids };
+  if (!process.env.DHAN_ACCESS_TOKEN || !process.env.NEXT_PUBLIC_DHAN_CLIENT_ID) {
+    // Credentials not configured — return empty set, not 500
+    return NextResponse.json({ indices: [], source: "unavailable" });
+  }
 
-      const ohlcRes = await fetchOHLC(segMap);
+  try {
+    const symbols = ["NIFTY", "BANKNIFTY", "FINNIFTY"];
+    const ids = symbols.map((s) => UNDERLYING[s].secId);
+    const segMap = { IDX_I: ids };
 
-      const indices = [];
-      for (const [name, secId] of Object.entries(INDEX_EQ_IDS)) {
-        const item = ohlcRes?.data?.IDX_I?.[String(secId)] || {};
-        const ltp = item.last_price || 0;
-        const ohlc = item.ohlc || {};
-        const change = ltp - (ohlc.close || ltp);
-        const changePct = ohlc.close ? ((change / ohlc.close) * 100).toFixed(2) : "0.00";
+    const ohlcRes = await fetchOHLC(segMap);
 
-        indices.push({
-          name: name === "NIFTY" ? "NIFTY 50" : name === "BANKNIFTY" ? "BANK NIFTY" : "FIN NIFTY",
-          price: ltp,
-          open: ohlc.open || 0,
-          high: ohlc.high || 0,
-          low: ohlc.low || 0,
-          close: ohlc.close || 0,
-          change: parseFloat(change.toFixed(2)),
-          changePercent: `${change >= 0 ? "+" : ""}${changePct}%`,
-        });
-      }
+    // Dhan response shape: { data: { IDX_I: { "13": { last_price, ohlc: { open, high, low, close } } } } }
+    const segData = ohlcRes?.data?.IDX_I || {};
 
-      return NextResponse.json({ indices, source: "live" });
-    } catch (err) {
-      console.error("[API /indices] Dhan error:", err.message);
-      // Return empty set rather than 500 so the UI can show graceful state without error spam
-      return NextResponse.json({ indices: [], source: "unavailable" });
-    }
-  } else {
-    // Credentials not configured — return empty payload, not 500
+    const indices = symbols.map((sym) => {
+      const secId = UNDERLYING[sym].secId;
+      const item  = segData[String(secId)] || {};
+      const ltp   = item.last_price || 0;
+      const ohlc  = item.ohlc || {};
+      const prev  = ohlc.close || ltp;
+      const change    = parseFloat((ltp - prev).toFixed(2));
+      const changePct = prev ? `${change >= 0 ? "+" : ""}${((change / prev) * 100).toFixed(2)}%` : "0.00%";
+
+      return {
+        name:          INDEX_DISPLAY[secId] || sym,
+        price:         ltp,
+        open:          ohlc.open  || 0,
+        high:          ohlc.high  || 0,
+        low:           ohlc.low   || 0,
+        close:         prev,
+        change,
+        changePercent: changePct,
+      };
+    });
+
+    return NextResponse.json({ indices, source: "live" });
+  } catch (err) {
+    console.error("[API /indices] Dhan error:", err.message);
     return NextResponse.json({ indices: [], source: "unavailable" });
   }
 }

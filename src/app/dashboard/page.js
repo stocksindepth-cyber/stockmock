@@ -116,8 +116,20 @@ function DashboardContent() {
         const res = await fetch("/api/indices", { signal: controller.signal });
         if (!res.ok) throw new Error("API error");
         const data = await res.json();
-        // source:"unavailable" means Dhan creds not set — show empty, not error
-        setIndices(data.source === "unavailable" ? null : data);
+        if (data.source === "unavailable" || !data.indices?.length) {
+          setIndices(null); // creds not set — show dashes, not error
+        } else {
+          // Convert array → keyed map { NIFTY: item, BANKNIFTY: item, ... }
+          const keyMap = {};
+          for (const item of data.indices) {
+            const key = item.name.replace(" ", "").replace("50", "").replace("NIFTY", "NIFTY").trim();
+            // Map display names back to symbol keys
+            if (item.name === "NIFTY 50")   keyMap.NIFTY     = item;
+            if (item.name === "BANK NIFTY") keyMap.BANKNIFTY = item;
+            if (item.name === "FIN NIFTY")  keyMap.FINNIFTY  = item;
+          }
+          setIndices(keyMap);
+        }
         setIndicesError(false);
       } catch (err) {
         if (err.name === "AbortError") return;
@@ -241,33 +253,33 @@ function DashboardContent() {
               </button>
             )}
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            {[
-              { key: "NIFTY",     label: "NIFTY 50" },
-              { key: "BANKNIFTY", label: "BANK NIFTY" },
-              { key: "FINNIFTY",  label: "FIN NIFTY" },
-              { key: "VIX",       label: "INDIA VIX" },
-            ].map(({ key, label }) => {
-              const val = indices?.[key];
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+            {["NIFTY", "BANKNIFTY", "FINNIFTY"].map((key) => {
+              const item = indices?.[key];
+              const isUp = item ? item.change >= 0 : null;
               return (
                 <div key={key} className="glass-card rounded-xl p-4">
-                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">{label}</p>
+                  <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
+                    {key === "NIFTY" ? "NIFTY 50" : key === "BANKNIFTY" ? "BANK NIFTY" : "FIN NIFTY"}
+                  </p>
                   {indicesLoading ? (
                     <>
                       <div className="h-7 w-24 bg-white/5 animate-pulse rounded mb-1" />
-                      <div className="h-4 w-16 bg-white/5 animate-pulse rounded" />
+                      <div className="h-4 w-20 bg-white/5 animate-pulse rounded" />
                     </>
-                  ) : indicesError || val == null ? (
+                  ) : !item ? (
                     <>
                       <p className="text-xl font-bold text-slate-600">—</p>
-                      <p className="text-xs text-slate-600 mt-1">Unavailable</p>
+                      <p className="text-xs text-slate-600 mt-1">{indicesError ? "Error" : "Add Dhan creds"}</p>
                     </>
                   ) : (
                     <>
                       <p className="text-xl font-bold text-white tabular-nums">
-                        {key === "VIX" ? val.toFixed(2) : `₹${Number(val).toLocaleString("en-IN")}`}
+                        ₹{Number(item.price).toLocaleString("en-IN")}
                       </p>
-                      <p className="text-xs text-slate-500 mt-1">Live</p>
+                      <p className={`text-xs mt-1 font-medium tabular-nums ${isUp ? "text-emerald-400" : "text-rose-400"}`}>
+                        {item.changePercent} {isUp ? "▲" : "▼"}
+                      </p>
                     </>
                   )}
                 </div>

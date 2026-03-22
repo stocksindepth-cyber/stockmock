@@ -5,13 +5,27 @@ import { ArrowRight, BarChart2, Shield, Zap, Target, Activity, Database, CheckCi
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
+  const router = useRouter();
+  const { currentUser, loading } = useAuth();
+
+  // Redirect authenticated users straight to their dashboard
+  useEffect(() => {
+    if (!loading && currentUser) {
+      router.replace("/dashboard");
+    }
+  }, [currentUser, loading, router]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // While auth is resolving, render nothing to prevent flash of marketing page
+  if (loading || currentUser) return null;
 
   const schemaData = {
     "@context": "https://schema.org",
