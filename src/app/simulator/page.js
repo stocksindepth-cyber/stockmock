@@ -265,6 +265,11 @@ function SimulatorContent() {
     return Math.max(0.01, dte + intraDay);
   }, [currentTick]);
 
+  const payoffResult = useMemo(
+    () => generatePayoffData(legs, initialSpot, 10, 200, daysToExpiry),
+    [legs, initialSpot, daysToExpiry]
+  );
+
   // Derive live P&L directly from the payoff chart data — single source of truth,
   // guarantees the top-card number is always in sync with the chart.
   const livePnl = useMemo(() => {
@@ -283,11 +288,6 @@ function SimulatorContent() {
       : closest.pnl;
     return isNaN(val) ? 0 : val;
   }, [payoffResult.data, liveSpot, daysToExpiry]);
-
-  const payoffResult = useMemo(
-    () => generatePayoffData(legs, initialSpot, 10, 200, daysToExpiry),
-    [legs, initialSpot, daysToExpiry]
-  );
 
   const premium = useMemo(() => netPremium(legs), [legs]);
 
