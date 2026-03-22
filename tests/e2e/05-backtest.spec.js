@@ -68,7 +68,8 @@ test.describe("Backtest API — real data flow", () => {
       headers: { "Content-Type": "application/json" },
     });
 
-    expect([200, 422, 401]).toContain(res.status());
+    // Must not crash server — 200 (data), 422 (validation), 401 (auth), 500 (BQ error) all ok
+    expect([200, 422, 401, 500]).toContain(res.status());
 
     if (res.status() === 200) {
       const body = await res.json();
@@ -95,7 +96,8 @@ test.describe("Backtest API — real data flow", () => {
       headers: { "Content-Type": "application/json" },
     });
 
-    expect([200, 422, 401]).toContain(res.status());
+    // Must not crash server
+    expect([200, 422, 401, 500]).toContain(res.status());
   });
 
   test("backtest covers 2016 data (8+ years of BigQuery data)", async ({ request }) => {

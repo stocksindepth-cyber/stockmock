@@ -23,7 +23,8 @@ test.describe("Login page", () => {
 
   test("shows link to sign up page", async ({ page }) => {
     await page.goto("/login");
-    const signupLink = page.getByRole("link", { name: /sign up|register|create account/i });
+    // Use first() — navbar also has a "Sign Up" link, causing multiple matches
+    const signupLink = page.getByRole("link", { name: /sign up|register|create account/i }).first();
     await expect(signupLink).toBeVisible();
   });
 
@@ -31,7 +32,8 @@ test.describe("Login page", () => {
     await page.goto("/login");
     await page.locator('input[type="email"]').fill("invalid@test.com");
     await page.locator('input[type="password"]').fill("wrongpassword123");
-    await page.getByRole("button", { name: /sign in|login|continue/i }).click();
+    // Button text is "Log In" — include "log in" and space-less variants
+    await page.getByRole("button", { name: /sign in|log in|login|continue/i }).click();
 
     // Should show error message, not crash
     await expect(
@@ -65,7 +67,8 @@ test.describe("Signup page", () => {
 
   test("shows link back to login", async ({ page }) => {
     await page.goto("/signup");
-    const loginLink = page.getByRole("link", { name: /log in|sign in|already have/i });
+    // Use first() — navbar also has a "Log In" link, causing multiple matches
+    const loginLink = page.getByRole("link", { name: /log in|sign in|already have/i }).first();
     await expect(loginLink).toBeVisible();
   });
 

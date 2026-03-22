@@ -4,8 +4,8 @@ import Footer from "@/components/Footer";
 import "./globals.css";
 
 export const metadata = {
-  title: "OptionsGyani | Free Options Strategy Builder & Backtesting Tool for NSE",
-  description: "India's most powerful free options analytics platform. Build multi-leg strategies, backtest on 8+ years of real NSE data, analyze open interest, and paper trade risk-free. Used by NIFTY & BANKNIFTY traders.",
+  title: "OptionsGyani — Free NSE Options Backtesting Tool",
+  description: "Free options analytics for NSE traders. Build strategies, backtest on 8+ years of real data, analyze open interest. NIFTY & BANKNIFTY.",
   keywords: "options strategy builder NSE, free option chain analyzer, options backtesting India, nifty weekly expiry strategy, iron condor nifty, short straddle banknifty, india vix options, options simulator with historical data, banknifty options strategy, nifty options tool",
   metadataBase: new URL("https://optionsgyani.in"),
   openGraph: {
