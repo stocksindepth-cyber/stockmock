@@ -111,10 +111,22 @@ export default function Footer() {
           ))}
         </div>
 
+        {/* Regulatory Disclaimer */}
+        <div className="mt-10 p-4 rounded-xl bg-orange-500/5 border border-orange-500/10">
+          <p className="text-orange-200/50 text-xs leading-relaxed text-center">
+            <strong className="text-orange-200/70">Regulatory Disclaimer:</strong> OptionsGyani is a software tool designed strictly for educational, analytical, and backtesting purposes. We are an analytics provider,{" "}
+            <strong className="text-orange-200/70">not SEBI registered Investment Advisors or Research Analysts.</strong> We do not provide trading tips, recommendations, or buy/sell signals. All data, calculations, and visualizations (including strategy payoffs, backtest results, and screeners) are based on historical and real-time data feeds and should not be construed as financial advice. Options trading involves significant risk and is not suitable for all investors. Past performance of any trading system or methodology is not necessarily indicative of future results. Please consult a qualified financial advisor before making any investment decisions.
+          </p>
+        </div>
+
         {/* Bottom bar */}
-        <div className="mt-10 pt-6 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
-          <p>© {new Date().getFullYear()} OptionsGyani. All rights reserved.</p>
-          <p>Options trading involves risk. Past backtested performance is not indicative of future results.</p>
+        <div className="mt-6 pt-5 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
+          <p>© {new Date().getFullYear()} OptionsGyani Analytics. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <a href="/terms" className="hover:text-slate-400 transition-colors">Terms of Service</a>
+            <a href="/privacy" className="hover:text-slate-400 transition-colors">Privacy Policy</a>
+            <a href="/terms#risk" className="hover:text-slate-400 transition-colors">Risk Disclosure</a>
+          </div>
         </div>
       </div>
     </footer>

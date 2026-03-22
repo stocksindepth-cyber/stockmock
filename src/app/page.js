@@ -279,57 +279,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Trust / Disclaimer Footer */}
-      <footer className="border-t border-white/5 bg-[#050810] pt-16 pb-8">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-            <div className="col-span-1 md:col-span-2">
-              <Link href="/" className="flex items-center gap-2 mb-4">
-                <Target className="w-6 h-6 text-emerald-500" />
-                <span className="text-xl font-bold tracking-tight text-white">OptionsGyani</span>
-              </Link>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
-                Advanced options analytics, backtesting software, and strategy building tools for the modern Indian derivatives trader.
-              </p>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Tools</h4>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li><Link href="/builder" className="hover:text-emerald-400 transition-colors">Strategy Builder</Link></li>
-                <li><Link href="/backtest" className="hover:text-emerald-400 transition-colors">Backtesting</Link></li>
-                <li><Link href="/screener" className="hover:text-emerald-400 transition-colors">Options Screener</Link></li>
-                <li><Link href="/chain" className="hover:text-emerald-400 transition-colors">Option Chain NSE</Link></li>
-                <li><Link href="/paper-trade" className="hover:text-emerald-400 transition-colors">Paper Trading</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-white font-semibold mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm text-slate-400">
-                <li><Link href="/learn" className="hover:text-emerald-400 transition-colors">Learn Options</Link></li>
-                <li><Link href="/pricing" className="hover:text-emerald-400 transition-colors">Pricing</Link></li>
-                <li><Link href="/simulator" className="hover:text-emerald-400 transition-colors">Time-Machine Simulator</Link></li>
-                <li><Link href="/dashboard" className="hover:text-emerald-400 transition-colors">Dashboard</Link></li>
-              </ul>
-            </div>
-          </div>
-          
-          <div className="border-t border-white/5 pt-8">
-            <div className="p-4 rounded-xl bg-orange-500/5 border border-orange-500/10 mb-8">
-              <p className="text-orange-200/60 text-xs leading-relaxed text-center">
-                <strong>Regulatory Disclaimer:</strong> OptionsGyani is a software tool designed strictly for educational, analytical, and backtesting purposes. We are an analytics provider, <strong>not SEBI registered Investment Advisors or Research Analysts.</strong> We do not provide trading tips, recommendations, or buy/sell signals. All data, calculations, and visualizations (including strategy payoffs, backtest results, and screeners) are based on historical and real-time data feeds and should not be construed as financial advice. Options trading involves significant risk and is not suitable for all investors. Past performance of any trading system or methodology is not necessarily indicative of future results. Please consult a qualified financial advisor before making any investment decisions.
-              </p>
-            </div>
-            <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-600">
-              <p>© {new Date().getFullYear()} OptionsGyani Analytics. All rights reserved.</p>
-              <div className="flex gap-4">
-                <Link href="/terms" className="hover:text-slate-300">Terms of Service</Link>
-                <Link href="/privacy" className="hover:text-slate-300">Privacy Policy</Link>
-                <Link href="/terms#risk" className="hover:text-slate-300">Risk Disclosure</Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </footer>
 
       {/* Structured Data for SEO */}
       <script

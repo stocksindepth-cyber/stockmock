@@ -476,10 +476,6 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* ── Bottom disclaimer ── */}
-        <p className="text-center text-xs text-slate-600 max-w-lg mx-auto">
-          OptionsGyani is not SEBI registered. Backtested results are for educational purposes only and do not guarantee future returns. Options trading involves significant risk of loss.
-        </p>
       </div>
     </div>
   );
