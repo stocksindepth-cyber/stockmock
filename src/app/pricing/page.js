@@ -195,11 +195,27 @@ export default function PricingPage() {
           theme: { color: "#6366F1" },
           handler: async (response) => {
             try {
-              await upgradeUserPlan(currentUser.uid, plan.dbPlan, durationDays);
-              window.location.href = "/profile?success=true";
+              // Server-side signature verification + plan activation
+              const verifyRes = await fetch("/api/razorpay/verify", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                  userId: currentUser.uid,
+                  planId: plan.dbPlan,
+                  durationDays,
+                }),
+              });
+              const verifyData = await verifyRes.json();
+              if (!verifyRes.ok || !verifyData.success) {
+                throw new Error(verifyData.error || "Verification failed");
+              }
+              window.location.href = "/profile?success=true&plan=" + plan.dbPlan;
               resolve();
             } catch (err) {
-              alert("Payment successful but activation failed. Contact support@optionsgyani.in with payment ID: " + response.razorpay_payment_id);
+              alert("Payment received but activation failed. Contact support@optionsgyani.in with payment ID: " + response.razorpay_payment_id);
               reject(err);
             }
           },
