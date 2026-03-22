@@ -1,5 +1,5 @@
 export default function sitemap() {
-  const baseUrl = "https://optionsgyani.in";
+  const baseUrl = "https://optionsgyani.com";
 
   const staticPages = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "daily", priority: 1.0 },

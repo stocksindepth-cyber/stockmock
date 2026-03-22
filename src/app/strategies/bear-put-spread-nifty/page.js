@@ -9,7 +9,7 @@ export const metadata = {
   openGraph: {
     title: "Bear Put Spread NIFTY — Strategy & Backtest | OptionsGyani",
     description: "Verified historical win rate 51.8%, avg 5.1% ROI per trade. Safely short NIFTY without huge margins.",
-    url: "https://optionsgyani.in/strategies/bear-put-spread-nifty",
+    url: "https://optionsgyani.com/strategies/bear-put-spread-nifty",
     type: "article",
   },
 };
@@ -48,7 +48,7 @@ export default function BearPutSpreadNiftyPage() {
             "headline": "Bear Put Spread NIFTY — Verified Downside Strategy & Data",
             "description": "Complete Bear Put Spread guide for NIFTY with real historical data.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.in" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
           }),

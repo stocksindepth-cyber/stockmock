@@ -25,10 +25,10 @@ export default function ContactPage() {
             <h3 className="text-white font-semibold mb-1">Email Support</h3>
             <p className="text-slate-500 text-sm mb-3">For account issues, billing queries, and technical support.</p>
             <a
-              href="mailto:support@optionsgyani.in"
+              href="mailto:support@optionsgyani.com"
               className="text-indigo-400 font-medium text-sm hover:text-indigo-300 transition-colors"
             >
-              support@optionsgyani.in
+              support@optionsgyani.com
             </a>
           </div>
 
@@ -39,10 +39,10 @@ export default function ContactPage() {
             <h3 className="text-white font-semibold mb-1">Business & Partnerships</h3>
             <p className="text-slate-500 text-sm mb-3">For partnership, collaboration, or press enquiries.</p>
             <a
-              href="mailto:hello@optionsgyani.in"
+              href="mailto:hello@optionsgyani.com"
               className="text-indigo-400 font-medium text-sm hover:text-indigo-300 transition-colors"
             >
-              hello@optionsgyani.in
+              hello@optionsgyani.com
             </a>
           </div>
 

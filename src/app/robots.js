@@ -7,6 +7,6 @@ export default function robots() {
         disallow: ["/dashboard", "/api/"],
       },
     ],
-    sitemap: "https://optionsgyani.in/sitemap.xml",
+    sitemap: "https://optionsgyani.com/sitemap.xml",
   };
 }

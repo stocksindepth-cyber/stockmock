@@ -50,7 +50,7 @@ export default function RefundPage() {
             <p>You may cancel your subscription at any time by:</p>
             <ul className="list-disc list-outside ml-5 space-y-1 mt-2">
               <li>Visiting your profile/account settings page</li>
-              <li>Emailing us at <a href="mailto:support@optionsgyani.in" className="text-indigo-400 hover:underline">support@optionsgyani.in</a> with your registered email address and subject line "Cancel Subscription"</li>
+              <li>Emailing us at <a href="mailto:support@optionsgyani.com" className="text-indigo-400 hover:underline">support@optionsgyani.com</a> with your registered email address and subject line "Cancel Subscription"</li>
             </ul>
             <p className="mt-3">
               Upon cancellation, your paid access will remain active until the end of the current billing period.
@@ -88,7 +88,7 @@ export default function RefundPage() {
 
             <p className="mt-3">
               Refund requests must be raised within <strong className="text-white">7 days</strong> of the payment date
-              by emailing <a href="mailto:support@optionsgyani.in" className="text-indigo-400 hover:underline">support@optionsgyani.in</a> with
+              by emailing <a href="mailto:support@optionsgyani.com" className="text-indigo-400 hover:underline">support@optionsgyani.com</a> with
               your registered email, Razorpay payment ID, and reason for the refund request.
             </p>
           </Section>
@@ -104,7 +104,7 @@ export default function RefundPage() {
 
           <Section title="6. Chargebacks">
             <p>
-              We encourage you to contact us at <a href="mailto:support@optionsgyani.in" className="text-indigo-400 hover:underline">support@optionsgyani.in</a>{" "}
+              We encourage you to contact us at <a href="mailto:support@optionsgyani.com" className="text-indigo-400 hover:underline">support@optionsgyani.com</a>{" "}
               before initiating a chargeback with your bank. Initiating an unjustified chargeback may result in
               immediate suspension of your account and may be subject to dispute resolution under applicable law.
             </p>
@@ -124,7 +124,7 @@ export default function RefundPage() {
             </p>
             <div className="mt-3 bg-slate-900 border border-slate-800 rounded-lg p-4 text-sm">
               <p className="text-white font-semibold">OptionsGyani Analytics</p>
-              <p className="text-slate-400 mt-1">Email: <a href="mailto:support@optionsgyani.in" className="text-indigo-400 hover:underline">support@optionsgyani.in</a></p>
+              <p className="text-slate-400 mt-1">Email: <a href="mailto:support@optionsgyani.com" className="text-indigo-400 hover:underline">support@optionsgyani.com</a></p>
               <p className="text-slate-400">Support hours: Monday–Friday, 10:00 AM – 6:00 PM IST</p>
             </div>
           </Section>

@@ -215,7 +215,7 @@ export default function PricingPage() {
               window.location.href = "/profile?success=true&plan=" + plan.dbPlan;
               resolve();
             } catch (err) {
-              alert("Payment received but activation failed. Contact support@optionsgyani.in with payment ID: " + response.razorpay_payment_id);
+              alert("Payment received but activation failed. Contact support@optionsgyani.com with payment ID: " + response.razorpay_payment_id);
               reject(err);
             }
           },

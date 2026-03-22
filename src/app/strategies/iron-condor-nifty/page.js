@@ -9,7 +9,7 @@ export const metadata = {
   openGraph: {
     title: "Iron Condor NIFTY — Backtest (2016–2024) | OptionsGyani",
     description: "Historical win rate 68.4%, average 2.8% monthly return. Real NSE data backtest for Iron Condor on NIFTY.",
-    url: "https://optionsgyani.in/strategies/iron-condor-nifty",
+    url: "https://optionsgyani.com/strategies/iron-condor-nifty",
     type: "article",
   },
 };
@@ -49,10 +49,10 @@ export default function IronCondorNiftyPage() {
             "headline": "Iron Condor NIFTY Strategy — Backtest Results 2016–2024",
             "description": "Complete Iron Condor guide for NIFTY weekly expiry with real backtested data.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.in" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
-            "mainEntityOfPage": "https://optionsgyani.in/strategies/iron-condor-nifty",
+            "mainEntityOfPage": "https://optionsgyani.com/strategies/iron-condor-nifty",
           }),
         }}
       />

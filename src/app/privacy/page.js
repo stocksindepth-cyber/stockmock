@@ -73,7 +73,7 @@ export default function PrivacyPage() {
               <li><strong className="text-slate-300">Deletion:</strong> Request deletion of your account and associated data</li>
               <li><strong className="text-slate-300">Correction:</strong> Update your profile information at any time</li>
             </ul>
-            <p className="mt-3">To exercise any of these rights, contact us at <a href="mailto:support@optionsgyani.in" className="text-blue-400 hover:underline">support@optionsgyani.in</a></p>
+            <p className="mt-3">To exercise any of these rights, contact us at <a href="mailto:support@optionsgyani.com" className="text-blue-400 hover:underline">support@optionsgyani.com</a></p>
           </section>
 
           <section>
@@ -88,7 +88,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">9. Contact Us</h2>
-            <p>For privacy-related concerns or data requests, contact <a href="mailto:support@optionsgyani.in" className="text-blue-400 hover:underline">support@optionsgyani.in</a></p>
+            <p>For privacy-related concerns or data requests, contact <a href="mailto:support@optionsgyani.com" className="text-blue-400 hover:underline">support@optionsgyani.com</a></p>
           </section>
 
         </div>

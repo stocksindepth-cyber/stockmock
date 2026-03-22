@@ -9,7 +9,7 @@ export const metadata = {
   openGraph: {
     title: "Short Straddle BANKNIFTY Weekly — Strategy & Backtest Data | OptionsGyani",
     description: "Verified historical win rate 62.1%, avg 4.1% monthly. Real NSE tick-level backtest.",
-    url: "https://optionsgyani.in/strategies/short-straddle-banknifty",
+    url: "https://optionsgyani.com/strategies/short-straddle-banknifty",
     type: "article",
   },
 };
@@ -49,7 +49,7 @@ export default function ShortStraddleBankNiftyPage() {
             "headline": "Short Straddle BANKNIFTY Weekly Expiry — Strategy Guide & Backtest",
             "description": "Complete guide to selling straddles on BANKNIFTY weekly options with real historical data.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.in" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
           }),

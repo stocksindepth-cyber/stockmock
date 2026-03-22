@@ -80,7 +80,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">9. Contact</h2>
-            <p>For any queries, write to us at <a href="mailto:support@optionsgyani.in" className="text-blue-400 hover:underline">support@optionsgyani.in</a></p>
+            <p>For any queries, write to us at <a href="mailto:support@optionsgyani.com" className="text-blue-400 hover:underline">support@optionsgyani.com</a></p>
           </section>
 
         </div>

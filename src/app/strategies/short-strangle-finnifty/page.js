@@ -9,7 +9,7 @@ export const metadata = {
   openGraph: {
     title: "Short Strangle FINNIFTY — Tuesday Expiry Backtest | OptionsGyani",
     description: "Verified historical win rate 72.5%, avg 3.2% monthly ROI. Sell wings and collect Theta.",
-    url: "https://optionsgyani.in/strategies/short-strangle-finnifty",
+    url: "https://optionsgyani.com/strategies/short-strangle-finnifty",
     type: "article",
   },
 };
@@ -48,7 +48,7 @@ export default function ShortStrangleFinniftyPage() {
             "headline": "Short Strangle FINNIFTY Tuesday Expiry — Strategy Guide & Backtest",
             "description": "Complete guide to selling strangles on FINNIFTY options with real historical data.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.in" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
           }),

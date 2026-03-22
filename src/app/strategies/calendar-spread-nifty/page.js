@@ -9,7 +9,7 @@ export const metadata = {
   openGraph: {
     title: "Calendar Spread NIFTY — Playbook & Data | OptionsGyani",
     description: "Verified historical win rate 64.3%. Cash in on differing time decay curves.",
-    url: "https://optionsgyani.in/strategies/calendar-spread-nifty",
+    url: "https://optionsgyani.com/strategies/calendar-spread-nifty",
     type: "article",
   },
 };
@@ -48,7 +48,7 @@ export default function CalendarSpreadNiftyPage() {
             "headline": "Calendar Spread NIFTY Multi-Expiry — Strategy Guide & Backtest",
             "description": "Complete guide to trading the Calendar Spread on NIFTY index options.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.in" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
           }),

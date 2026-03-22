@@ -7,11 +7,11 @@ export const metadata = {
   title: "OptionsGyani — Free NSE Options Backtesting Tool",
   description: "Free options analytics for NSE traders. Build strategies, backtest on 8+ years of real data, analyze open interest. NIFTY & BANKNIFTY.",
   keywords: "options strategy builder NSE, free option chain analyzer, options backtesting India, nifty weekly expiry strategy, iron condor nifty, short straddle banknifty, india vix options, options simulator with historical data, banknifty options strategy, nifty options tool",
-  metadataBase: new URL("https://optionsgyani.in"),
+  metadataBase: new URL("https://optionsgyani.com"),
   openGraph: {
     title: "OptionsGyani — Free Options Strategy Builder & Backtesting for NSE",
     description: "Build, backtest, and paper trade options strategies on NIFTY & BANKNIFTY. Real NSE data from 2016. Free.",
-    url: "https://optionsgyani.in",
+    url: "https://optionsgyani.com",
     siteName: "OptionsGyani",
     images: [
       {
@@ -32,7 +32,7 @@ export const metadata = {
     creator: "@OptionsGyani",
   },
   alternates: {
-    canonical: "https://optionsgyani.in",
+    canonical: "https://optionsgyani.com",
   },
   robots: {
     index: true,

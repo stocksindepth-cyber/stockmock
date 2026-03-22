@@ -9,7 +9,7 @@ export const metadata = {
   openGraph: {
     title: "Bull Call Spread NIFTY — Pre-Event Backtest Data | OptionsGyani",
     description: "Verified historical win rate 54.2%, avg 8.3% ROI per trade. Real NSE tick-level backtest on pre-event setups.",
-    url: "https://optionsgyani.in/strategies/bull-call-spread-nifty",
+    url: "https://optionsgyani.com/strategies/bull-call-spread-nifty",
     type: "article",
   },
 };
@@ -55,7 +55,7 @@ export default function BullCallSpreadNiftyPage() {
             "headline": "Bull Call Spread NIFTY — Verified Pre-Event Strategy & Backtest Data",
             "description": "Complete Bull Call Spread guide for NIFTY with real historical data.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.in" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
           }),

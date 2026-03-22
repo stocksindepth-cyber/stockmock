@@ -2,7 +2,7 @@
 // Razorpay sends events here after payment lifecycle changes.
 // This is a server-side BACKUP — the verify endpoint handles the primary flow.
 // Configure in Razorpay Dashboard → Webhooks:
-//   URL:    https://optionsgyani.in/api/razorpay/webhook
+//   URL:    https://optionsgyani.com/api/razorpay/webhook
 //   Events: payment.captured, payment.failed
 // ─────────────────────────────────────────────────────────────────────────────
 import { NextResponse } from "next/server";

@@ -9,7 +9,7 @@ export const metadata = {
   openGraph: {
     title: "NIFTY Weekly Expiry Playbook 2025 (Backtest Verified) | OptionsGyani",
     description: "Daily quantitative roadmap for NIFTY weekly options, built on 8 years of tick data.",
-    url: "https://optionsgyani.in/strategies/nifty-weekly-expiry-guide",
+    url: "https://optionsgyani.com/strategies/nifty-weekly-expiry-guide",
     type: "article",
   },
 };
@@ -88,10 +88,10 @@ export default function NiftyWeeklyExpiryGuidePage() {
             "headline": "NIFTY Weekly Expiry Options Strategy — Quantitative Trading Playbook",
             "description": "Day-by-day structural guide for trading NIFTY weekly options — best entry days, Theta decay schedules, and edge-based strategy selection.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.in" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
-            "mainEntityOfPage": "https://optionsgyani.in/strategies/nifty-weekly-expiry-guide",
+            "mainEntityOfPage": "https://optionsgyani.com/strategies/nifty-weekly-expiry-guide",
           }),
         }}
       />

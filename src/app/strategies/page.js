@@ -8,7 +8,7 @@ export const metadata = {
   openGraph: {
     title: "Best NSE Options Strategies — Backtested with Real Data | OptionsGyani",
     description: "Iron Condor, Short Straddle, Short Strangle — all backtested on 8+ years of real NSE data. Free for Indian traders.",
-    url: "https://optionsgyani.in/strategies",
+    url: "https://optionsgyani.com/strategies",
     type: "website",
   },
 };
@@ -257,13 +257,13 @@ export default function StrategiesPage() {
             "@type": "CollectionPage",
             "name": "NSE Options Strategies — Backtested Results",
             "description": "Iron Condor, Short Straddle, Bull Call Spread — backtested on 8+ years of real NSE data.",
-            "url": "https://optionsgyani.in/strategies",
+            "url": "https://optionsgyani.com/strategies",
             "publisher": { "@type": "Organization", "name": "OptionsGyani" },
             "hasPart": STRATEGIES.map(s => ({
               "@type": "Article",
               "name": s.name,
               "description": s.description,
-              "url": `https://optionsgyani.in/strategies/${s.slug}`,
+              "url": `https://optionsgyani.com/strategies/${s.slug}`,
             })),
           }),
         }}

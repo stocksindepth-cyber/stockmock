@@ -9,7 +9,7 @@ export const metadata = {
   openGraph: {
     title: "Iron Butterfly BANKNIFTY Strategy & Backtest Data | OptionsGyani",
     description: "Verified historical win rate 58.2%, avg 5.5% monthly ROI. Sleep peacefully holding overnight straddles by capping risk.",
-    url: "https://optionsgyani.in/strategies/iron-butterfly-banknifty",
+    url: "https://optionsgyani.com/strategies/iron-butterfly-banknifty",
     type: "article",
   },
 };
@@ -48,7 +48,7 @@ export default function IronButterflyBankNiftyPage() {
             "headline": "Iron Butterfly BANKNIFTY Weekly Expiry — Strategy Guide & Backtest",
             "description": "Complete guide to trading the Iron Butterfly on BANKNIFTY options.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.in" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
           }),
