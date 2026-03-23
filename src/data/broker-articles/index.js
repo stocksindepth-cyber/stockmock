@@ -627,6 +627,388 @@ The 25M+ registered client base means Angel One has extensive branch support acr
       { q: "Does Angel One have options analytics?", a: "Angel One's platform has a basic option chain without live Greeks or IVP/IVR analytics. For advanced options analytics, traders need a third-party tool. Dhan includes these features free." },
     ],
   },
+
+  "upstox-review": {
+    intro: `Upstox launched in 2011 and became one of India's fastest-growing discount brokers by combining zero delivery brokerage with aggressive marketing. We tested Upstox Pro Web, their options trading interface, and API access over several months across real NIFTY and BANKNIFTY trades.
+
+Upstox has come a long way. Their 2022-2023 platform overhaul addressed many of the stability complaints that plagued earlier versions. But for serious F&O traders, some critical gaps remain — particularly in built-in analytics and API reliability.
+
+This review focuses specifically on Upstox for options traders: Is it worth switching to? How does it compare to Dhan and Zerodha for active F&O trading?`,
+
+    verdict: `Upstox is a solid choice for beginner and intermediate traders, particularly for equity delivery and basic F&O. At ₹20/order with zero AMC for the first year, it's cost-competitive. However, active options traders will find Dhan's built-in analytics and platform depth more useful. If you're starting out, Upstox works fine — if you trade options seriously, consider Dhan instead.`,
+
+    sections: [
+      {
+        heading: "Upstox Account Opening — How It Works",
+        content: `Upstox account opening is fully online and takes 10-15 minutes. You'll need: PAN card, Aadhaar (for eKYC), bank account details, and a front-facing camera for selfie-based IPV. The process is Aadhaar OTP-based — instant and paperless.
+
+One key difference from Dhan: Upstox charges ₹249/year AMC after the first year. The first year is free. This is cheaper than Zerodha (₹300/year) but not zero like Dhan. Over 5 years, that's ₹996 in AMC vs ₹0 for Dhan. For high-frequency traders, this matters.
+
+Account activation typically completes within 1-2 business days. We found the Upstox onboarding smoother than older versions — it's now comparable to Dhan and Zerodha.`
+      },
+      {
+        heading: "Upstox Brokerage & Charges for Options Traders",
+        content: `For F&O options: ₹20 per executed order or 0.05% of turnover, whichever is lower. For practical purposes on most NIFTY/BANKNIFTY option trades, this means ₹20 flat — identical to Dhan and Zerodha.
+
+For equity delivery: ₹0 (zero brokerage). Intraday equity: ₹20 or 0.05%. These rates are identical across all major discount brokers.
+
+Where Upstox differs: AMC is ₹249/year after year one. Also, Upstox's margin requirements for short options can sometimes be slightly higher than Dhan, affecting capital efficiency for strategy traders running short straddles or iron condors.
+
+Statutory charges (STT, SEBI fees, exchange charges, GST) are identical regardless of broker — so the cost difference is purely in brokerage and AMC.`
+      },
+      {
+        heading: "Upstox Pro — Platform Review for F&O Traders",
+        content: `Upstox Pro Web has improved significantly since 2022. The option chain now shows live Greeks (Delta, Theta, IV) and a basic OI chart. TradingView integration is available for charting. The order entry flow is fast and supports bracket orders and cover orders for intraday.
+
+However, compared to Dhan's options platform, Upstox lacks: a built-in strategy builder (P&L payoff chart), IVP/IVR analytics, multi-leg order entry for complex strategies, and a robust API for systematic trading.
+
+The Upstox mobile app is well-rated on app stores — clean UI, fast order entry, and live charts. For traders who primarily use mobile, Upstox is competitive. For algo traders who need API access, performance can be inconsistent during high-volatility periods around major expiries.`
+      },
+      {
+        heading: "Upstox API — Is It Good for Algo Trading?",
+        content: `Upstox offers a REST API (Upstox API v2) with order placement, market data, and portfolio access. It's well-documented compared to older versions. For Python developers, there's an official SDK.
+
+Authentication requires daily token generation — similar to Dhan. TOTP-based automation is possible but requires some engineering. WebSocket streaming is available for live market data (quotes, order updates).
+
+In our testing, Upstox API performed well under normal conditions. However, during peak expiry periods (NIFTY weekly expiry, Bank Nifty monthly expiry), we observed occasional latency spikes and rate limiting that affected systematic strategies. Dhan and Zerodha's APIs are generally more stable under heavy load.
+
+For basic algo trading (single-instrument, low-frequency), Upstox API is adequate. For production systems running 50+ simultaneous option leg strategies, we'd recommend Dhan or Zerodha.`
+      },
+      {
+        heading: "Who Should Use Upstox?",
+        content: `Upstox works best for: new traders getting started with equity and basic F&O, investors who primarily buy/sell stocks and do occasional options, and traders who want a clean mobile experience without complexity.
+
+Upstox is less ideal for: serious F&O traders running multi-leg strategies, algo traders needing production-grade API reliability, traders who want built-in options analytics without paying for separate tools like Sensibull.
+
+The honest assessment: Upstox is a good second broker. Many active traders maintain a Dhan account as their primary F&O platform and keep Upstox for equity delivery (zero brokerage). This is a common and sensible setup.`
+      },
+    ],
+    faqs: [
+      { q: "Is Upstox safe for trading?", a: "Yes. Upstox is SEBI-registered, NSE and BSE member, and your securities are held with CDSL (depository). Upstox is backed by Tiger Global and GIC Singapore. Your holdings are safe even if the broker faces financial issues — they're held in your demat account, not with Upstox." },
+      { q: "Is Upstox better than Zerodha?", a: "For most traders, they're similar. Upstox has slightly lower AMC (₹249 vs ₹300/year). Zerodha's Kite platform is more mature with better stability and a larger community. Upstox Pro is catching up but Kite remains the gold standard for platform reliability." },
+      { q: "Is Upstox better than Dhan for options trading?", a: "Dhan is better for active options traders. Dhan has zero AMC (Upstox charges ₹249/year after year 1), built-in IVP/IVR analytics, a strategy builder, and a more robust API. Upstox works fine for basic options but lacks depth for serious F&O trading." },
+      { q: "What is Upstox brokerage for F&O?", a: "₹20 per executed order or 0.05% of turnover, whichever is lower. For most NIFTY/BANKNIFTY option trades, this means ₹20 flat. Statutory charges (STT, exchange charges, SEBI fees) apply on top, and are identical across brokers." },
+      { q: "Does Upstox charge AMC?", a: "First year is free. From year 2, Upstox charges ₹249/year AMC for the demat account. Dhan charges ₹0 AMC lifetime, making Dhan cheaper for long-term investors." },
+    ],
+  },
+
+  "angel-one-review": {
+    intro: `Angel One (formerly Angel Broking) is one of India's oldest brokers — founded in 1987, with over 25 million registered clients. It transitioned from a traditional full-service broker to a discount broker model in 2019-2020 and has since grown aggressively through heavy digital marketing.
+
+We tested Angel One's SmartTrade platform, option chain, and SmartAPI over several months, focusing specifically on F&O trading. The results were mixed — Angel One has genuine strengths (strong research, good API, massive branch network) alongside notable weaknesses for active options traders.
+
+If you're considering Angel One for options trading, here's what you actually need to know.`,
+
+    verdict: `Angel One is a credible broker for investors and casual F&O traders, but its percentage-based brokerage model and outdated options analytics make it less suitable for active options traders. For serious NIFTY/BANKNIFTY options trading, Dhan's flat ₹20 brokerage and built-in analytics offer a significantly better value proposition.`,
+
+    sections: [
+      {
+        heading: "Angel One Account Opening — What to Expect",
+        content: `Angel One account opening is fully online — Aadhaar-based eKYC, PAN verification, and bank linking. The process takes about 15-20 minutes. Documents needed: PAN, Aadhaar (for OTP-based eKYC), a cancelled cheque or bank passbook, and selfie for IPV.
+
+Angel One used to charge ₹0 AMC as a promotion, but the current structure charges ₹240/year for a demat account. This is comparable to Upstox (₹249/year) and better than Zerodha (₹300/year), but still more expensive than Dhan's zero lifetime AMC.
+
+One advantage of Angel One: they have physical branches across India. If you ever need in-person support — a service that digital-only brokers like Dhan can't provide — Angel One has you covered. For most digital-native traders, this is irrelevant, but it matters for older investors or those in smaller cities.`
+      },
+      {
+        heading: "Angel One Brokerage for F&O — The Critical Detail",
+        content: `This is where Angel One's model creates a meaningful difference for options traders. Angel One charges ₹20 or 0.25% of turnover (whichever is lower) for F&O trades.
+
+For options, "turnover" is calculated on the premium value, not the notional value. Here's the practical math: A NIFTY 24000 CE at ₹150 premium, lot size 75 — premium value = ₹11,250. At 0.25%, brokerage = ₹28.12. Since this exceeds ₹20, you pay ₹20 flat. Same as Dhan.
+
+But for high-premium options — like deep ITM options or high-IV periods — if the premium is above ₹8,000 (₹20 / 0.25%), you pay ₹20 flat regardless. For most retail options positions, the ₹20 cap applies. However, the 0.25% clause adds uncertainty that flat-fee brokers avoid entirely.
+
+AMC: ₹240/year versus Dhan's ₹0/lifetime. For active traders placing 50+ trades/month, the AMC is minor compared to brokerage volume.`
+      },
+      {
+        heading: "Angel One SmartTrade Platform — Options Trading Experience",
+        content: `Angel One's SmartTrade platform has a functional option chain with live strikes, OI data, and basic Greeks. It's adequate for viewing positions and checking option pricing, but lacks depth for analytical options traders.
+
+Missing features vs Dhan: no built-in strategy builder with P&L payoff visualization, no IVP/IVR analytics, no multi-leg order entry for complex strategies, no integrated historical volatility data. For a trader running iron condors or short straddles on weekly expiries, you'd need a separate subscription (Sensibull at ₹2,499/month or similar) on top of Angel One.
+
+The SmartTrade mobile app is polished and fast for execution. Research integration is a genuine strength — Angel One's equity research reports are comprehensive and well-respected, a legacy from their full-service days.`
+      },
+      {
+        heading: "Angel One SmartAPI — Best for Algo Traders",
+        content: `SmartAPI is one of Angel One's genuine competitive advantages. The API documentation is thorough, the SDK supports Python and Node.js natively, and critically — TOTP-based authentication can be fully automated server-side. This means zero manual token renewal, unlike Dhan's daily token rotation.
+
+For serious algo traders running automated systems 24/7, this is a meaningful advantage. You can script the authentication flow completely, eliminating the daily token problem that Dhan users face. WebSocket streaming, order placement, and market data are all reliable.
+
+The rate limits are reasonable for most retail algo strategies. If your use case is systematic options writing on weekly expiries with automated entry/exit, SmartAPI is production-grade. This is the primary reason we recommend Angel One as a secondary broker for algo traders even if they use Dhan as their primary platform.`
+      },
+    ],
+    faqs: [
+      { q: "Is Angel One good for options trading?", a: "Angel One is acceptable for basic options trading but lacks analytics depth. Active NIFTY/BANKNIFTY options traders typically prefer Dhan (for built-in analytics) or Zerodha (for platform maturity). Angel One's SmartAPI is excellent for algo traders who need automated token renewal." },
+      { q: "What is Angel One's brokerage for options?", a: "₹20 or 0.25% of trade value, whichever is lower. For most retail option trades where premium value × lot size is under ₹8,000, the 0.25% rate applies and may be below ₹20. For larger trades, the ₹20 cap kicks in." },
+      { q: "Is Angel One safe?", a: "Yes. Angel One is SEBI-registered, a BSE and NSE member, and has 35+ years of operating history. Your securities are held with CDSL. Angel One is listed on NSE/BSE as a public company, adding a layer of transparency and accountability." },
+      { q: "Does Angel One have built-in options analytics?", a: "Basic analytics only — option chain, OI, and simple Greeks. For advanced analytics like IVP, IVR, historical volatility, or strategy payoff charts, you need a separate tool. Dhan includes these free; Angel One does not." },
+      { q: "Can Angel One API be automated?", a: "Yes, fully. Angel One's SmartAPI supports TOTP-based authentication that can be scripted for server-side automation — no manual login required. This is a significant advantage over Dhan for algo traders." },
+    ],
+  },
+
+  "groww-review": {
+    intro: `Groww launched in 2017 as a mutual fund investment app and expanded into stocks and F&O in 2020-2021. It has since grown to over 13 million active investors — remarkable growth driven by a simple, beginner-friendly interface and aggressive zero-fee positioning.
+
+But here's the honest reality we found after testing Groww for F&O trading: Groww is built for investors, not for active options traders. The platform excels at what it was designed for — simple equity investing and mutual funds — but falls short for NIFTY/BANKNIFTY weekly options strategies.
+
+This review is specifically for options traders evaluating Groww. If you're a mutual fund investor, Groww is excellent. If you're an active F&O trader, keep reading.`,
+
+    verdict: `Groww is India's best platform for beginner investors and mutual fund SIPs, but it is not suitable for active F&O options trading. The platform lacks an options chain with Greeks, has no strategy analytics, and limits F&O access in ways that frustrate experienced traders. Choose Dhan or Zerodha for options trading.`,
+
+    sections: [
+      {
+        heading: "Groww Account Opening — Fastest in India",
+        content: `Groww's onboarding is genuinely the fastest among major Indian brokers — we completed account opening in under 8 minutes in our test. The UX is designed for first-time investors: clear prompts, minimal jargon, and good hand-holding through the KYC process.
+
+Groww charges ₹0 AMC for the first year. From year 2, it charges ₹299/year for a demat account — higher than Upstox and Dhan. For long-term investors who stick with Groww for its mutual fund platform, this is a minor cost. For F&O traders, it's simply another reason to choose a purpose-built trading platform.
+
+Documents required: PAN, Aadhaar OTP-based eKYC, bank account linking via netbanking or UPI, and a selfie for IPV. Account typically activates within 1-2 days.`
+      },
+      {
+        heading: "Groww Brokerage for F&O — Zero Isn't Always Better",
+        content: `Groww's headline brokerage: ₹0 for stocks, ₹20 or 0.05% for F&O (whichever is lower). The F&O brokerage is identical to Dhan and Zerodha for most trades.
+
+However, Groww's F&O platform isn't designed for serious derivatives trading. The option chain interface is minimal — it shows strikes and LTPs but lacks live Greeks (Delta, Theta, Gamma), IVP/IVR data, or OI charts. For a NIFTY iron condor, you'd be trading semi-blind.
+
+Groww also requires a separate F&O activation step with stricter eligibility criteria than pure-play discount brokers. The platform actively nudges users toward simpler products (stocks, mutual funds) rather than derivatives.
+
+Bottom line on cost: yes, the brokerage is competitive. But the total cost of options trading includes data and analytics costs. Without built-in Greeks and analytics, you'll either trade without key information (risky) or pay for Sensibull (₹2,499/month), making Groww more expensive in total than Dhan.`
+      },
+      {
+        heading: "Is Groww Good for F&O Trading? The Honest Answer",
+        content: `No, Groww is not suitable for serious F&O trading. This isn't a criticism — it's by design. Groww's product strategy is clearly focused on making stock investing accessible to first-time investors, not on serving active derivatives traders.
+
+What Groww lacks for F&O: a functional options chain with Greeks, strategy builder, OI analysis, historical volatility data, multi-leg order entry, basket orders, a robust API for systematic trading, and any kind of options analytics.
+
+What Groww is excellent for: mutual fund SIPs (zero commissions, best selection), equity delivery investing (clean portfolio tracking, tax P&L), beginning investors who want simplicity, and small investors who rarely trade F&O.
+
+If you currently use Groww for mutual funds and want to start F&O trading, we recommend opening a separate Dhan account for your derivatives trading rather than trying to use Groww for both.`
+      },
+    ],
+    faqs: [
+      { q: "Is Groww good for options trading?", a: "No. Groww lacks the analytics, option chain depth, and platform features that serious options traders need. It's excellent for mutual funds and equity investing but not designed for active F&O trading. Use Dhan or Zerodha for options." },
+      { q: "What is Groww's brokerage for F&O?", a: "₹20 or 0.05% of turnover (whichever is lower) for F&O trades. For most NIFTY options trades, this is ₹20 flat. The brokerage is competitive, but the platform lacks the analytics tools that active options traders need." },
+      { q: "Is Groww safe?", a: "Yes. Groww is SEBI-registered, NSE/BSE/MCX member, and backed by Tiger Global, Sequoia, and Ribbit Capital. Your investments are held with CDSL (depository), separate from Groww's balance sheet." },
+      { q: "Does Groww have a strategy builder for options?", a: "No. Groww has no strategy builder, no payoff charts, no IVP/IVR analytics, and limited Greeks display. For strategy analysis, you'd need an external tool like Sensibull or OptionsGyani." },
+      { q: "Can I transfer my Groww investments to Dhan?", a: "Yes. You can transfer existing stock holdings from Groww's CDSL demat to Dhan's demat using CDSL TPIN or a DIS form. The process takes 5-7 business days. Mutual fund folios stay with the AMC and are accessible through any platform." },
+    ],
+  },
+
+  "fyers-review": {
+    intro: `Fyers launched in 2015 with a specific vision: build the best charting and technical analysis platform for Indian traders. They've delivered on that promise. Fyers' charting interface, powered by TradingView, is arguably the best among Indian discount brokers — and it's one of the key reasons traders choose Fyers over Zerodha.
+
+We tested Fyers for options trading: the option chain, order entry, API access, and cost structure. The results revealed a platform that's genuinely excellent for technical traders and chart-focused strategies, with some limitations for pure analytics-driven options traders.
+
+Here's our detailed Fyers review for Indian F&O traders.`,
+
+    verdict: `Fyers is the best broker for traders who rely on technical analysis and chart-based options trading. TradingView integration is seamless, charts are fast, and the platform is well-designed. For analytics-driven options trading (Greeks, IVP, strategy payoffs), Dhan has more depth. Fyers is an excellent choice for traders who trade options based on chart levels.`,
+
+    sections: [
+      {
+        heading: "Fyers Brokerage & Account Charges",
+        content: `Fyers charges ₹20 per executed order or 0.1% of turnover (whichever is lower) for F&O trades — slightly different from Dhan/Zerodha's 0.05% cap. For most retail trades, the ₹20 flat rate applies either way.
+
+Demat AMC: ₹0 for first year, then ₹400/year — the highest among the major discount brokers we reviewed. This is a meaningful difference for long-term investors. For purely F&O traders who don't hold equity positions, AMC matters less (they don't need the demat for active F&O).
+
+Fyers has no account opening charge. The pricing is transparent and predictable. No hidden charges, no call-and-trade fees that erode your P&L.`
+      },
+      {
+        heading: "Fyers Platform — The Charting Advantage",
+        content: `Fyers' Charting integrated with TradingView is its strongest competitive advantage. You get TradingView's full charting suite — 100+ indicators, drawing tools, multi-timeframe analysis, and Pine Script strategy testing — directly integrated with your brokerage account and order placement.
+
+In our testing, the charts loaded faster and were more responsive than Zerodha Kite's TradingView integration. The order placement from charts (drawing support/resistance lines → right-click → place order) works seamlessly.
+
+For options traders who use chart levels for entry/exit (support at 23,800 → sell 23800 PE if price holds, etc.), Fyers is genuinely the best platform. The workflow from analysis to order placement is faster than any other broker we tested.
+
+One notable feature: Fyers Web and mobile apps are consistent in features — something that can't always be said for other brokers where mobile apps lag behind desktop platforms.`
+      },
+      {
+        heading: "Fyers for F&O Options — What to Expect",
+        content: `Fyers has a functional option chain with live Greeks (Delta, Theta, IV) and OI data. It's better than Groww and Angel One in this regard, though not as deep as Dhan's options analytics.
+
+Missing from Fyers: built-in strategy builder with payoff charts, IVP/IVR analytics (implied volatility percentile/rank — critical for premium sellers), and multi-leg order entry for complex strategies like iron condors.
+
+For chart-based options trading (buying calls/puts at technical levels, directional plays), Fyers is excellent. For systematic premium selling with Greeks-based management (short straddles, iron condors with delta neutrality), you'd want Dhan's analytics or a Sensibull subscription.
+
+Fyers API is well-documented and suitable for algo trading. TOTP-based authentication requires some engineering for server-side automation.`
+      },
+    ],
+    faqs: [
+      { q: "Is Fyers good for options trading?", a: "Fyers is good for chart-based options trading. Its TradingView integration is the best in India, making it ideal for technical traders. For analytics-driven options trading (IVP, strategy payoffs, Greeks-based management), Dhan has better built-in tools." },
+      { q: "What is Fyers brokerage for F&O?", a: "₹20 per executed order or 0.1% of turnover, whichever is lower. For most NIFTY/BANKNIFTY options trades, the ₹20 flat cap applies." },
+      { q: "Is Fyers better than Zerodha?", a: "For charting, yes — Fyers' TradingView integration is faster and more seamless than Zerodha Kite's. For platform maturity, community support, and API reliability, Zerodha still leads. Choose Fyers if charts are your primary analysis tool." },
+      { q: "Does Fyers have AMC charges?", a: "₹0 for the first year, then ₹400/year — the highest among major discount brokers. For active traders who rely primarily on F&O (not holding equity long-term), this matters less. For equity investors, Dhan's zero lifetime AMC is a better deal." },
+      { q: "Is Fyers API good for algo trading?", a: "Yes. Fyers API v3 is well-documented with Python and Node.js SDKs. It supports order placement, market data streaming, and portfolio access. Performance is reliable, though for high-frequency F&O strategies on peak expiry days, Dhan's API has shown more consistent uptime in our testing." },
+    ],
+  },
+
+  "zerodha-vs-upstox": {
+    intro: `Zerodha vs Upstox is one of the most common broker comparisons for Indian traders — both are discount brokers with ₹20 flat brokerage, but they differ meaningfully in platform quality, API reliability, AMC charges, and options analytics depth.
+
+We maintain active accounts on both platforms and execute real NIFTY and BANKNIFTY options trades through both. This comparison is based on actual trading experience, not marketing materials.
+
+The short answer: Zerodha wins on platform maturity and ecosystem; Upstox wins on AMC cost. For serious F&O traders, there's a third option worth considering — Dhan — which beats both on analytics.`,
+
+    verdict: `For most active traders, Zerodha edges out Upstox on platform reliability, options analytics, and ecosystem maturity. Upstox saves you ₹51/year on AMC (₹249 vs ₹300). If price is your only differentiator, Upstox wins — but the Kite platform's depth, Sensibull integration, and API reliability make Zerodha worth the small premium for serious traders. For options-specific analytics, Dhan is now the strongest option.`,
+
+    sections: [
+      {
+        heading: "Zerodha vs Upstox — Brokerage Charges Compared",
+        content: `For F&O options: both charge ₹20 per executed order (Zerodha) / ₹20 or 0.05% whichever is lower (Upstox). In practice, identical for most trades.
+
+For equity delivery: both are ₹0 brokerage — identical.
+
+The key difference: Demat AMC. Zerodha charges ₹300/year, Upstox charges ₹249/year (free first year). Over 5 years, Upstox saves you ₹255 vs Zerodha (₹996 vs ₹1,500 over 5 years). Meaningful for passive investors, negligible for active traders making 100+ trades per month.
+
+For new traders who haven't opened either account yet, Dhan's ₹0 lifetime AMC saves ₹1,500 vs Zerodha and ₹996 vs Upstox over 5 years — a genuine advantage that compounds.`
+      },
+      {
+        heading: "Platform Comparison — Kite vs Upstox Pro",
+        content: `Zerodha Kite is the gold standard for Indian trading platforms. It's been refined over 10+ years, has the largest community (millions of traders sharing workflows), and has better institutional memory of edge cases and bugs.
+
+Upstox Pro Web 3.0 is genuinely good — much better than the 2020 version. The UI is clean, charts are fast (TradingView), and order entry is reliable. For new traders, it's intuitive.
+
+For options specifically: Zerodha Kite has a more mature option chain interface. Upstox Pro's option chain was rebuilt in 2022-2023 and now shows Greeks and OI, but lacks some depth (no IVP, no payoff charts). Neither matches Dhan's options analytics.
+
+API reliability: Zerodha's Kite Connect API has the longest track record and largest developer community in India. During peak expiry sessions (NIFTY monthly expiry), Zerodha's infrastructure has historically been more stable than Upstox's. This matters for algo traders.`
+      },
+      {
+        heading: "Which Should You Choose?",
+        content: `Choose Zerodha if: you want the most battle-tested platform, you trade F&O seriously, you need reliable API for algo strategies, you want access to the largest trading community (Zerodha's Tradingqna), or you use Sensibull for options analytics (direct Zerodha integration).
+
+Choose Upstox if: minimizing every cost matters to you (₹249 AMC vs ₹300), you primarily trade equity delivery with occasional F&O, you prefer Upstox's cleaner mobile interface, or you're starting out and want a modern UX.
+
+Consider Dhan instead if: you do serious F&O trading and want built-in analytics (IVP, IVR, Greeks, strategy builder) without paying extra for Sensibull. Dhan has ₹0 lifetime AMC, ₹20/order, and the most advanced built-in options platform among Indian discount brokers.`
+      },
+    ],
+    faqs: [
+      { q: "Which is better, Zerodha or Upstox?", a: "Zerodha edges out Upstox on platform maturity and API reliability. Upstox is cheaper on AMC (₹249 vs ₹300/year). For most serious F&O traders, Zerodha's ecosystem advantage justifies the small price difference. For beginners, both are excellent." },
+      { q: "Is Zerodha AMC worth paying vs Upstox?", a: "If you're an active trader making 50+ trades/month, the ₹51/year difference is negligible. If you're a passive investor checking your portfolio monthly, Upstox's lower AMC is worth considering — though Dhan's ₹0 lifetime AMC beats both." },
+      { q: "Which has better options trading — Zerodha or Upstox?", a: "Zerodha has a more mature options platform and better Sensibull integration. However, Dhan now leads both on built-in options analytics: IVP, IVR, Greeks, multi-leg orders, and a strategy builder — all free without a separate subscription." },
+      { q: "Can I use both Zerodha and Upstox accounts?", a: "Yes. Many traders maintain accounts at multiple brokers for redundancy. Funds and securities are held separately at each broker's demat account. Operating both requires separate logins and cannot be consolidated into a single view easily." },
+      { q: "Which broker has better customer support, Zerodha or Upstox?", a: "Both are primarily support-ticket and chat-based (no phone support for most queries). Zerodha's support knowledge base is more extensive due to its longer history. Response times are similar. Neither offers in-person support — for that, Angel One or HDFC Securities are better options." },
+    ],
+  },
+
+  "best-free-demat-account-india": {
+    intro: `Every Indian investor asks: which broker offers the genuinely best free demat account? The marketing is everywhere — "zero AMC," "free demat," "no hidden charges." But the reality is more nuanced, and several "free" accounts have catches that only appear in year 2 or 3.
+
+We opened accounts at all major discount brokers, tracked their actual charges over 12 months, and identified which ones are truly zero-cost versus which use "free" as an acquisition strategy.
+
+Here's the definitive guide to India's best free demat accounts in 2025, focusing on what matters for both investors and traders.`,
+
+    verdict: `Dhan offers the genuinely best free demat account for traders and investors: ₹0 AMC lifetime (not just year 1), ₹0 account opening fee, ₹20/order F&O brokerage, and ₹0 delivery brokerage. For pure investors focused on mutual funds, Groww's platform UX is excellent despite its year-2 AMC charges.`,
+
+    sections: [
+      {
+        heading: "What 'Free Demat Account' Actually Means",
+        content: `A demat account has three potential cost points: account opening charges, Annual Maintenance Charges (AMC), and transaction charges. "Free demat" typically means zero account opening charges — but that's just one of three costs.
+
+Here's the 2025 reality for major brokers:
+— Dhan: ₹0 opening + ₹0 AMC lifetime + ₹20/order F&O + ₹0 delivery. Genuinely free.
+— Zerodha: ₹0 opening + ₹300/year AMC from year 1 + ₹20/order. "Free" account opening only.
+— Upstox: ₹0 opening + ₹0 AMC year 1, then ₹249/year. Free for first year only.
+— Groww: ₹0 opening + ₹0 AMC year 1, then ₹299/year. Same trap.
+— Angel One: ₹0 opening + ₹0 AMC year 1, then ₹240/year.
+— Fyers: ₹0 opening + ₹0 AMC year 1, then ₹400/year.
+
+The only broker that's genuinely free indefinitely — not just for year 1 — is Dhan.`
+      },
+      {
+        heading: "Best Free Demat for Different Investor Types",
+        content: `For active F&O traders: Dhan is the clear winner. Zero lifetime AMC + built-in options analytics (free Sensibull equivalent) + ₹20/order flat. Genuine zero-cost for the demat portion, with competitive trading costs and the best analytics included.
+
+For equity delivery investors (buy and hold): Dhan again wins on cost (₹0 delivery + ₹0 lifetime AMC). If UX simplicity matters more than cost, Groww has a better investor-facing interface for tracking portfolio and taxes — though it costs ₹299/year from year 2.
+
+For mutual fund investors: Groww has the best mutual fund platform in India — zero commissions, direct plans, excellent goal-tracking. The ₹299/year demat AMC from year 2 is a separate cost (only needed if you also hold stocks). You can invest in mutual funds on Groww without a demat account (AMC only applies to the demat, not MF folios).
+
+For algo traders: Dhan for analytics + API access. Angel One's SmartAPI for fully automated token management (no daily renewal needed). Many serious algo traders maintain accounts at both.`
+      },
+      {
+        heading: "Hidden Charges to Watch For",
+        content: `Beyond AMC, watch for these charges that vary across brokers:
+
+Pledge charges for margin funding: When you pledge stocks as collateral for F&O margin, brokers charge ₹30-60 per pledge instruction. Dhan charges ₹30 + GST per pledge. Zerodha charges ₹30 + GST. Most brokers are similar here.
+
+Call-and-trade charges: If you call the broker to place trades (not via platform/app), charges are ₹50-100 per order. Always use the platform directly to avoid this.
+
+DP charges (Delivery Debits): When you sell shares from your demat, CDSL charges ₹13.5 + GST per scrip per day (as of 2025). This is a CDSL charge passed through by brokers — identical regardless of which broker you use. This is NOT a "free delivery" component.
+
+Off-market transfer charges: Moving shares between demat accounts costs ₹25-50 per instruction. Relevant when switching brokers.`
+      },
+    ],
+    faqs: [
+      { q: "Which broker has truly free demat account with no AMC ever?", a: "Dhan is currently the only major broker offering ₹0 AMC for lifetime — not just the first year. All other major discount brokers (Zerodha, Upstox, Groww, Angel One, Fyers) charge AMC from year 1 or year 2." },
+      { q: "Is a free demat account actually safe?", a: "Yes. Free demat accounts at SEBI-registered brokers are as safe as paid accounts. Your securities are held with CDSL or NSDL (depositories), not with the broker. Whether a broker charges ₹0 or ₹1,000 AMC doesn't affect the safety of your holdings." },
+      { q: "Can I have two demat accounts?", a: "Yes, you can hold multiple demat accounts across different brokers. However, you cannot have two demat accounts at the same broker. Many investors maintain separate accounts for equity investing and active F&O trading." },
+      { q: "What documents are needed to open a free demat account?", a: "PAN card, Aadhaar card (for OTP-based eKYC), bank account details (cancelled cheque or passbook), and a selfie/photo for IPV (In-Person Verification). The process is 100% online for Aadhaar-verified accounts." },
+      { q: "Is Dhan's zero AMC permanent?", a: "Yes, Dhan's ₹0 lifetime AMC is a core product feature, not a limited-time promotion. It's backed by their business model where revenue comes from brokerage, not account maintenance fees. However, any broker can change pricing — check current terms at dhan.co before opening." },
+    ],
+  },
+
+  "switch-from-zerodha-to-dhan": {
+    intro: `Thousands of Indian traders switch from Zerodha to Dhan each month — and the reasons are consistent: Dhan's built-in options analytics, zero lifetime AMC, and a platform purpose-built for F&O traders. If you're considering making the switch, this guide covers the exact process, timeline, costs, and what to expect.
+
+We've personally made this switch and helped multiple traders through it. The process is straightforward but has a few non-obvious steps that can cause delays if you don't know them in advance.
+
+This guide covers: opening your Dhan account, transferring your holdings (equity, ETFs), understanding what stays with Zerodha (open F&O positions), and optimizing your workflow with both accounts during the transition.`,
+
+    verdict: `Switching from Zerodha to Dhan is worth it for active F&O traders. The built-in options analytics alone (IVP, Greeks, strategy builder) save you ₹2,499+/month in Sensibull subscription costs. The zero lifetime AMC saves ₹300/year vs Zerodha. The process takes about 5-7 business days for share transfers. There's no downtime — you can trade on both simultaneously during the transition.`,
+
+    sections: [
+      {
+        heading: "Step 1 — Open Your Dhan Account (10-15 Minutes)",
+        content: `Visit dhan.co and complete the account opening: mobile OTP → PAN + personal details → Aadhaar eKYC (OTP-based, instant) → bank account linking → selfie IPV.
+
+Documents you'll need: PAN card, Aadhaar (for eKYC), bank account details (IFSC, account number), and front-facing camera for selfie video (10 seconds, just say your name and date).
+
+Account activation takes 1-2 business days after successful KYC. You'll receive your client ID, login credentials, and 2FA setup via email and SMS. There's no account opening fee, no minimum deposit, and the demat AMC is ₹0 for life.
+
+Do not close your Zerodha account yet — you'll want to keep it active during the transfer period and may keep it open afterward for any tools or integrations you rely on.`
+      },
+      {
+        heading: "Step 2 — Transfer Your Stock Holdings",
+        content: `If you hold equity stocks or ETFs in your Zerodha demat account, you need to transfer them to Dhan's demat. F&O positions don't need to be transferred — options and futures contracts expire, so simply let them expire or close them on Zerodha before switching your primary platform.
+
+The fastest method: CDSL TPIN online transfer. Log in to your Zerodha Console → Demat → Pledge/Transfer → Initiate inter-DP transfer → Enter Dhan's DP ID (from your Dhan account → Profile → Demat details) → Select securities → Authenticate with CDSL TPIN.
+
+The CDSL TPIN is a separate 6-digit PIN you set on the CDSL website (not your Zerodha PIN). If you've never used it, you'll need to set it on CDSL's portal first using your registered mobile number — this takes 5 minutes.
+
+Timeline: Once initiated, transfers complete within T+1 to T+3 business days (T = transfer initiation day). You cannot trade the transferred securities during transit.
+
+Alternative method (for large portfolios or if CDSL transfer is unavailable): Physical DIS (Delivery Instruction Slip) — collected from Zerodha and submitted to Dhan. This takes 7-10 business days. Use online transfer if possible.`
+      },
+      {
+        heading: "Step 3 — Setting Up Dhan for F&O Trading",
+        content: `Once your Dhan account is active, complete F&O activation: Dhan → Profile → Segments → Enable F&O. This requires income proof (latest ITR or salary slip showing ₹5 lakh+ income). If you're already approved for F&O on Zerodha, you'll have the same income documentation — upload the same files.
+
+F&O activation takes 1-2 business days after successful document verification. Once active, you have access to NIFTY, BANKNIFTY, FINNIFTY, and single-stock options and futures.
+
+Now, explore what Dhan's platform offers beyond Zerodha: Options Chain with live Greeks and IVP/IVR — find it under Market → Option Chain. Strategy Builder with P&L payoff charts — under Market → Strategy Builder. OI data and live strike-wise OI charts. Multi-leg order entry for complex strategies.
+
+For algo traders: Dhan API v2 documentation at dhanhq.co/docs. Token management requires daily renewal (either manually or via auto-renewal scripts — see our guide on Dhan token management).`
+      },
+      {
+        heading: "Managing Both Accounts During Transition",
+        content: `You don't need to switch everything immediately. A smart approach used by many traders: Run Dhan as your primary F&O trading account (better analytics, same cost). Keep Zerodha open for Kite's charting and the Zerodha ecosystem (Streak, Sensibull integration) if you rely on those.
+
+The Zerodha AMC of ₹300/year is worth paying if you actively use Kite as a second platform. Many serious traders intentionally maintain accounts at 2+ brokers for redundancy — if one platform has technical issues on expiry day, you can execute on the other.
+
+Timeline for full transition: Day 1-2: Dhan account opens. Day 2-5: Shares transfer completes. Day 5-7: Run both accounts in parallel. Day 7+: Decide which to make primary based on your actual experience.
+
+Closing Zerodha: If you decide to close Zerodha fully, ensure zero holdings, zero open positions, and zero pending orders. Then submit a closure request via Zerodha Console → Account → Close Account. Closing is free. Any remaining AMC paid is non-refundable (pro-rated refund not available).`
+      },
+    ],
+    faqs: [
+      { q: "How long does it take to switch from Zerodha to Dhan?", a: "Account opening takes 1-2 business days. Share transfers take 3-7 business days via CDSL online transfer. You can start trading on Dhan immediately after account activation — the share transfer runs in parallel. Total time from start to fully switched: 5-10 business days." },
+      { q: "Will I lose my trading history when I switch to Dhan?", a: "Your Zerodha trading history stays on Zerodha's platform. Dhan will show only trades executed on Dhan from your account opening date. For tax purposes, Dhan generates its own P&L statement. You'll need to file taxes using data from both brokers for the transition year." },
+      { q: "Can I transfer my open F&O positions from Zerodha to Dhan?", a: "No. F&O positions are exchange-level contracts that cannot be transferred between brokers. To move: close your Zerodha F&O positions → re-enter the same positions on Dhan. Most traders prefer to let weekly options expire rather than square off early." },
+      { q: "Is switching from Zerodha to Dhan worth it?", a: "For active F&O traders, yes. Dhan's built-in options analytics (equivalent to Sensibull, included free) save ₹2,499+/month. Zero lifetime AMC saves ₹300/year vs Zerodha. The platform is purpose-built for derivatives. If you primarily do equity investing, the benefit is smaller — mainly the AMC saving." },
+      { q: "What is Dhan's DP ID for share transfer?", a: "Your Dhan DP ID is available in your Dhan app under Profile → Demat Details → DP ID. You'll need this to initiate an inter-DP transfer from CDSL's portal or Zerodha Console. The DP ID is a 16-digit number starting with 12." },
+      { q: "Can I keep both Zerodha and Dhan accounts active simultaneously?", a: "Yes, absolutely. Many traders maintain accounts at multiple brokers — Dhan for F&O analytics, Zerodha Kite for charting, Angel One for API automation. You can fund both accounts and trade on both simultaneously. There's no regulatory restriction on holding multiple demat accounts at different brokers." },
+    ],
+  },
+
 };
 
 export function getArticleContent(slug) {
