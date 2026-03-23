@@ -61,11 +61,10 @@ export default function ContactPage() {
             <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center mb-4">
               <MapPin className="w-5 h-5 text-indigo-400" />
             </div>
-            <h3 className="text-white font-semibold mb-1">Registered Address</h3>
+            <h3 className="text-white font-semibold mb-1">Based In</h3>
             <p className="text-slate-500 text-sm leading-relaxed">
-              OptionsGyani Analytics<br />
-              India<br />
-              CIN: (Pending incorporation)
+              Bangalore, Karnataka<br />
+              India
             </p>
           </div>
         </div>
