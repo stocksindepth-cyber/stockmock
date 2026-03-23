@@ -32,6 +32,7 @@ const PLANS = [
       learn: "Full Options Academy",
       simulator: "10 paper trades / month",
       builder: "View-only payoff builder",
+      alerts: "3 IV alerts",
       export: false,
       api: false,
       support: "Community forum",
@@ -58,6 +59,7 @@ const PLANS = [
       learn: "Full Options Academy",
       simulator: "Unlimited paper trading",
       builder: "Full payoff builder + scenario analysis",
+      alerts: "20 IV alerts",
       export: "CSV export of backtest results",
       api: false,
       support: "Priority email support",
@@ -94,16 +96,22 @@ const PLANS = [
 
 // ─── Feature comparison rows ───────────────────────────────────────────────────
 const COMPARISON = [
-  { label: "Daily Backtests", free: "5 / day", pro: "Unlimited", elite: "Unlimited" },
-  { label: "Historical Data", free: "Last 1 year", pro: "2016 – today", elite: "2016 – today + intraday" },
-  { label: "Strategy Templates", free: "2 basic", pro: "20+ strategies", elite: "20+ + custom" },
-  { label: "Option Chain", free: "✓ Live", pro: "✓ Live + Greeks", elite: "✓ Live + OI Heatmap" },
-  { label: "Paper Trading", free: "10 / month", pro: "Unlimited", elite: "Unlimited + P&L analytics" },
-  { label: "Payoff Builder", free: "View only", pro: "Full access", elite: "Full + scanner" },
-  { label: "Options Academy", free: "✓ Full", pro: "✓ Full", elite: "✓ Full + webinars" },
-  { label: "CSV Export", free: "✗", pro: "✓", elite: "✓ + JSON + scheduled" },
-  { label: "API Access", free: "✗", pro: "✗", elite: "✓ 100k calls/mo" },
-  { label: "Support", free: "Forum", pro: "Priority email", elite: "WhatsApp" },
+  { label: "Daily Backtests",         free: "5 / day",         pro: "Unlimited",                elite: "Unlimited" },
+  { label: "Historical Data",         free: "Last 1 year",     pro: "2016 – today (8+ yrs)",    elite: "2016 – today + intraday" },
+  { label: "Strategy Templates",      free: "2 basic",         pro: "20+ strategies",           elite: "20+ + custom" },
+  { label: "Option Chain",            free: "✓ Live",          pro: "✓ Live + Greeks",          elite: "✓ Live + OI Heatmap" },
+  { label: "IVP / IVR Analytics",     free: "✓",               pro: "✓",                        elite: "✓" },
+  { label: "ATM Straddle Tracker",    free: "✓",               pro: "✓",                        elite: "✓" },
+  { label: "A/B Strategy Comparison", free: "✗",               pro: "✓",                        elite: "✓" },
+  { label: "SL / TP Controls",        free: "✗",               pro: "✓",                        elite: "✓" },
+  { label: "IV Alerts (Email)",       free: "3 alerts",        pro: "20 alerts",                elite: "Unlimited alerts" },
+  { label: "Expiry-wise Trade Log",   free: "✗",               pro: "✓",                        elite: "✓" },
+  { label: "Paper Trading",           free: "10 / month",      pro: "Unlimited",                elite: "Unlimited + P&L analytics" },
+  { label: "Payoff Builder",          free: "View only",       pro: "Full access",              elite: "Full + scanner" },
+  { label: "Options Academy",         free: "✓ Full",          pro: "✓ Full",                   elite: "✓ Full + webinars" },
+  { label: "CSV Export",              free: "✗",               pro: "✓",                        elite: "✓ + JSON + scheduled" },
+  { label: "API Access",              free: "✗",               pro: "✗",                        elite: "✓ 100k calls/mo" },
+  { label: "Support",                 free: "Forum",           pro: "Priority email",           elite: "WhatsApp" },
 ];
 
 const FAQ = [

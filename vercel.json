@@ -13,6 +13,14 @@
     {
       "path": "/api/cron/dhan-renew",
       "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/check-alerts",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/check-alerts",
+      "schedule": "0 14 * * *"
     }
   ],
   "headers": [

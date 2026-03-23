@@ -7,7 +7,7 @@ import {
   BarChart2, Layers, History, TrendingUp, Target, Zap,
   Menu, X, User, CreditCard, LogOut, ChevronDown,
   Sparkles, BookOpen, LineChart, Info, Mail, RefreshCcw,
-  LayoutDashboard,
+  LayoutDashboard, Bell,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -22,6 +22,7 @@ const TOOL_LINKS = [
   { href: "/oi-analysis", label: "OI Analysis",  icon: TrendingUp },
   { href: "/screener",    label: "Screener",     icon: Target     },
   { href: "/paper-trade", label: "Paper Trade",  icon: Zap        },
+  { href: "/alerts",      label: "IV Alerts",    icon: Bell       },
 ];
 
 // ── "More" dropdown — non-transactional / marketing ──────────────────────────
