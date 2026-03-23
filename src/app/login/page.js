@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Target, Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
+import { trackLoginSuccess, trackLoginError, trackForgotPassword } from "@/lib/analytics";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -26,8 +27,10 @@ export default function LoginPage() {
       setError("");
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+      trackLoginSuccess("google");
       router.push(getRedirectPath());
     } catch (err) {
+      trackLoginError("google");
       setError(err.message);
       setLoading(false);
     }
@@ -38,6 +41,7 @@ export default function LoginPage() {
       setError("Please enter your email address above, then click Forgot Password.");
       return;
     }
+    trackForgotPassword();
     setResetLoading(true);
     setError("");
     try {
@@ -56,8 +60,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      trackLoginSuccess("email");
       router.push(getRedirectPath());
     } catch (err) {
+      trackLoginError("email");
       setError("Invalid email or password. Please try again.");
       setLoading(false);
     }

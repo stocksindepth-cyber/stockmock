@@ -7,6 +7,12 @@ import { useRouter } from "next/navigation";
 import { upgradeUserPlan } from "@/lib/firebase/userService";
 import Link from "next/link";
 import AppModal from "@/components/AppModal";
+import {
+  trackPlanClick, trackBillingToggle,
+  trackPaymentInitiated, trackPaymentSuccess,
+  trackPaymentFailed, trackPaymentCancelled,
+  trackPricingFAQOpen, trackDhanReferralClick,
+} from "@/lib/analytics";
 
 const DHAN_REFERRAL_URL = "https://join.dhan.co/?invite=XDCAS95683";
 
@@ -151,6 +157,9 @@ export default function PricingPage() {
   const [modal, setModal] = useState(null);
 
   const handleSubscribe = async (plan) => {
+    const billing = annual ? "annual" : "monthly";
+    trackPlanClick(plan.dbPlan || plan.id, billing);
+
     if (plan.id === "free") {
       router.push(currentUser ? "/backtest" : "/signup");
       return;
@@ -179,9 +188,12 @@ export default function PricingPage() {
 
       if (order.mock) {
         await upgradeUserPlan(currentUser.uid, plan.dbPlan, durationDays);
+        trackPaymentSuccess(plan.dbPlan, price, billing, "mock");
         window.location.href = "/profile?success=true";
         return;
       }
+
+      trackPaymentInitiated(plan.dbPlan, price, billing);
 
       await new Promise((resolve, reject) => {
         if (window.Razorpay) return resolve();
@@ -222,6 +234,7 @@ export default function PricingPage() {
               if (!verifyRes.ok || !verifyData.success) {
                 throw new Error(verifyData.error || "Verification failed");
               }
+              trackPaymentSuccess(plan.dbPlan, price, billing, response.razorpay_payment_id);
               window.location.href = "/profile?success=true&plan=" + plan.dbPlan;
               resolve();
             } catch (err) {
@@ -247,6 +260,7 @@ export default function PricingPage() {
           },
           modal: {
             ondismiss: () => {
+              trackPaymentCancelled(plan.dbPlan);
               setProcessingId(null);
               reject(new Error("Payment cancelled"));
             },
@@ -257,6 +271,7 @@ export default function PricingPage() {
     } catch (error) {
       if (error?.message !== "Payment cancelled") {
         console.error("Payment error:", error);
+        trackPaymentFailed(plan.dbPlan);
         setModal({
           type: "error",
           title: "Payment Failed",
@@ -302,13 +317,13 @@ export default function PricingPage() {
         <div className="flex justify-center mb-10">
           <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-full px-2 py-1">
             <button
-              onClick={() => setAnnual(false)}
+              onClick={() => { setAnnual(false); trackBillingToggle("monthly"); }}
               className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${!annual ? "bg-slate-700 text-white" : "text-slate-400 hover:text-white"}`}
             >
               Monthly
             </button>
             <button
-              onClick={() => setAnnual(true)}
+              onClick={() => { setAnnual(true); trackBillingToggle("annual"); }}
               className={`px-5 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${annual ? "bg-slate-700 text-white" : "text-slate-400 hover:text-white"}`}
             >
               Annual
@@ -416,6 +431,7 @@ export default function PricingPage() {
                       href={DHAN_REFERRAL_URL}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => trackDhanReferralClick("pricing_plan_card")}
                       className="flex items-start gap-3 group"
                     >
                       <div className="w-8 h-8 rounded-lg bg-orange-500/15 border border-orange-500/25 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -491,6 +507,7 @@ export default function PricingPage() {
             href={DHAN_REFERRAL_URL}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackDhanReferralClick("pricing_bottom_cta")}
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-sm font-bold transition-colors whitespace-nowrap flex-shrink-0"
           >
             Open Free Account <ExternalLink className="w-4 h-4" />
@@ -507,7 +524,7 @@ export default function PricingPage() {
                 className="border border-slate-800 rounded-xl overflow-hidden bg-slate-900/30"
               >
                 <button
-                  onClick={() => setOpenFaq(openFaq === i ? null : i)}
+                  onClick={() => { const next = openFaq === i ? null : i; setOpenFaq(next); if (next !== null) trackPricingFAQOpen(item.q); }}
                   className="w-full flex items-center justify-between px-5 py-4 text-left text-slate-200 font-medium text-sm hover:text-white transition-colors"
                 >
                   {item.q}

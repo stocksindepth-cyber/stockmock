@@ -7,6 +7,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
+import { trackCTAClick, trackToolNavigate } from "@/lib/analytics";
 
 // ── Testimonials data ──────────────────────────────────────────────────────────
 const TESTIMONIALS = [
@@ -139,11 +140,11 @@ export default function Home() {
             className="flex flex-col sm:flex-row items-center gap-4 w-full"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
           >
-            <Link href="/backtest" className="group flex items-center justify-center gap-2 px-8 py-4 w-full sm:w-auto rounded-full bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold text-lg hover:from-emerald-500 hover:to-blue-500 transition-all shadow-[0_0_40px_rgba(16,185,129,0.3)]">
+            <Link href="/backtest" onClick={() => trackCTAClick("Start Backtesting Free", "homepage_hero")} className="group flex items-center justify-center gap-2 px-8 py-4 w-full sm:w-auto rounded-full bg-gradient-to-r from-emerald-600 to-blue-600 text-white font-semibold text-lg hover:from-emerald-500 hover:to-blue-500 transition-all shadow-[0_0_40px_rgba(16,185,129,0.3)]">
               Start Backtesting Free
               <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
-            <Link href="/chain" className="flex items-center justify-center gap-2 px-8 py-4 w-full sm:w-auto rounded-full glass hover:bg-white/5 text-white font-semibold text-lg transition-all border border-white/10">
+            <Link href="/chain" onClick={() => trackCTAClick("Live Option Chain", "homepage_hero")} className="flex items-center justify-center gap-2 px-8 py-4 w-full sm:w-auto rounded-full glass hover:bg-white/5 text-white font-semibold text-lg transition-all border border-white/10">
               Live Option Chain
             </Link>
           </motion.div>
@@ -259,7 +260,7 @@ export default function Home() {
                 badge: "New",
               },
             ].map((f) => (
-              <Link key={f.title} href={f.href} className="group p-7 rounded-2xl glass border border-white/5 hover:border-white/10 hover:-translate-y-1 transition-all duration-300 block">
+              <Link key={f.title} href={f.href} onClick={() => trackToolNavigate(f.title.toLowerCase().replace(/[^a-z0-9]+/g, "_"), "homepage_features")} className="group p-7 rounded-2xl glass border border-white/5 hover:border-white/10 hover:-translate-y-1 transition-all duration-300 block">
                 <div className="flex items-start justify-between mb-4">
                   <div className={`w-11 h-11 rounded-xl ${f.bg} flex items-center justify-center`}>
                     {f.icon}
@@ -396,7 +397,7 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <Link href="/backtest" className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-semibold transition-all shadow-lg shadow-emerald-500/20">
+            <Link href="/backtest" onClick={() => trackCTAClick("Try Backtesting Free", "homepage_comparison")} className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-semibold transition-all shadow-lg shadow-emerald-500/20">
               Try Backtesting Free <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
@@ -413,10 +414,10 @@ export default function Home() {
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Start free. Upgrade when you're ready.</h2>
             <p className="text-slate-400 text-lg mb-8">No credit card. No trial expiry. 5 free backtests every day, live option chain, full Options Academy — forever free.</p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/signup" className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-semibold text-lg transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)]">
+              <Link href="/signup" onClick={() => trackCTAClick("Create Free Account", "homepage_final_cta")} className="flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-gradient-to-r from-emerald-600 to-blue-600 hover:from-emerald-500 hover:to-blue-500 text-white font-semibold text-lg transition-all shadow-[0_0_30px_rgba(16,185,129,0.3)]">
                 Create Free Account <ArrowRight className="w-5 h-5" />
               </Link>
-              <Link href="/pricing" className="flex items-center justify-center gap-2 px-8 py-4 rounded-full glass border border-white/10 hover:bg-white/5 text-white font-semibold text-lg transition-all">
+              <Link href="/pricing" onClick={() => trackCTAClick("View Pricing", "homepage_final_cta")} className="flex items-center justify-center gap-2 px-8 py-4 rounded-full glass border border-white/10 hover:bg-white/5 text-white font-semibold text-lg transition-all">
                 View Pricing
               </Link>
             </div>

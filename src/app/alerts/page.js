@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
+import { trackAlertCreate, trackAlertDelete, trackAlertToggle } from "@/lib/analytics";
 import ProtectedRoute from "@/components/ProtectedRoute";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -254,6 +255,7 @@ function AlertsContent() {
 
       if (!res.ok) throw new Error(data.error || `Server error ${res.status}`);
 
+      trackAlertCreate(metric, condition);
       setAlerts((prev) => [data.alert, ...prev]);
     } catch (err) {
       setFormError(err.message || "Failed to create alert. Please try again.");
@@ -271,6 +273,7 @@ function AlertsContent() {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Delete failed");
+      trackAlertDelete();
       setAlerts((prev) => prev.filter((a) => a.id !== alertId));
     } catch (err) {
       // Silent fail — alert stays in list
@@ -290,6 +293,7 @@ function AlertsContent() {
         body: JSON.stringify({ active: newActive }),
       });
       if (!res.ok) throw new Error("Toggle failed");
+      trackAlertToggle(newActive);
       setAlerts((prev) =>
         prev.map((a) => (a.id === alertId ? { ...a, active: newActive } : a))
       );

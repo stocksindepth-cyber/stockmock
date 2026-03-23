@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Target, Mail, Lock, User, Eye, EyeOff, ArrowRight } from "lucide-react";
 import { createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, updateProfile } from "firebase/auth";
 import { auth } from "@/lib/firebase/config";
+import { trackSignupSuccess, trackSignupError } from "@/lib/analytics";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -23,8 +24,10 @@ export default function SignupPage() {
       setError("");
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
+      trackSignupSuccess("google");
       router.push("/dashboard");
     } catch (err) {
+      trackSignupError("google", err.code);
       setError(err.message);
       setLoading(false);
     }
@@ -42,8 +45,10 @@ export default function SignupPage() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: name });
+      trackSignupSuccess("email");
       router.push("/dashboard");
     } catch (err) {
+      trackSignupError("email", err.code);
       setError(err.message);
       setLoading(false);
     }

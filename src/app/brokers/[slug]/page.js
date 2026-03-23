@@ -7,6 +7,7 @@ import {
   BrokerScorecard, FeeTable, ProsCons, FAQSection,
   RelatedArticles, DisclaimerBox, DhanCTA,
 } from "@/components/broker/BrokerArticleShell";
+import ArticleAnalytics from "@/components/broker/ArticleAnalytics";
 
 // ── Static generation ──────────────────────────────────────────────────────────
 export async function generateStaticParams() {
@@ -121,6 +122,7 @@ export default async function BrokerArticlePage({ params }) {
 
   return (
     <div className="min-h-screen bg-[#080C16]">
+      <ArticleAnalytics slug={slug} />
       {/* Ambient glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-indigo-500/5 blur-[140px] rounded-full pointer-events-none" />
 

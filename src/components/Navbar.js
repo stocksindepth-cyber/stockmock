@@ -13,6 +13,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { auth } from "@/lib/firebase/config";
 import { signOut } from "firebase/auth";
+import { trackToolNavigate, trackLogout } from "@/lib/analytics";
 
 // ── Core tool links (logged-in) ───────────────────────────────────────────────
 const TOOL_LINKS = [
@@ -85,6 +86,7 @@ export default function Navbar() {
   const isActive = (href) => pathname === href || pathname?.startsWith(href + "/");
 
   function handleSignOut() {
+    trackLogout();
     setProfileOpen(false);
     setMobileOpen(false);
     signOut(auth);
@@ -116,6 +118,7 @@ export default function Navbar() {
                     <Link
                       key={href}
                       href={href}
+                      onClick={() => trackToolNavigate(label.toLowerCase().replace(/\s+/g, "_"), "navbar")}
                       className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
                         isActive(href)
                           ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
@@ -348,7 +351,7 @@ export default function Navbar() {
                 <Link
                   key={href}
                   href={href}
-                  onClick={() => setMobileOpen(false)}
+                  onClick={() => { setMobileOpen(false); trackToolNavigate(label.toLowerCase().replace(/\s+/g, "_"), "navbar_mobile"); }}
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
                     isActive(href) ? "bg-blue-500/20 text-blue-300" : "text-slate-400 hover:text-white hover:bg-white/5"
                   }`}

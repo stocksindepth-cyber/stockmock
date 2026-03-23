@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Target, ExternalLink } from "lucide-react";
+import { trackDhanReferralClick } from "@/lib/analytics";
 
 const DHAN_REFERRAL_URL = "https://join.dhan.co/?invite=XDCAS95683";
 
@@ -76,6 +79,7 @@ export default function Footer() {
             href={DHAN_REFERRAL_URL}
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => trackDhanReferralClick("footer")}
             className="flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-colors whitespace-nowrap flex-shrink-0"
           >
             Open Free Account <ExternalLink className="w-3 h-3" />
