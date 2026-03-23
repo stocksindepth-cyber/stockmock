@@ -8,8 +8,9 @@ import {
 } from "recharts";
 import {
   Play, TrendingUp, TrendingDown, Activity, StopCircle,
-  Database, Wifi, WifiOff, Info, ChevronDown, ChevronUp
+  Database, Wifi, WifiOff, Info, ChevronDown, ChevronUp, ExternalLink
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { checkAndIncrementSimulationLimit } from "@/lib/firebase/userService";
 import UpgradeBanner from "@/components/UpgradeBanner";
@@ -122,23 +123,114 @@ function DataSourceBadge({ dataSource, dataNote, coverage }) {
   );
 }
 
+// ─── Expiry Payoff Chart ───────────────────────────────────────────────────────
+
+function computeExpiryPayoff(legs, centerSpot, steps = 60) {
+  const strikes = legs.map((l) => l.strike);
+  const minStrike = Math.min(...strikes);
+  const maxStrike = Math.max(...strikes);
+  const spread = Math.max(maxStrike - minStrike, centerSpot * 0.06);
+  const spotMin = Math.round(centerSpot - spread * 1.2);
+  const spotMax = Math.round(centerSpot + spread * 1.2);
+  const step = (spotMax - spotMin) / steps;
+  const data = [];
+  for (let i = 0; i <= steps; i++) {
+    const spot = spotMin + i * step;
+    let pnl = 0;
+    for (const leg of legs) {
+      const intrinsic = leg.type === "CE"
+        ? Math.max(spot - leg.strike, 0)
+        : Math.max(leg.strike - spot, 0);
+      pnl += leg.action === "BUY"
+        ? (intrinsic - leg.entry) * leg.qty
+        : (leg.entry - intrinsic) * leg.qty;
+    }
+    data.push({ spot: Math.round(spot), pnl: Math.round(pnl) });
+  }
+  return data;
+}
+
+function TradePayoffChart({ trade }) {
+  if (!trade.legs?.length || !trade.legs[0].qty) return null;
+  const payoff = computeExpiryPayoff(trade.legs, trade.exitSpot || trade.atmStrike);
+  const maxAbs = Math.max(...payoff.map((d) => Math.abs(d.pnl)), 1);
+  return (
+    <div className="mt-3 pt-3 border-t border-white/5">
+      <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 font-semibold">
+        Payoff at Expiry · Actual exit spot: {trade.exitSpot?.toLocaleString()}
+      </p>
+      <ResponsiveContainer width="100%" height={110}>
+        <LineChart data={payoff} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
+          <XAxis dataKey="spot" hide />
+          <YAxis domain={[-maxAbs * 1.1, maxAbs * 1.1]} hide />
+          <ReferenceLine y={0} stroke="#475569" strokeDasharray="3 3" />
+          <ReferenceLine
+            x={trade.exitSpot}
+            stroke={trade.pnl >= 0 ? "#34d399" : "#f87171"}
+            strokeWidth={1.5}
+            strokeDasharray="4 2"
+            label={{ value: "Exit", position: "top", fill: "#94a3b8", fontSize: 9 }}
+          />
+          <Line
+            type="monotone" dataKey="pnl" stroke="#3b82f6" strokeWidth={1.5}
+            dot={false} isAnimationActive={false}
+          />
+          <Tooltip
+            formatter={(v) => [`₹${v.toLocaleString("en-IN")}`, "P&L at expiry"]}
+            labelFormatter={(s) => `Spot: ${Number(s).toLocaleString("en-IN")}`}
+            contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, fontSize: 11 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
+  );
+}
+
 // ─── Trade Detail Row ─────────────────────────────────────────────────────────
 
-function TradeRow({ trade, expanded, onToggle }) {
+function TradeRow({ trade, expanded, onToggle, underlying }) {
+  const router = useRouter();
+
+  function openInSimulator(e) {
+    e.stopPropagation();
+    const payload = {
+      underlying,
+      entryDate: trade.entryDate,
+      expiryDate: trade.expiryDate,
+      entrySpot: trade.entrySpot,
+      atmStrike: trade.atmStrike,
+      legs: trade.legs.map((l) => ({
+        type: l.type,
+        action: l.action,
+        strike: l.strike,
+        premium: l.entry,
+        lots: l.lots || 1,
+        lotSize: l.qty ? Math.round(l.qty / (l.lots || 1)) : 75,
+      })),
+    };
+    try { sessionStorage.setItem("backtestReplay", JSON.stringify(payload)); } catch {}
+    router.push("/simulator?from=backtest");
+  }
+
   return (
     <div
       className="border border-white/5 rounded-lg overflow-hidden cursor-pointer"
       onClick={onToggle}
     >
-      <div className={`flex items-center gap-3 px-4 py-2.5 text-sm ${trade.pnl >= 0 ? "bg-emerald-500/5" : "bg-rose-500/5"}`}>
-        <span className="text-slate-500 font-mono w-8 text-xs">{trade.cycle}</span>
-        <span className="text-slate-300 w-24 text-xs">{trade.entryDate}</span>
-        <span className="text-slate-400 text-xs hidden md:block w-20">{trade.expiryDate}</span>
-        <span className="text-slate-400 text-xs hidden lg:block w-20">{trade.entrySpot?.toLocaleString()}</span>
-        <span className={`font-mono font-semibold ml-auto ${trade.pnl >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+      <div className={`grid grid-cols-5 md:grid-cols-6 gap-3 items-center px-4 py-2.5 text-sm ${trade.pnl >= 0 ? "bg-emerald-500/5" : "bg-rose-500/5"}`}>
+        <span className="text-slate-500 font-mono text-xs">{trade.cycle}</span>
+        <span className="text-slate-300 text-xs">{trade.entryDate}</span>
+        <span className="text-slate-400 text-xs hidden md:block">{trade.expiryDate}</span>
+        <span className="text-slate-400 text-xs hidden lg:block">{trade.entrySpot?.toLocaleString()}</span>
+        <span className={`font-mono font-semibold text-xs ${trade.pnl >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
           {trade.pnl >= 0 ? "+" : ""}₹{trade.pnl?.toLocaleString()}
         </span>
-        <ChevronDown className={`w-3 h-3 text-slate-500 transition-transform ${expanded ? "rotate-180" : ""}`} />
+        <span className="flex items-center justify-between gap-1">
+          <span className={`font-mono text-xs ${trade.cumulativePnl >= 0 ? "text-emerald-500/70" : "text-rose-500/70"}`}>
+            {trade.cumulativePnl >= 0 ? "+" : ""}₹{trade.cumulativePnl?.toLocaleString()}
+          </span>
+          <ChevronDown className={`w-3 h-3 text-slate-500 transition-transform flex-shrink-0 ${expanded ? "rotate-180" : ""}`} />
+        </span>
       </div>
       {expanded && trade.legs && (
         <div className="px-4 py-3 bg-slate-900/60 border-t border-white/5">
@@ -154,6 +246,17 @@ function TradeRow({ trade, expanded, onToggle }) {
               <span className="font-mono">₹{leg.exit?.toFixed(1)} · <span className={leg.pnl >= 0 ? "text-emerald-400" : "text-rose-400"}>{leg.pnl >= 0 ? "+" : ""}₹{leg.pnl?.toLocaleString()}</span></span>
             </div>
           ))}
+          <TradePayoffChart trade={trade} />
+          <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-3">
+            <button
+              onClick={openInSimulator}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-medium transition-colors"
+            >
+              <ExternalLink className="w-3 h-3" />
+              Replay in Simulator
+            </button>
+            <span className="text-[10px] text-slate-600">Practice this exact setup with live price replay</span>
+          </div>
         </div>
       )}
     </div>
@@ -180,20 +283,22 @@ function BacktestContent() {
   const [customStartDate, setCustomStartDate] = useState("2022-01-01");
   const [customEndDate, setCustomEndDate] = useState(new Date().toISOString().split("T")[0]);
   const [expiryType, setExpiryType] = useState("Weekly");
-  const [entryTime, setEntryTime] = useState("09:20");
-  const [exitTime, setExitTime] = useState("15:15");
   const [slippage, setSlippage] = useState(0.5);
 
-  const [result, setResult] = useState(null);
-  const [isRunning, setIsRunning] = useState(false);
-  const [progress, setProgress] = useState(0);
-  const [statusMsg, setStatusMsg] = useState("");
-  const [mounted, setMounted] = useState(false);
+  // Streaming state — populated progressively as SSE events arrive
+  const [trades,      setTrades]      = useState([]);   // accumulates on "trades" events
+  const [summary,     setSummary]     = useState(null); // set on "complete"
+  const [meta,        setMeta]        = useState(null); // coverage + date range
+  const [isRunning,   setIsRunning]   = useState(false);
+  const [progress,    setProgress]    = useState(0);
+  const [statusMsg,   setStatusMsg]   = useState("");
+  const [streamError, setStreamError] = useState(null);
+  const [mounted,     setMounted]     = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [expandedTrade, setExpandedTrade] = useState(null);
-  const [showTradeLog, setShowTradeLog] = useState(false);
+  const [showTradeLog,  setShowTradeLog]  = useState(false);
 
-  const isRunningRef = useRef(false);
+  const abortRef = useRef(null);
   const { currentUser } = useAuth();
 
   useEffect(() => setMounted(true), []);
@@ -210,103 +315,128 @@ function BacktestContent() {
     return { startDate: d.toISOString().split("T")[0], endDate: today };
   }, [timeframe, customStartDate, customEndDate]);
 
+  // Pattern analytics derived from streamed trades
   const { dayPatternData, monthPatternData, aiMacroContext } = useMemo(() => {
-    if (!result) return { dayPatternData: [], monthPatternData: [], aiMacroContext: "" };
-    const dayMap = {};
-    const monthMap = {};
-
-    result.trades.forEach((t) => {
-      if (!dayMap[t.dayOfWeek]) dayMap[t.dayOfWeek] = { name: t.dayOfWeek, pnl: 0, trades: 0 };
-      dayMap[t.dayOfWeek].pnl += t.pnl;
-      dayMap[t.dayOfWeek].trades += 1;
-
-      if (!monthMap[t.month]) monthMap[t.month] = { name: t.month, pnl: 0, trades: 0 };
-      monthMap[t.month].pnl += t.pnl;
-      monthMap[t.month].trades += 1;
+    if (!trades.length) return { dayPatternData: [], monthPatternData: [], aiMacroContext: "" };
+    const dayMap = {}, monthMap = {};
+    trades.forEach((t) => {
+      if (!dayMap[t.dayOfWeek])  dayMap[t.dayOfWeek]  = { name: t.dayOfWeek,  pnl: 0, trades: 0 };
+      if (!monthMap[t.month])    monthMap[t.month]     = { name: t.month,      pnl: 0, trades: 0 };
+      dayMap[t.dayOfWeek].pnl  += t.pnl; dayMap[t.dayOfWeek].trades  += 1;
+      monthMap[t.month].pnl    += t.pnl; monthMap[t.month].trades    += 1;
     });
-
-    const daysOrder = ["Mon", "Tue", "Wed", "Thu", "Fri"];
-    const monthsOrder = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    const dPattern = Object.values(dayMap).sort((a, b) => daysOrder.indexOf(a.name) - daysOrder.indexOf(b.name));
-    const mPattern = Object.values(monthMap).sort((a, b) => monthsOrder.indexOf(a.name) - monthsOrder.indexOf(b.name));
-
-    const isRealData = result.dataSource === "real";
-    const suffix = isRealData ? " (based on actual NSE market prices)" : " (based on GBM simulation)";
+    const daysOrder   = ["Mon","Tue","Wed","Thu","Fri"];
+    const monthsOrder = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const dPattern = Object.values(dayMap).sort((a,b) => daysOrder.indexOf(a.name)   - daysOrder.indexOf(b.name));
+    const mPattern = Object.values(monthMap).sort((a,b) => monthsOrder.indexOf(a.name) - monthsOrder.indexOf(b.name));
 
     let ctx = "";
     if (startDate <= "2020-05-01") {
-      ctx = "Period includes the COVID-19 crash (Q1 2020). Real NSE data shows IV spiking to 80%+ which devastated short-vega strategies." + suffix;
+      ctx = "Period includes the COVID-19 crash (Q1 2020). NSE data shows IV spiking to 80%+ which devastated short-vega strategies.";
     } else if (startDate <= "2022-03-01") {
-      ctx = "Period covers the Russia-Ukraine onset (Feb 2022). NSE options saw elevated IV and wider bid-ask spreads during this macro event." + suffix;
+      ctx = "Period covers the Russia-Ukraine onset (Feb 2022). NSE options saw elevated IV and wider bid-ask spreads during this macro event.";
     } else {
-      ctx = "This timeframe represents post-COVID normalised market conditions with periodic RBI and US Fed policy volatility." + suffix;
+      ctx = "This timeframe represents post-COVID normalised market conditions with periodic RBI and US Fed policy volatility.";
     }
-
     return { dayPatternData: dPattern, monthPatternData: mPattern, aiMacroContext: ctx };
-  }, [result, startDate]);
+  }, [trades, startDate]);
 
   const handleRunBacktest = useCallback(async () => {
     if (isRunning) {
-      isRunningRef.current = false;
+      abortRef.current?.abort();
       setIsRunning(false);
       return;
     }
 
     const limitCheck = await checkAndIncrementSimulationLimit(currentUser?.uid);
-    if (!limitCheck.allowed) {
-      setUpgradeOpen(true);
-      return;
-    }
+    if (!limitCheck.allowed) { setUpgradeOpen(true); return; }
 
-    setIsRunning(true);
-    isRunningRef.current = true;
-    setResult(null);
+    // Reset all streaming state
+    setTrades([]);
+    setSummary(null);
+    setMeta(null);
+    setStreamError(null);
     setProgress(0);
     setExpandedTrade(null);
     setShowTradeLog(false);
-    setStatusMsg("Connecting to NSE data warehouse...");
+    setIsRunning(true);
+    setStatusMsg("Initiating backtest…");
+
+    const abort = new AbortController();
+    abortRef.current = abort;
 
     try {
-      setProgress(15);
-      setStatusMsg("Querying historical options chain from BigQuery...");
-
       const response = await fetch("/api/backtest", {
-        method: "POST",
+        method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          strategy: selectedStrategy,
-          underlying,
-          startDate,
-          endDate,
-          expiryType,
-          slippage,
-        }),
+        body: JSON.stringify({ strategy: selectedStrategy, underlying, startDate, endDate, expiryType, slippage }),
+        signal: abort.signal,
       });
 
-      setProgress(70);
-      setStatusMsg("Computing P&L across all expiry cycles...");
-
       if (!response.ok) {
-        const err = await response.json();
-        throw new Error(err.message || "Backtest API error");
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || `HTTP ${response.status}`);
       }
 
-      const data = await response.json();
+      const reader  = response.body.getReader();
+      const decoder = new TextDecoder();
+      let   buffer  = "";
 
-      setProgress(90);
-      setStatusMsg("Building performance analytics...");
-      await new Promise((r) => setTimeout(r, 400));
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop(); // keep incomplete last chunk
 
-      setProgress(100);
-      setResult(data);
+        for (const chunk of chunks) {
+          const line = chunk.trim();
+          if (!line.startsWith("data: ")) continue;
+          let event;
+          try { event = JSON.parse(line.slice(6)); } catch { continue; }
+
+          if (event.type === "status") {
+            setStatusMsg(event.message);
+            setProgress(event.progress ?? 0);
+
+          } else if (event.type === "trades") {
+            setTrades((prev) => [...prev, ...event.trades]);
+            setStatusMsg(event.message || `Processed ${event.cycle} / ${event.total} cycles`);
+            setProgress(event.progress ?? 0);
+
+          } else if (event.type === "complete") {
+            setSummary(event.summary);
+            setMeta({
+              coverage:           event.coverage,
+              effectiveDateRange: event.effectiveDateRange,
+              dataSource:         event.dataSource || "real",
+              dataNote:           event.dataNote,
+              totalRows:          event.totalRows,
+              uniqueExpiries:     event.uniqueExpiries,
+            });
+            setProgress(100);
+            setStatusMsg(`Done · ${event.summary?.totalTrades} trades on real NSE data`);
+
+          } else if (event.type === "error") {
+            setStreamError({ code: event.code, message: event.message });
+            setStatusMsg(`Error: ${event.message}`);
+            setIsRunning(false);
+            return;
+          }
+        }
+      }
     } catch (err) {
-      console.error("Backtest error:", err);
-      setStatusMsg(`Error: ${err.message}`);
+      if (err.name !== "AbortError") {
+        console.error("Backtest stream error:", err);
+        setStreamError({ code: "client_error", message: err.message });
+        setStatusMsg(`Error: ${err.message}`);
+      }
     } finally {
       setIsRunning(false);
-      isRunningRef.current = false;
     }
   }, [selectedStrategy, underlying, startDate, endDate, expiryType, slippage, currentUser, isRunning]);
+
+  const isComplete = !!summary;
 
   if (!mounted) return null;
 
@@ -413,36 +543,6 @@ function BacktestContent() {
             </div>
 
             <div className="col-span-1">
-              <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Entry Time</label>
-              <select
-                value={entryTime}
-                onChange={(e) => setEntryTime(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 text-white px-3 py-2.5 rounded-lg text-sm"
-              >
-                <option value="09:16">09:16 AM</option>
-                <option value="09:20">09:20 AM</option>
-                <option value="09:30">09:30 AM</option>
-                <option value="10:00">10:00 AM</option>
-                <option value="12:30">12:30 PM</option>
-              </select>
-            </div>
-
-            <div className="col-span-1">
-              <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Exit Time</label>
-              <select
-                value={exitTime}
-                onChange={(e) => setExitTime(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 text-white px-3 py-2.5 rounded-lg text-sm"
-              >
-                <option value="15:10">03:10 PM</option>
-                <option value="15:15">03:15 PM</option>
-                <option value="15:20">03:20 PM</option>
-                <option value="15:25">03:25 PM</option>
-                <option value="15:30">03:30 PM</option>
-              </select>
-            </div>
-
-            <div className="col-span-1">
               <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Slippage (%)</label>
               <input
                 type="number"
@@ -463,7 +563,6 @@ function BacktestContent() {
               <span className="text-white font-medium">{selectedStrategy.replace(/-/g, " ")}</span> ·{" "}
               {startDate} → {endDate} ·{" "}
               <span className="text-blue-400">{expiryType} expiry</span> ·{" "}
-              Entry <span className="text-blue-400">{entryTime}</span> Exit <span className="text-blue-400">{exitTime}</span> ·{" "}
               {slippage}% slippage
             </div>
             <button
@@ -482,245 +581,328 @@ function BacktestContent() {
             </button>
           </div>
 
-          {/* Progress bar */}
-          {isRunning && (
-            <div className="mt-4 border-t border-white/5 pt-4">
-              <div className="flex justify-between text-xs text-slate-400 mb-2">
-                <span>{statusMsg}</span>
-                <span className="text-blue-400 font-mono">{progress}%</span>
+          {/* Live streaming progress panel */}
+          {(isRunning || isComplete || streamError) && (
+            <div className="mt-4 border-t border-white/5 pt-4 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-xs min-w-0">
+                  {isRunning && (
+                    <span className="relative flex h-2 w-2 shrink-0">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+                    </span>
+                  )}
+                  {isComplete && !isRunning && (
+                    <span className="relative flex h-2 w-2 shrink-0">
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+                    </span>
+                  )}
+                  <span className={`truncate ${streamError ? "text-rose-400 font-medium" : "text-slate-300"}`}>
+                    {statusMsg}
+                  </span>
+                </div>
+                <span className={`font-mono text-xs shrink-0 ${isComplete ? "text-emerald-400" : "text-blue-400"}`}>
+                  {progress}%
+                </span>
               </div>
+
               <div className="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
                 <div
-                  className="bg-blue-500 h-1.5 transition-all duration-500"
+                  className={`h-1.5 rounded-full transition-all duration-300 ${
+                    streamError ? "bg-rose-500" : isComplete ? "bg-emerald-500" : "bg-blue-500"
+                  }`}
                   style={{ width: `${progress}%` }}
                 />
               </div>
+
+              {/* BigQuery not configured */}
+              {streamError?.code === "not_configured" && (
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-sm">
+                  <p className="text-amber-300 font-semibold mb-2">BigQuery Not Configured</p>
+                  <p className="text-amber-400/80 text-xs mb-3">{streamError.message}</p>
+                  <div className="space-y-1 text-xs text-slate-400 font-mono bg-slate-900/60 rounded-lg p-3">
+                    <p className="text-slate-500"># Add to .env.local</p>
+                    <p className="text-blue-300">BIGQUERY_PROJECT_ID=your-project-id</p>
+                    <p className="text-blue-300">{"BIGQUERY_CREDENTIALS_JSON={\"type\":\"service_account\",...}"}</p>
+                    <p className="text-blue-300">BIGQUERY_DATASET=optionsgyani</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Other errors */}
+              {streamError && streamError.code !== "not_configured" && (
+                <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-4 text-sm">
+                  <p className="text-rose-300 font-semibold mb-1">Backtest Failed</p>
+                  <p className="text-rose-400/80 text-xs">{streamError.message}</p>
+                </div>
+              )}
+
+              {/* Live trade ticker — visible while streaming */}
+              {isRunning && trades.length > 0 && (
+                <div className="bg-slate-900/60 border border-white/5 rounded-xl p-3">
+                  <p className="text-[10px] text-slate-500 uppercase tracking-widest font-semibold mb-2">
+                    Live Feed · Last 5 Cycles
+                  </p>
+                  <div className="space-y-1.5">
+                    {trades.slice(-5).map((t) => (
+                      <div key={t.cycle} className="flex items-center justify-between text-xs text-slate-400 gap-2">
+                        <span className="font-mono text-slate-600 w-8">#{t.cycle}</span>
+                        <span className="text-slate-500 w-24 hidden sm:block">{t.entryDate?.slice(0, 10)}</span>
+                        <span className="font-mono text-slate-500 w-20 hidden md:block">
+                          ATM {t.atmStrike?.toLocaleString("en-IN")}
+                        </span>
+                        <span className={`font-mono font-semibold ml-auto ${t.pnl >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                          {t.pnl >= 0 ? "+" : ""}₹{t.pnl?.toLocaleString("en-IN")}
+                        </span>
+                        <span className={`font-mono text-[10px] w-28 text-right hidden sm:block ${t.cumulativePnl >= 0 ? "text-emerald-500/60" : "text-rose-500/60"}`}>
+                          cum ₹{t.cumulativePnl?.toLocaleString("en-IN")}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>
 
-        {/* Results */}
-        {result && (
+        {/* ── Results — render incrementally as trades stream in ────────── */}
+        {(trades.length > 0 || isComplete) && !streamError && (
           <>
-            {/* Data Source Badge */}
-            <DataSourceBadge
-              dataSource={result.dataSource}
-              dataNote={result.dataNote}
-              coverage={result.coverage}
-            />
+            {/* Data source badge */}
+            {meta && (
+              <DataSourceBadge
+                dataSource={meta.dataSource || "real"}
+                dataNote={meta.dataNote || `${trades.length} trades on real NSE Bhavcopy data`}
+                coverage={meta.coverage}
+              />
+            )}
 
-            {/* AI Analysis */}
-            <div className="glass-card rounded-2xl p-6 border border-emerald-500/20 mb-8 relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-              <div className="flex items-start gap-4">
-                <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl">
-                  <Activity className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-white mb-2">AI Strategy Analysis</h3>
-                  <div className="text-slate-300 leading-relaxed space-y-3">
-                    <p>
-                      The <span className="text-white font-medium">{selectedStrategy.replace(/-/g, " ")}</span> on{" "}
-                      {underlying} shows a{" "}
-                      <span className={result.summary.winRate >= 50 ? "text-emerald-400 font-medium" : "text-rose-400 font-medium"}>
-                        {result.summary.winRate}% win rate
-                      </span>{" "}
-                      over <span className="text-white">{result.summary.totalTrades} cycles</span>.
-                      The strategy has{" "}
-                      {result.summary.expectancy > 0 ? "a positive statistical edge" : "a negative statistical expectancy"}{" "}
-                      with a projected return of{" "}
-                      <span className={result.summary.expectancy >= 0 ? "text-emerald-400" : "text-rose-400 font-medium"}>
-                        ₹{result.summary.expectancy?.toLocaleString()} per trade
-                      </span>{" "}
-                      over the long term.
-                    </p>
-                    <div className="pl-4 border-l-2 border-slate-700 py-1">
-                      <p className="text-sm text-slate-400">
-                        <strong className="text-white">Macro Insight:</strong> {aiMacroContext}
-                      </p>
+            {/* Summary cards — only after complete */}
+            {isComplete && summary && (
+              <>
+                {/* Strategy insight */}
+                <div className="glass-card rounded-2xl p-6 border border-emerald-500/20 mb-8 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
+                  <div className="flex items-start gap-4">
+                    <div className="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl">
+                      <Activity className="w-6 h-6" />
                     </div>
-                    <p>
-                      Best day historically:{" "}
-                      <span className="text-blue-400 font-medium">
-                        {dayPatternData.reduce((p, c) => (p.pnl > c.pnl ? p : c), { name: "N/A", pnl: -Infinity }).name}
-                      </span>.{" "}
-                      Max drawdown:{" "}
-                      <span className="text-rose-400 font-medium">₹{result.summary.maxDrawdown?.toLocaleString()}</span>.{" "}
-                      {result.summary.avgLoss > result.summary.avgWin
-                        ? "Average losing trade is larger than average winner — strict stop-losses are recommended."
-                        : "Average win is larger than average loss — a positive reward-to-risk profile."}
-                    </p>
-                    {result.dataNote && (
-                      <p className="text-xs text-slate-500">Source: {result.dataNote}</p>
-                    )}
+                    <div>
+                      <h3 className="text-xl font-semibold text-white mb-2">Strategy Analysis</h3>
+                      <div className="text-slate-300 leading-relaxed space-y-3">
+                        <p>
+                          The <span className="text-white font-medium">{selectedStrategy.replace(/-/g, " ")}</span> on{" "}
+                          {underlying} shows a{" "}
+                          <span className={summary.winRate >= 50 ? "text-emerald-400 font-medium" : "text-rose-400 font-medium"}>
+                            {summary.winRate}% win rate
+                          </span>{" "}
+                          over <span className="text-white">{summary.totalTrades} real NSE cycles</span>.{" "}
+                          {summary.expectancy > 0 ? "Positive statistical edge" : "Negative statistical expectancy"} —{" "}
+                          ₹{summary.expectancy?.toLocaleString("en-IN")} expectancy per trade.
+                        </p>
+                        <div className="pl-4 border-l-2 border-slate-700 py-1">
+                          <p className="text-sm text-slate-400">
+                            <strong className="text-white">Macro Context:</strong> {aiMacroContext}
+                          </p>
+                        </div>
+                        <p>
+                          {(() => {
+                            const positiveExpectancy = summary.expectancy > 0;
+                            const goodRR = summary.avgWin > summary.avgLoss;
+                            if (positiveExpectancy && goodRR)
+                              return "Both win rate and reward-to-risk work in your favour — edge is confirmed.";
+                            if (positiveExpectancy && !goodRR)
+                              return `High ${summary.winRate}% win rate compensates for smaller average wins — frequency-driven edge. Watch slippage costs.`;
+                            if (!positiveExpectancy && goodRR)
+                              return `Despite avg win (₹${summary.avgWin?.toLocaleString("en-IN")}) exceeding avg loss (₹${summary.avgLoss?.toLocaleString("en-IN")}), the ${summary.winRate}% win rate is too low — you lose more often than you win, erasing the R:R advantage. This strategy lost money in this period.`;
+                            return `Both win rate (${summary.winRate}%) and reward-to-risk work against you — average loss exceeds average win and wins are rare. Strict position sizing required.`;
+                          })()}
+                          {" "}Max drawdown:{" "}
+                          <span className="text-rose-400 font-medium">₹{summary.maxDrawdown?.toLocaleString("en-IN")}</span>.
+                        </p>
+                        {meta?.dataNote && (
+                          <p className="text-xs text-slate-500">Source: {meta.dataNote}</p>
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
 
-            {/* Summary Cards */}
-            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
-              <div className="glass-card rounded-xl p-4 text-center col-span-2">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Total P&L</p>
-                <p className={`text-2xl font-bold font-mono tracking-tight ${result.summary.totalPnL >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                  ₹{result.summary.totalPnL?.toLocaleString()}
-                </p>
-              </div>
-              <div className="glass-card rounded-xl p-4 text-center">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Win Rate</p>
-                <p className={`text-xl font-bold font-mono ${result.summary.winRate >= 50 ? "text-emerald-400" : "text-amber-400"}`}>
-                  {result.summary.winRate}%
-                </p>
-              </div>
-              <div className="glass-card rounded-xl p-4 text-center">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Expectancy</p>
-                <p className={`text-xl font-bold font-mono ${result.summary.expectancy >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                  ₹{result.summary.expectancy?.toLocaleString()}
-                </p>
-              </div>
-              <div className="glass-card rounded-xl p-4 text-center">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Avg Win</p>
-                <p className="text-xl font-bold font-mono text-emerald-400">
-                  ₹{result.summary.avgWin?.toLocaleString()}
-                </p>
-              </div>
-              <div className="glass-card rounded-xl p-4 text-center">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Avg Loss</p>
-                <p className="text-xl font-bold font-mono text-rose-400">
-                  ₹{result.summary.avgLoss?.toLocaleString()}
-                </p>
-              </div>
-              <div className="glass-card rounded-xl p-4 text-center">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Max DD</p>
-                <p className="text-xl font-bold font-mono text-rose-400">
-                  ₹{result.summary.maxDrawdown?.toLocaleString()}
-                </p>
-              </div>
-              <div className="glass-card rounded-xl p-4 text-center">
-                <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">W / L</p>
-                <p className="text-xl font-bold font-mono">
-                  <span className="text-emerald-400">{result.summary.wins}</span>
-                  <span className="text-slate-500 mx-1">/</span>
-                  <span className="text-rose-400">{result.summary.losses}</span>
-                </p>
-              </div>
-            </div>
+                {/* Summary metric cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
+                  <div className="glass-card rounded-xl p-4 text-center col-span-2">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Total P&amp;L</p>
+                    <p className={`text-2xl font-bold font-mono tracking-tight ${summary.totalPnL >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                      ₹{summary.totalPnL?.toLocaleString("en-IN")}
+                    </p>
+                  </div>
+                  <div className="glass-card rounded-xl p-4 text-center">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Win Rate</p>
+                    <p className={`text-xl font-bold font-mono ${summary.winRate >= 50 ? "text-emerald-400" : "text-amber-400"}`}>
+                      {summary.winRate}%
+                    </p>
+                  </div>
+                  <div className="glass-card rounded-xl p-4 text-center">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Expectancy</p>
+                    <p className={`text-xl font-bold font-mono ${summary.expectancy >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                      ₹{summary.expectancy?.toLocaleString("en-IN")}
+                    </p>
+                  </div>
+                  <div className="glass-card rounded-xl p-4 text-center">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Avg Win</p>
+                    <p className="text-xl font-bold font-mono text-emerald-400">₹{summary.avgWin?.toLocaleString("en-IN")}</p>
+                  </div>
+                  <div className="glass-card rounded-xl p-4 text-center">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Avg Loss</p>
+                    <p className="text-xl font-bold font-mono text-rose-400">₹{summary.avgLoss?.toLocaleString("en-IN")}</p>
+                  </div>
+                  <div className="glass-card rounded-xl p-4 text-center">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">Max DD</p>
+                    <p className="text-xl font-bold font-mono text-rose-400">₹{summary.maxDrawdown?.toLocaleString("en-IN")}</p>
+                  </div>
+                  <div className="glass-card rounded-xl p-4 text-center">
+                    <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1 font-bold">W / L</p>
+                    <p className="text-xl font-bold font-mono">
+                      <span className="text-emerald-400">{summary.wins}</span>
+                      <span className="text-slate-500 mx-1">/</span>
+                      <span className="text-rose-400">{summary.losses}</span>
+                    </p>
+                  </div>
+                </div>
+              </>
+            )}
 
-            {/* Charts Row 1 */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-              <div className="glass-card rounded-2xl p-4 md:p-6 lg:col-span-2">
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Cumulative P&L Curve</h3>
-                <ResponsiveContainer width="100%" height={320}>
-                  <LineChart data={result.trades}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                    <XAxis dataKey="cycle" stroke="#64748B" fontSize={11} minTickGap={30} />
-                    <YAxis stroke="#64748B" fontSize={11} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
-                    <Tooltip content={<BacktestTooltip />} />
-                    <ReferenceLine y={0} stroke="#475569" strokeDasharray="4 4" />
-                    <Line
-                      type="monotone"
-                      dataKey="cumulativePnl"
-                      stroke="#3B82F6"
-                      strokeWidth={2}
-                      dot={false}
-                      activeDot={{ r: 6, fill: "#3B82F6", stroke: "#000", strokeWidth: 2 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
+            {/* Equity curve — draws live as trades stream in */}
+            {trades.length > 1 && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div className="glass-card rounded-2xl p-4 md:p-6 lg:col-span-2">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
+                      Cumulative P&amp;L Curve
+                    </h3>
+                    {isRunning && (
+                      <span className="text-[10px] text-blue-400 animate-pulse font-medium">● streaming</span>
+                    )}
+                  </div>
+                  <ResponsiveContainer width="100%" height={320}>
+                    <LineChart data={trades}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                      <XAxis dataKey="cycle" stroke="#64748B" fontSize={11} minTickGap={30} />
+                      <YAxis stroke="#64748B" fontSize={11} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
+                      <Tooltip content={<BacktestTooltip />} />
+                      <ReferenceLine y={0} stroke="#475569" strokeDasharray="4 4" />
+                      <Line type="monotone" dataKey="cumulativePnl" stroke="#3B82F6" strokeWidth={2}
+                        dot={false} isAnimationActive={false}
+                        activeDot={{ r: 6, fill: "#3B82F6", stroke: "#000", strokeWidth: 2 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
 
-              <div className="glass-card rounded-2xl p-4 md:p-6">
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Day of Week Pattern</h3>
-                <ResponsiveContainer width="100%" height={320}>
-                  <BarChart data={dayPatternData} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
-                    <XAxis type="number" stroke="#64748B" fontSize={10} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
-                    <YAxis dataKey="name" type="category" stroke="#94A3B8" fontSize={11} tickLine={false} axisLine={false} />
-                    <Tooltip content={<PatternTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
-                    <ReferenceLine x={0} stroke="#475569" />
-                    <Bar dataKey="pnl" radius={[0, 4, 4, 0]} barSize={24}>
-                      {dayPatternData.map((entry, index) => (
-                        <Cell key={index} fill={entry.pnl >= 0 ? "#10B981" : "#EF4444"} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+                {isComplete && dayPatternData.length > 0 && (
+                  <div className="glass-card rounded-2xl p-4 md:p-6">
+                    <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Day of Week Pattern</h3>
+                    <ResponsiveContainer width="100%" height={320}>
+                      <BarChart data={dayPatternData} layout="vertical" margin={{ top: 0, right: 30, left: 10, bottom: 0 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal vertical={false} />
+                        <XAxis type="number" stroke="#64748B" fontSize={10} tickFormatter={(v) => `${(v / 1000).toFixed(0)}K`} />
+                        <YAxis dataKey="name" type="category" stroke="#94A3B8" fontSize={11} tickLine={false} axisLine={false} />
+                        <Tooltip content={<PatternTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
+                        <ReferenceLine x={0} stroke="#475569" />
+                        <Bar dataKey="pnl" radius={[0, 4, 4, 0]} barSize={24} isAnimationActive={false}>
+                          {dayPatternData.map((entry, index) => (
+                            <Cell key={index} fill={entry.pnl >= 0 ? "#10B981" : "#EF4444"} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </div>
-            </div>
+            )}
 
-            {/* Charts Row 2 */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              <div className="glass-card rounded-2xl p-4 md:p-6">
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Trade-by-Trade Performance</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={result.trades}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                    <XAxis dataKey="cycle" stroke="#64748B" fontSize={10} minTickGap={30} />
-                    <YAxis stroke="#64748B" fontSize={11} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
-                    <Tooltip content={<BacktestTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
-                    <ReferenceLine y={0} stroke="#475569" />
-                    <Bar dataKey="pnl" radius={[2, 2, 0, 0]}>
-                      {result.trades.map((entry, index) => (
-                        <Cell key={index} fill={entry.pnl >= 0 ? "#10B981" : "#EF4444"} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
+            {/* Trade-by-trade bars + monthly heatmap — after complete */}
+            {isComplete && trades.length > 1 && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div className="glass-card rounded-2xl p-4 md:p-6">
+                  <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Trade-by-Trade Performance</h3>
+                  <ResponsiveContainer width="100%" height={250}>
+                    <BarChart data={trades}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                      <XAxis dataKey="cycle" stroke="#64748B" fontSize={10} minTickGap={30} />
+                      <YAxis stroke="#64748B" fontSize={11} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
+                      <Tooltip content={<BacktestTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
+                      <ReferenceLine y={0} stroke="#475569" />
+                      <Bar dataKey="pnl" radius={[2, 2, 0, 0]} isAnimationActive={false}>
+                        {trades.map((entry, index) => (
+                          <Cell key={index} fill={entry.pnl >= 0 ? "#10B981" : "#EF4444"} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {monthPatternData.length > 0 && (
+                  <div className="glass-card rounded-2xl p-4 md:p-6">
+                    <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Monthly Heat Patterns</h3>
+                    <ResponsiveContainer width="100%" height={250}>
+                      <BarChart data={monthPatternData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
+                        <XAxis dataKey="name" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
+                        <YAxis stroke="#64748B" fontSize={11} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
+                        <Tooltip content={<PatternTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
+                        <ReferenceLine y={0} stroke="#475569" />
+                        <Bar dataKey="pnl" radius={[4, 4, 0, 0]} barSize={20} isAnimationActive={false}>
+                          {monthPatternData.map((entry, index) => (
+                            <Cell key={index} fill={entry.pnl >= 0 ? "#14B8A6" : "#F43F5E"} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                )}
               </div>
+            )}
 
-              <div className="glass-card rounded-2xl p-4 md:p-6">
-                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider mb-4">Monthly Heat Patterns</h3>
-                <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={monthPatternData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                    <XAxis dataKey="name" stroke="#64748B" fontSize={11} tickLine={false} axisLine={false} />
-                    <YAxis stroke="#64748B" fontSize={11} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
-                    <Tooltip content={<PatternTooltip />} cursor={{ fill: "rgba(255,255,255,0.05)" }} />
-                    <ReferenceLine y={0} stroke="#475569" />
-                    <Bar dataKey="pnl" radius={[4, 4, 0, 0]} barSize={20}>
-                      {monthPatternData.map((entry, index) => (
-                        <Cell key={index} fill={entry.pnl >= 0 ? "#14B8A6" : "#F43F5E"} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Trade Log */}
-            {result.trades?.length > 0 && (
-              <div className="glass-card rounded-2xl p-4 md:p-6">
+            {/* Trade log */}
+            {trades.length > 0 && (
+              <div className="glass-card rounded-2xl overflow-hidden mb-8">
                 <div
-                  className="flex items-center justify-between cursor-pointer"
+                  className="flex items-center justify-between px-6 py-4 border-b border-white/5 cursor-pointer hover:bg-white/2 transition-colors"
                   onClick={() => setShowTradeLog((v) => !v)}
                 >
-                  <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
-                    Trade Log ({result.trades.length} trades)
-                  </h3>
-                  <div className="flex items-center gap-2 text-slate-500 text-xs">
-                    {result.dataSource === "real" && (
-                      <span className="text-emerald-400 text-xs flex items-center gap-1">
-                        <Database className="w-3 h-3" /> Real prices
-                      </span>
-                    )}
-                    {showTradeLog ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  <div>
+                    <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">Trade Log</h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {trades.length} trades{" "}
+                      {isRunning
+                        ? <span className="text-blue-400 animate-pulse">· streaming…</span>
+                        : <span className="text-emerald-400">· real NSE data</span>}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-emerald-400 text-xs hidden sm:flex items-center gap-1">
+                      <Database className="w-3 h-3" /> Real prices
+                    </span>
+                    {showTradeLog ? <ChevronUp className="w-4 h-4 text-slate-400" /> : <ChevronDown className="w-4 h-4 text-slate-400" />}
                   </div>
                 </div>
 
                 {showTradeLog && (
-                  <div className="mt-4 space-y-1 max-h-[500px] overflow-y-auto pr-1">
-                    {/* Header */}
-                    <div className="grid grid-cols-5 gap-3 px-4 py-2 text-[10px] text-slate-500 uppercase tracking-wider font-medium">
+                  <div className="divide-y divide-white/3 max-h-[600px] overflow-y-auto">
+                    <div className="grid grid-cols-5 md:grid-cols-6 gap-3 px-4 py-2 text-[10px] text-slate-600 uppercase tracking-widest font-semibold">
                       <span>#</span>
                       <span>Entry Date</span>
                       <span className="hidden md:block">Expiry</span>
                       <span className="hidden lg:block">Entry Spot</span>
-                      <span className="text-right">P&L</span>
+                      <span>P&amp;L</span>
+                      <span>Cumulative</span>
                     </div>
-                    {result.trades.map((trade) => (
+                    {trades.map((trade) => (
                       <TradeRow
                         key={trade.cycle}
                         trade={trade}
+                        underlying={underlying}
                         expanded={expandedTrade === trade.cycle}
                         onToggle={() => setExpandedTrade(expandedTrade === trade.cycle ? null : trade.cycle)}
                       />
@@ -730,7 +912,6 @@ function BacktestContent() {
               </div>
             )}
 
-            {/* Dhan referral — shown after backtest results */}
             <DhanReferralBanner variant="banner" context="backtest" className="mt-6 rounded-xl" />
           </>
         )}

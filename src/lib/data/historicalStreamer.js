@@ -120,9 +120,15 @@ export function generateHistoricalCampaign(startDateStr, days = 5, baseSpot = 22
   const stream = [];
   let currentSpot  = baseSpot;
   let globalMinute = 0;
+  const baseDate   = new Date(`${startDateStr}T09:15:00`);
 
   for (let d = 0; d < days; d++) {
     const trend = Math.random() > 0.5 ? 1 : -1;
+
+    // Compute calendar date for this day by adding d calendar days to start
+    const dayDate = new Date(baseDate);
+    dayDate.setDate(dayDate.getDate() + d);
+    const dateStr = dayDate.toISOString().split("T")[0];
 
     if (d > 0) {
       const gapMagnitude = Math.random() * 0.015 * currentSpot;
@@ -143,9 +149,10 @@ export function generateHistoricalCampaign(startDateStr, days = 5, baseSpot = 22
         minuteIndex: i,
         globalMinute: globalMinute++,
         time:        timeCode,
+        date:        dateStr,
         spot:        currentSpot,
         isNewDay:    i === 0,
-        timestamp:   new Date(`${startDateStr}T${timeCode}:00`).toISOString(),
+        timestamp:   `${dateStr}T${timeCode}:00`,
         dataSource:  "simulation",
       });
     }

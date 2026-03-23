@@ -57,18 +57,25 @@ async function headers() {
   };
 }
 
-async function dhanPost(endpoint, body) {
-  const res = await fetch(`${DHAN_BASE}${endpoint}`, {
-    method:  "POST",
-    headers: await headers(),
-    body:    JSON.stringify(body),
-    cache:   "no-store",
-  });
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(`Dhan API ${res.status}: ${text}`);
+async function dhanPost(endpoint, body, timeoutMs = 8000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(`${DHAN_BASE}${endpoint}`, {
+      method:  "POST",
+      headers: await headers(),
+      body:    JSON.stringify(body),
+      cache:   "no-store",
+      signal:  controller.signal,
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`Dhan API ${res.status}: ${text}`);
+    }
+    return res.json();
+  } finally {
+    clearTimeout(timer);
   }
-  return res.json();
 }
 
 // ── Security ID mapping (Dhan-specific) ──

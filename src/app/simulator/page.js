@@ -14,10 +14,12 @@ import { generatePayoffData, netPremium, calculatePOP } from "@/lib/options/payo
 import { impliedVolatility } from "@/lib/options/greeks";
 import { getAllTemplates, generateStrategyLegs } from "@/lib/options/strategies";
 import { generateCampaignFromRealCloses, generateHistoricalCampaign } from "@/lib/data/historicalStreamer";
+import { STRIKE_INTERVALS, LOT_SIZES } from "@/lib/nse/constants";
 import { useAuth } from "@/context/AuthContext";
 import { checkAndIncrementSimulationLimit } from "@/lib/firebase/userService";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import ExpiryCalendar from "@/components/ExpiryCalendar";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -89,9 +91,11 @@ function SimulatorContent() {
   const [currentMinute, setCurrentMinute] = useState(0);
   const [isPlaying,    setIsPlaying]    = useState(false);
   const [speed,        setSpeed]        = useState(1);
+  const [timeframe,    setTimeframe]    = useState(1); // minutes per step: 1, 5, 15
   const [mounted,      setMounted]      = useState(false);
   const [dataSource,   setDataSource]   = useState("real"); // "real" | "simulation"
   const [isLoading,    setIsLoading]    = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
 
   // ── Strategy state ────────────────────────────────────────────────────────
   const [legs,         setLegs]         = useState([]);
@@ -108,9 +112,29 @@ function SimulatorContent() {
 
   const { currentUser, userProfile, updateLocalProfile, loading: authLoading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setMounted(true);
+    // If navigated from backtest replay, seed legs from sessionStorage
+    if (searchParams?.get("from") === "backtest") {
+      try {
+        const raw = sessionStorage.getItem("backtestReplay");
+        if (raw) {
+          const payload = JSON.parse(raw);
+          sessionStorage.removeItem("backtestReplay");
+          if (payload.underlying) setUnderlying(payload.underlying);
+          if (payload.entryDate) setTargetDate(payload.entryDate);
+          if (payload.expiryDate) setExpiryDate(payload.expiryDate);
+          if (payload.legs?.length) {
+            const seeded = stampEntryIV(payload.legs, payload.entrySpot || 22500, 1);
+            setLegs(seeded);
+            setInitialLegs(seeded);
+            return; // skip default historical load
+          }
+        }
+      } catch {}
+    }
     loadHistoricalDay();
   }, []);
 
@@ -155,14 +179,15 @@ function SimulatorContent() {
       if (json.dataSource === "real" && json.days?.length > 0) {
         campaignData   = generateCampaignFromRealCloses(json.days);
         const entryClose = json.days[0].close;
-        resolvedAtm    = json.atmStrike || Math.round(entryClose / 50) * 50;
+        const strikeInterval = STRIKE_INTERVALS[underlying] || 50;
+        resolvedAtm    = json.atmStrike || Math.round(entryClose / strikeInterval) * strikeInterval;
         resolvedSource = "real";
 
         // Seed legs: use real NSE premiums, then lock in entry IV
         const optMap = {};
         for (const o of (json.options || [])) optMap[`${o.strike}_${o.type}`] = o;
 
-        const lotSize  = underlying === "BANKNIFTY" ? 30 : underlying === "FINNIFTY" ? 65 : 75;
+        const lotSize  = LOT_SIZES[underlying] || 75;
         const rawLegs  = generateStrategyLegs("iron-condor", resolvedAtm);
         const seeded   = rawLegs.map((leg) => {
           const key  = `${leg.strike}_${leg.type}`;
@@ -174,9 +199,8 @@ function SimulatorContent() {
             expiry: expiryDate,
           };
         });
-        // entryDTE = trading days in campaign - 1 (today is day 1, expiry is last day)
-        const entryDTE = Math.max(json.days.length - 1, 1);
-        const withIV   = stampEntryIV(seeded, entryClose, entryDTE);
+        // Use CALENDAR days (same as daysToExpiry) so BS price at minute 0 = entry premium
+        const withIV = stampEntryIV(seeded, entryClose, diffDays);
         setLegs(withIV);
         setInitialLegs(withIV);
       }
@@ -186,8 +210,11 @@ function SimulatorContent() {
 
     // ── Fallback: pure GBM simulation ─────────────────────────────────────────
     if (!campaignData) {
-      campaignData   = generateHistoricalCampaign(targetDate, diffDays, 22500);
-      resolvedAtm    = Math.round(campaignData[0].spot / 50) * 50;
+      // Fallback base spot per underlying (approximate current levels)
+      const fallbackBase = underlying === "BANKNIFTY" ? 46000 : underlying === "FINNIFTY" ? 20000 : 22500;
+      campaignData   = generateHistoricalCampaign(targetDate, diffDays, fallbackBase);
+      const strikeIntervalFb = STRIKE_INTERVALS[underlying] || 50;
+      resolvedAtm    = Math.round(campaignData[0].spot / strikeIntervalFb) * strikeIntervalFb;
       resolvedSource = "simulation";
 
       const rawFallback = generateStrategyLegs("iron-condor", resolvedAtm)
@@ -209,23 +236,26 @@ function SimulatorContent() {
   }, [targetDate, expiryDate, underlying, currentUser, authLoading, router, userProfile, updateLocalProfile]);
 
   // ── Playback loop ──────────────────────────────────────────────────────────
+  // Advance by `timeframe` ticks per step so 5m/15m candle users see coarser
+  // granularity while DTE / P&L still update correctly (tick dates unchanged).
   useEffect(() => {
     if (isPlaying && playbackData.length > 0) {
       playIntervalRef.current = setInterval(() => {
         setCurrentMinute((prev) => {
-          if (prev >= playbackData.length - 2) {
+          const next = prev + timeframe;
+          if (next >= playbackData.length - 1) {
             setIsPlaying(false);
             setIsModalOpen(true);
             return playbackData.length - 1;
           }
-          return prev + 1;
+          return next;
         });
       }, 1000 / speed);
     } else {
       clearInterval(playIntervalRef.current);
     }
     return () => clearInterval(playIntervalRef.current);
-  }, [isPlaying, speed, playbackData]);
+  }, [isPlaying, speed, timeframe, playbackData]);
 
   // ── Derived tick values ────────────────────────────────────────────────────
   const currentTick = playbackData[currentMinute] ?? { spot: 22500, time: "09:15", dayIndex: 1, totalDays: 1 };
@@ -285,12 +315,26 @@ function SimulatorContent() {
   }, [playbackData]);
 
   // ── Analytics ──────────────────────────────────────────────────────────────
+
+  // DTE in CALENDAR days from the current simulation moment to expiry.
+  // Using calendar days (not trading days) is critical for two reasons:
+  //   1. Weekend theta: Fri→Mon = 3 calendar days of decay, not 1 trading day
+  //   2. Consistent with how real options are priced (T = calendar_days / 365)
   const daysToExpiry = useMemo(() => {
+    if (expiryDate && currentTick.date) {
+      // Parse current sim time and expiry time in local timezone
+      const [h, m] = (currentTick.time || "15:30").split(":").map(Number);
+      const nowMs  = new Date(`${currentTick.date}T${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:00`).getTime();
+      const expMs  = new Date(`${expiryDate}T15:30:00`).getTime();
+      const calDays = (expMs - nowMs) / 86_400_000;
+      return Math.max(0.01, calDays);
+    }
+    // Fallback for pure-simulation mode (no real dates in ticks)
     const dte      = (currentTick.totalDays ?? 1) - (currentTick.dayIndex ?? 1);
-    const timeVal  = parseFloat((currentTick.time ?? "15:30").replace(":", "."));
-    const intraDay = Math.max(0, 15.5 - timeVal) / 24;
+    const [h, m]   = (currentTick.time ?? "15:30").split(":").map(Number);
+    const intraDay = Math.max(0, (15 * 60 + 30 - (h * 60 + m))) / (6.25 * 60);
     return Math.max(0.01, dte + intraDay);
-  }, [currentTick]);
+  }, [currentTick, expiryDate]);
 
   const payoffResult = useMemo(
     () => generatePayoffData(legs, initialSpot, 10, 200, daysToExpiry),
@@ -469,14 +513,25 @@ function SimulatorContent() {
                 <CalendarDays className="w-3.5 h-3.5" /> Simulation Setup
               </p>
 
-              {/* Underlying */}
+              {/* Underlying — switching clears the loaded simulation */}
               <div className="mb-4">
                 <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2">Underlying</p>
                 <div className="flex gap-2">
                   {["NIFTY", "BANKNIFTY", "FINNIFTY"].map((u) => (
                     <button
                       key={u}
-                      onClick={() => setUnderlying(u)}
+                      onClick={() => {
+                        if (u !== underlying) {
+                          setUnderlying(u);
+                          // Clear simulation — spot price, strikes, and lot sizes differ per index
+                          setPlaybackData([]);
+                          setCurrentMinute(0);
+                          setLegs([]);
+                          setInitialLegs([]);
+                          setAdjustments([]);
+                          setIsPlaying(false);
+                        }
+                      }}
                       className={`flex-1 py-2 rounded-lg text-xs font-bold transition-all ${
                         underlying === u
                           ? "bg-blue-600 text-white shadow-lg shadow-blue-900/30"
@@ -490,7 +545,7 @@ function SimulatorContent() {
               </div>
 
               {/* Dates */}
-              <div className="grid grid-cols-2 gap-3 mb-4">
+              <div className="grid grid-cols-2 gap-3 mb-2">
                 <div>
                   <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-1.5">Entry Date</p>
                   <input
@@ -515,10 +570,29 @@ function SimulatorContent() {
                     className="w-full bg-white/5 border border-white/10 text-white px-3 py-2 rounded-lg text-xs focus:outline-none focus:border-blue-500"
                   />
                 </div>
-                <p className="col-span-2 text-[9px] text-slate-600 text-center -mt-1">
-                  Real NSE data: Jan 2016 – Jun 2024
-                </p>
               </div>
+              <p className="text-[9px] text-slate-600 text-center mb-2">Real NSE data: Jan 2016 – Jun 2024</p>
+
+              {/* Expiry calendar toggle */}
+              <button
+                onClick={() => setShowCalendar((v) => !v)}
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 mb-3 rounded-lg bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:border-white/20 transition-all text-[10px] font-semibold"
+              >
+                <CalendarDays className="w-3 h-3" />
+                {showCalendar ? "Hide" : "View"} Expiry Calendar
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${showCalendar ? "rotate-180" : ""}`} />
+              </button>
+              {showCalendar && (
+                <div className="mb-3 border border-white/8 rounded-xl p-3 bg-white/2">
+                  <ExpiryCalendar
+                    entryDate={targetDate}
+                    expiryDate={expiryDate}
+                    onEntryChange={setTargetDate}
+                    onExpiryChange={setExpiryDate}
+                    underlying={underlying}
+                  />
+                </div>
+              )}
 
               <button
                 onClick={loadHistoricalDay}
@@ -621,6 +695,8 @@ function SimulatorContent() {
         onTogglePlay={() => setIsPlaying((v) => !v)}
         speed={speed}
         onSpeedChange={setSpeed}
+        timeframe={timeframe}
+        onTimeframeChange={setTimeframe}
         currentMinute={currentMinute}
         totalMinutes={playbackData.length > 0 ? playbackData.length - 1 : 375}
         dayIndex={currentTick.dayIndex}

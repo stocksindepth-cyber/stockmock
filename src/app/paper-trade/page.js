@@ -6,7 +6,8 @@ import {
   Wallet, TrendingUp, TrendingDown, Clock, Plus, X, RefreshCw,
   Activity, BarChart2, CheckCircle2, AlertTriangle, ChevronDown,
   Target, Zap, ArrowUpRight, ArrowDownRight, BookOpen, RotateCcw,
-  IndianRupee, Layers, ShieldCheck,
+  IndianRupee, Layers, ShieldCheck, Trash2, MessageSquare, BookMarked,
+  ChevronRight, Save, Calendar,
 } from "lucide-react";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PayoffChart from "@/components/PayoffChart";
@@ -18,11 +19,12 @@ import {
   db,
 } from "@/lib/firebase/config";
 import {
-  doc, getDoc, setDoc, updateDoc, collection, addDoc,
+  doc, getDoc, setDoc, updateDoc, collection, addDoc, deleteDoc,
   query, orderBy, serverTimestamp, writeBatch, getDocs,
 } from "firebase/firestore";
 import { getAllTemplates, generateStrategyLegs } from "@/lib/options/strategies";
 import { generatePayoffData, calculatePOP } from "@/lib/options/payoff";
+import { impliedVolatility } from "@/lib/options/greeks";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -95,9 +97,40 @@ function calcDTE(expiryStr) {
   return Math.max(0, (new Date(expiryStr) - new Date()) / (1000 * 60 * 60 * 24));
 }
 
+/** Human-readable DTE label */
+function dteLabel(expiryStr) {
+  if (!expiryStr) return "—";
+  const dte = calcDTE(expiryStr);
+  if (dte <= 0) return "Expired";
+  if (dte < 1)  return `${Math.round(dte * 24)}h left`;
+  return `${Math.ceil(dte)}d left`;
+}
+
+/** Duration between two timestamps (Firestore or ISO) */
+function tradeDuration(openedAt, closedAt) {
+  if (!openedAt) return "—";
+  const start = openedAt?.toDate ? openedAt.toDate() : new Date(openedAt);
+  const end   = closedAt?.toDate  ? closedAt.toDate()  : closedAt ? new Date(closedAt) : new Date();
+  const diffMs = end - start;
+  const days   = Math.floor(diffMs / 86_400_000);
+  const hours  = Math.floor((diffMs % 86_400_000) / 3_600_000);
+  if (days > 0) return `${days}d ${hours}h`;
+  const mins = Math.floor((diffMs % 3_600_000) / 60_000);
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+}
+
+/** % return on margin blocked */
+function pctReturn(pnl, margin) {
+  if (!margin || margin === 0) return null;
+  return ((pnl / margin) * 100).toFixed(1);
+}
+
 /**
  * Map stored legs (entryPremium) → payoff-lib format (premium).
  * The payoff library expects `premium` field; stored positions use `entryPremium`.
+ * Spread preserves `iv` if it was stored at entry — payoff.js skips re-derivation
+ * when leg.iv is present, which is critical for correct theta decay display.
  */
 function toPayoffLegs(legs) {
   return (legs ?? []).map((l) => ({ ...l, premium: l.entryPremium ?? l.premium ?? 0 }));
@@ -115,6 +148,33 @@ function computePayoff(legs, spotPrice, expiryStr) {
     const pop    = calculatePOP(result.data, spotPrice, dte);
     return { ...result, pop, dte };
   } catch { return null; }
+}
+
+/**
+ * Stamp Black-Scholes IV on each leg at the moment of entry and store it
+ * alongside entryPremium in Firestore.
+ *
+ * WHY: generatePayoffData re-derives IV from premium at the *current* DTE.
+ * As time passes, a smaller DTE with the same premium implies a higher sigma,
+ * which exactly cancels theta decay — making P&L look flat until expiry.
+ * Storing IV once at entry and reusing it every render fixes this.
+ */
+function stampIV(legs, entrySpot, expiryStr) {
+  const dte = Math.max(calcDTE(expiryStr), 0.5);
+  const T   = dte / 365;
+  return legs.map((leg) => {
+    const type = leg.type === "PE" ? "PE" : "CE";
+    let iv = impliedVolatility(
+      Number(leg.entryPremium) || 0.1,
+      Number(entrySpot),
+      Number(leg.strike),
+      T,
+      0.07,
+      type
+    );
+    if (isNaN(iv) || iv <= 0.01 || iv > 5) iv = 0.18; // NIFTY typical fallback
+    return { ...leg, iv };
+  });
 }
 
 // ─── Option-chain price lookup ────────────────────────────────────────────────
@@ -196,15 +256,22 @@ function PaperTradeContent() {
   const [mtmLoading, setMtmLoading] = useState(false);
 
   // ── UI state ──────────────────────────────────────────────────────────────
-  const [submitting,  setSubmitting]  = useState(false);
-  const [closingId,   setClosingId]   = useState(null);
-  const [resetConfirm, setResetConfirm] = useState(false);
-  const [istTime,     setIstTime]     = useState("");
-  const [marketOpen,  setMarketOpen]  = useState(false);
-  const [activeTab,   setActiveTab]   = useState("trade"); // trade | positions | history
-  const [expandedPos, setExpandedPos] = useState(null);   // posId with chart expanded
-  const [liveSpotMap, setLiveSpotMap] = useState({});     // posId → current spot price
-  const [modal,       setModal]       = useState(null);   // AppModal state
+  const [submitting,    setSubmitting]    = useState(false);
+  const [closingId,     setClosingId]     = useState(null);
+  const [deletingId,    setDeletingId]    = useState(null);
+  const [resetConfirm,  setResetConfirm]  = useState(false);
+  const [istTime,       setIstTime]       = useState("");
+  const [marketOpen,    setMarketOpen]    = useState(false);
+  const [activeTab,     setActiveTab]     = useState("trade"); // trade | positions | history
+  const [expandedPos,   setExpandedPos]   = useState(null);   // posId with chart expanded
+  const [expandedHist,  setExpandedHist]  = useState(null);   // history row expanded
+  const [liveSpotMap,   setLiveSpotMap]   = useState({});     // posId → current spot price
+  const [modal,         setModal]         = useState(null);   // AppModal state
+  // notes
+  const [noteMap,       setNoteMap]       = useState({});     // tradeId → draft note text
+  const [savingNoteId,  setSavingNoteId]  = useState(null);
+  // saved strategies from builder
+  const [savedStrategies, setSavedStrategies] = useState([]);
 
   // ── Derived ───────────────────────────────────────────────────────────────
   const indexMeta     = useMemo(() => INDICES.find((i) => i.id === selIndex) ?? INDICES[0], [selIndex]);
@@ -273,7 +340,23 @@ function PaperTradeContent() {
     const tradesRef = collection(db, "users", currentUser.uid, "paperTrades");
     const q = query(tradesRef, orderBy("createdAt", "desc"));
     const tradesSnap = await getDocs(q);
-    setTrades(tradesSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    const tradeList = tradesSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
+    setTrades(tradeList);
+
+    // Pre-populate note draft map from stored notes
+    const storedNotes = {};
+    for (const t of tradeList) {
+      if (t.note) storedNotes[t.id] = t.note;
+    }
+    setNoteMap((prev) => ({ ...storedNotes, ...prev }));
+
+    // Load saved strategies from builder
+    try {
+      const stratRef = collection(db, "users", currentUser.uid, "savedStrategies");
+      const stratQ = query(stratRef, orderBy("createdAt", "desc"));
+      const stratSnap = await getDocs(stratQ);
+      setSavedStrategies(stratSnap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    } catch { /* non-critical */ }
   }, [currentUser]);
 
   useEffect(() => {
@@ -403,6 +486,13 @@ function PaperTradeContent() {
     setSubmitting(true);
     try {
       const template = templates.find((t) => t.key === selStrategy);
+
+      // Stamp entry IV on every leg before persisting to Firestore.
+      // This locks the IV so that theta decay renders correctly over the
+      // life of the trade — without it, payoff.js re-derives IV at smaller
+      // DTE which exactly offsets decay and makes P&L appear flat until expiry.
+      const legsWithIV = stampIV(pricedLegs, spotPrice, selExpiry);
+
       const tradesRef = collection(db, "users", currentUser.uid, "paperTrades");
       await addDoc(tradesRef, {
         strategy:  template?.name || selStrategy,
@@ -410,7 +500,7 @@ function PaperTradeContent() {
         indexName: indexMeta.name,
         expiry:    selExpiry,
         lots:      selLots,
-        legs:      pricedLegs,
+        legs:      legsWithIV,
         entrySpot: spotPrice,
         entryPremium: netPrem,
         margin,
@@ -537,6 +627,50 @@ function PaperTradeContent() {
     } catch (e) {
       console.error("Reset failed", e);
     }
+  }
+
+  // ── Delete a closed trade from history ───────────────────────────────────
+  async function handleDeleteTrade(tradeId) {
+    if (!currentUser || deletingId) return;
+    setDeletingId(tradeId);
+    try {
+      const tradeRef = doc(db, "users", currentUser.uid, "paperTrades", tradeId);
+      await deleteDoc(tradeRef);
+      await loadData();
+    } catch (e) {
+      console.error("Delete trade failed", e);
+      setModal({
+        type: "error",
+        title: "Delete Failed",
+        message: "Could not delete this trade record. Please try again.",
+        actions: [{ label: "OK", onClick: () => setModal(null), variant: "primary" }],
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  // ── Save a note on any trade ───────────────────────────────────────────────
+  async function handleSaveNote(tradeId) {
+    if (!currentUser || savingNoteId) return;
+    const note = (noteMap[tradeId] ?? "").trim();
+    setSavingNoteId(tradeId);
+    try {
+      const tradeRef = doc(db, "users", currentUser.uid, "paperTrades", tradeId);
+      await updateDoc(tradeRef, { note });
+      setTrades((prev) => prev.map((t) => t.id === tradeId ? { ...t, note } : t));
+    } catch (e) {
+      console.error("Save note failed", e);
+    } finally {
+      setSavingNoteId(null);
+    }
+  }
+
+  // ── Load a saved strategy into the New Trade form ─────────────────────────
+  function handleLoadSavedStrategy(strat) {
+    if (strat.underlying) setSelIndex(strat.underlying);
+    // store for use after expiries load
+    // We don't auto-place; user selects expiry + hits Place
   }
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -678,6 +812,32 @@ function PaperTradeContent() {
 
             {/* Left: form */}
             <div className="lg:col-span-2 space-y-5">
+
+              {/* Saved strategies from builder */}
+              {savedStrategies.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <BookMarked className="w-3 h-3" /> My Saved Strategies
+                  </p>
+                  <div className="space-y-1.5">
+                    {savedStrategies.slice(0, 5).map((s) => (
+                      <button
+                        key={s.id}
+                        onClick={() => { setSelIndex(s.underlying || "NIFTY"); }}
+                        className="w-full flex items-center justify-between bg-white/3 hover:bg-white/6 border border-white/8 hover:border-violet-500/30 rounded-xl px-4 py-3 text-left transition-all group"
+                      >
+                        <div>
+                          <p className="text-sm font-semibold text-white group-hover:text-violet-300 transition-colors">{s.name}</p>
+                          <p className="text-[11px] text-slate-500 mt-0.5">
+                            {s.underlying} · {s.legs?.length ?? 0} leg{s.legs?.length !== 1 ? "s" : ""} · Spot ref ₹{s.spotPrice?.toLocaleString("en-IN")}
+                          </p>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-violet-400 transition-colors shrink-0" />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Market closed notice */}
               {!marketOpen && (
@@ -951,7 +1111,7 @@ function PaperTradeContent() {
                       </div>
 
                       {/* Position details */}
-                      <div className="px-5 py-3 grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
+                      <div className="px-5 py-3 grid grid-cols-2 sm:grid-cols-5 gap-4 text-sm">
                         <div>
                           <p className="text-[11px] text-slate-500 mb-0.5">Entry Spot</p>
                           <p className="font-semibold text-white tabular-nums">₹{pos.entrySpot?.toLocaleString("en-IN")}</p>
@@ -967,7 +1127,15 @@ function PaperTradeContent() {
                           <p className="font-semibold text-white tabular-nums">{fmtINR(pos.margin)}</p>
                         </div>
                         <div>
-                          <p className="text-[11px] text-slate-500 mb-0.5">Entry Time</p>
+                          <p className="text-[11px] text-slate-500 mb-0.5 flex items-center gap-1">
+                            <Calendar className="w-2.5 h-2.5" /> DTE
+                          </p>
+                          <p className={`font-semibold text-xs tabular-nums ${calcDTE(pos.expiry) <= 1 ? "text-amber-400" : "text-slate-300"}`}>
+                            {dteLabel(pos.expiry)}
+                          </p>
+                        </div>
+                        <div>
+                          <p className="text-[11px] text-slate-500 mb-0.5">Open Since</p>
                           <p className="font-semibold text-slate-300 text-xs">{fmtIST(pos.createdAt)}</p>
                         </div>
                       </div>
@@ -987,6 +1155,32 @@ function PaperTradeContent() {
                               </span>
                             </div>
                           ))}
+                        </div>
+                      </div>
+
+                      {/* Notes */}
+                      <div className="px-5 pb-3">
+                        <div className="flex items-end gap-2">
+                          <div className="flex-1">
+                            <p className="text-[11px] text-slate-500 mb-1 flex items-center gap-1">
+                              <MessageSquare className="w-2.5 h-2.5" /> Trade Note
+                            </p>
+                            <textarea
+                              rows={2}
+                              value={noteMap[pos.id] ?? pos.note ?? ""}
+                              onChange={(e) => setNoteMap((prev) => ({ ...prev, [pos.id]: e.target.value }))}
+                              placeholder="Add a note about this trade…"
+                              className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none transition-colors"
+                            />
+                          </div>
+                          <button
+                            onClick={() => handleSaveNote(pos.id)}
+                            disabled={savingNoteId === pos.id}
+                            className="shrink-0 mb-0.5 flex items-center gap-1 px-3 py-2 bg-blue-600/80 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all"
+                          >
+                            <Save className="w-3 h-3" />
+                            {savingNoteId === pos.id ? "…" : "Save"}
+                          </button>
                         </div>
                       </div>
 
@@ -1045,58 +1239,172 @@ function PaperTradeContent() {
                 <p className="text-base font-semibold">No closed trades yet</p>
               </div>
             ) : (
-              <div className="bg-white/3 border border-white/8 rounded-2xl overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-white/3 border-b border-white/8">
-                      <tr>
-                        {["Strategy", "Index", "Expiry", "Entry Spot", "Exit Spot", "P&L", "Closed At"].map((h) => (
-                          <th key={h} className="py-3 px-4 text-left text-[11px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">
-                            {h}
-                          </th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-white/5">
-                      {closedTrades.map((t) => (
-                        <tr key={t.id} className="hover:bg-white/[0.02] transition-colors">
-                          <td className="py-3.5 px-4 font-semibold text-white">{t.strategy}</td>
-                          <td className="py-3.5 px-4">
-                            <span className={`px-2 py-0.5 rounded text-[11px] font-bold ${
-                              COLOR_MAP[INDICES.find((i) => i.id === t.indexKey)?.color ?? "blue"].bg
-                            } ${COLOR_MAP[INDICES.find((i) => i.id === t.indexKey)?.color ?? "blue"].text}`}>
-                              {t.indexKey ?? t.index}
+              <div className="space-y-2">
+                {/* Portfolio summary bar */}
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
+                  {[
+                    { label: "Total Trades",  value: closedTrades.length,       color: "text-white"         },
+                    { label: "Wins",           value: winCount,                  color: "text-emerald-400"   },
+                    { label: "Losses",         value: lossCount,                 color: "text-rose-400"      },
+                    { label: "Win Rate",       value: winRate !== null ? `${winRate}%` : "—", color: winRate !== null ? (winRate >= 50 ? "text-emerald-400" : "text-rose-400") : "text-slate-500" },
+                    { label: "Realized P&L",  value: `${sign(profile?.realizedPnL ?? 0)}${fmtINR(profile?.realizedPnL ?? 0)}`, color: (profile?.realizedPnL ?? 0) >= 0 ? "text-emerald-400" : "text-rose-400" },
+                  ].map(({ label, value, color }) => (
+                    <div key={label} className="bg-white/3 border border-white/8 rounded-xl p-3 text-center">
+                      <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold mb-1">{label}</p>
+                      <p className={`text-base font-black tabular-nums ${color}`}>{value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                {closedTrades.map((t) => {
+                  const isExpanded  = expandedHist === t.id;
+                  const pct         = pctReturn(t.pnl ?? 0, t.margin);
+                  const duration    = tradeDuration(t.createdAt, t.closedAt);
+                  const c           = COLOR_MAP[INDICES.find((i) => i.id === t.indexKey)?.color ?? "blue"];
+                  const isDel       = deletingId === t.id;
+
+                  return (
+                    <div key={t.id} className="bg-white/3 border border-white/8 rounded-2xl overflow-hidden hover:border-white/12 transition-colors">
+                      {/* Main row */}
+                      <div
+                        className="flex flex-col sm:flex-row sm:items-center justify-between px-5 py-4 gap-3 cursor-pointer select-none"
+                        onClick={() => setExpandedHist(isExpanded ? null : t.id)}
+                      >
+                        <div className="flex items-center gap-3 flex-wrap">
+                          <span className={`px-2 py-0.5 rounded-lg text-[11px] font-black uppercase tracking-widest ${c.bg} ${c.border} border ${c.text}`}>
+                            {t.indexKey ?? t.index}
+                          </span>
+                          <span className="text-sm font-bold text-white">{t.strategy}</span>
+                          <span className="text-[11px] text-slate-500 font-mono">{t.expiry}</span>
+                          <span className="text-[11px] text-slate-600 flex items-center gap-1">
+                            <Clock className="w-2.5 h-2.5" />{duration}
+                          </span>
+                          {t.note && (
+                            <span className="text-[11px] text-blue-400/70 flex items-center gap-1">
+                              <MessageSquare className="w-2.5 h-2.5" /> note
                             </span>
-                          </td>
-                          <td className="py-3.5 px-4 text-slate-400 text-xs font-mono">{t.expiry}</td>
-                          <td className="py-3.5 px-4 text-slate-300 tabular-nums font-mono">₹{t.entrySpot?.toLocaleString("en-IN")}</td>
-                          <td className="py-3.5 px-4 text-slate-300 tabular-nums font-mono">₹{t.exitSpot?.toLocaleString("en-IN")}</td>
-                          <td className="py-3.5 px-4">
-                            <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-black tabular-nums ${
-                              (t.pnl ?? 0) >= 0 ? "bg-emerald-500/15 text-emerald-400" : "bg-rose-500/15 text-rose-400"
+                          )}
+                        </div>
+                        <div className="flex items-center gap-3 shrink-0">
+                          <div className="text-right">
+                            <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-lg text-sm font-black tabular-nums ${
+                              (t.pnl ?? 0) >= 0 ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/20" : "bg-rose-500/15 text-rose-400 border border-rose-500/20"
                             }`}>
-                              {(t.pnl ?? 0) >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+                              {(t.pnl ?? 0) >= 0 ? <ArrowUpRight className="w-3.5 h-3.5" /> : <ArrowDownRight className="w-3.5 h-3.5" />}
                               {sign(t.pnl ?? 0)}{fmtINR(t.pnl ?? 0)}
                             </span>
-                          </td>
-                          <td className="py-3.5 px-4 text-slate-500 text-xs">{fmtIST(t.closedAt)}</td>
-                        </tr>
-                      ))}
-                    </tbody>
+                            {pct !== null && (
+                              <p className={`text-[10px] mt-0.5 text-right font-semibold ${(t.pnl ?? 0) >= 0 ? "text-emerald-500/70" : "text-rose-500/70"}`}>
+                                {pct > 0 ? "+" : ""}{pct}% on margin
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDeleteTrade(t.id); }}
+                            disabled={isDel}
+                            className="p-2 rounded-lg text-slate-600 hover:text-rose-400 hover:bg-rose-500/10 transition-all disabled:opacity-40"
+                            title="Delete from history"
+                          >
+                            {isDel ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                          </button>
+                          <ChevronDown className={`w-4 h-4 text-slate-600 transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                        </div>
+                      </div>
 
-                    {/* Footer totals */}
-                    <tfoot className="bg-white/3 border-t border-white/10">
-                      <tr>
-                        <td colSpan={5} className="py-3 px-4 text-xs font-bold text-slate-400 uppercase tracking-widest">Total Realized P&amp;L</td>
-                        <td className="py-3 px-4">
-                          <span className={`text-base font-black tabular-nums ${(profile?.realizedPnL ?? 0) >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
-                            {sign(profile?.realizedPnL ?? 0)}{fmtINR(profile?.realizedPnL ?? 0)}
-                          </span>
-                        </td>
-                        <td />
-                      </tr>
-                    </tfoot>
-                  </table>
+                      {/* Expanded details */}
+                      {isExpanded && (
+                        <div className="border-t border-white/8 px-5 py-4 space-y-4">
+                          {/* Entry/exit details */}
+                          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+                            <div>
+                              <p className="text-[11px] text-slate-500 mb-0.5">Entry Spot</p>
+                              <p className="font-semibold text-white tabular-nums">₹{t.entrySpot?.toLocaleString("en-IN")}</p>
+                            </div>
+                            <div>
+                              <p className="text-[11px] text-slate-500 mb-0.5">Exit Spot</p>
+                              <p className="font-semibold text-white tabular-nums">₹{t.exitSpot?.toLocaleString("en-IN")}</p>
+                            </div>
+                            <div>
+                              <p className="text-[11px] text-slate-500 mb-0.5">Margin Blocked</p>
+                              <p className="font-semibold text-white tabular-nums">{fmtINR(t.margin)}</p>
+                            </div>
+                            <div>
+                              <p className="text-[11px] text-slate-500 mb-0.5">Duration</p>
+                              <p className="font-semibold text-slate-300 text-xs">{duration}</p>
+                            </div>
+                          </div>
+
+                          {/* Entry / exit leg comparison */}
+                          {t.exitLegs?.length > 0 && (
+                            <div>
+                              <p className="text-[11px] text-slate-500 uppercase tracking-widest font-semibold mb-2">Leg-wise P&amp;L</p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                {t.exitLegs.map((leg, i) => {
+                                  const legPnl = (leg.action === "SELL" ? 1 : -1) * (leg.entryPremium - leg.exitPremium) * leg.lots * leg.lotSize;
+                                  return (
+                                    <div key={i} className="flex items-center justify-between bg-white/3 rounded-lg px-3 py-2 text-xs">
+                                      <div className="flex items-center gap-2">
+                                        <span className={`px-1.5 py-0.5 rounded font-bold ${leg.action === "SELL" ? "bg-rose-500/20 text-rose-400" : "bg-emerald-500/20 text-emerald-400"}`}>{leg.action}</span>
+                                        <span className={`px-1.5 py-0.5 rounded font-bold ${leg.type === "CE" ? "bg-blue-500/20 text-blue-300" : "bg-orange-500/20 text-orange-300"}`}>{leg.type}</span>
+                                        <span className="text-slate-300 font-mono font-semibold">{leg.strike}</span>
+                                      </div>
+                                      <div className="text-right">
+                                        <span className="text-slate-500 text-[10px]">
+                                          ₹{leg.entryPremium?.toFixed(2)} → ₹{leg.exitPremium?.toFixed(2)}
+                                        </span>
+                                        <span className={`ml-2 font-bold ${legPnl >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                                          {legPnl >= 0 ? "+" : "−"}₹{Math.abs(Math.round(legPnl)).toLocaleString("en-IN")}
+                                        </span>
+                                      </div>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Timeline */}
+                          <div className="flex items-center gap-2 text-[11px] text-slate-500">
+                            <span>Opened: <span className="text-slate-400">{fmtIST(t.createdAt)}</span></span>
+                            <span className="text-slate-700">→</span>
+                            <span>Closed: <span className="text-slate-400">{fmtIST(t.closedAt)}</span></span>
+                          </div>
+
+                          {/* Notes */}
+                          <div>
+                            <p className="text-[11px] text-slate-500 mb-1.5 flex items-center gap-1">
+                              <MessageSquare className="w-2.5 h-2.5" /> Trade Notes
+                            </p>
+                            <div className="flex gap-2">
+                              <textarea
+                                rows={2}
+                                value={noteMap[t.id] ?? t.note ?? ""}
+                                onChange={(e) => setNoteMap((prev) => ({ ...prev, [t.id]: e.target.value }))}
+                                placeholder="What did you learn? Why did you take this trade?"
+                                className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-xs text-slate-300 placeholder-slate-600 focus:outline-none focus:border-blue-500 resize-none transition-colors"
+                              />
+                              <button
+                                onClick={() => handleSaveNote(t.id)}
+                                disabled={savingNoteId === t.id}
+                                className="shrink-0 self-start mt-0.5 flex items-center gap-1 px-3 py-2 bg-blue-600/80 hover:bg-blue-500 disabled:opacity-50 text-white text-xs font-semibold rounded-lg transition-all"
+                              >
+                                <Save className="w-3 h-3" />
+                                {savingNoteId === t.id ? "…" : "Save"}
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+
+                {/* Footer total */}
+                <div className="flex items-center justify-between px-5 py-3 bg-white/3 border border-white/8 rounded-xl">
+                  <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Total Realized P&amp;L</span>
+                  <span className={`text-base font-black tabular-nums ${(profile?.realizedPnL ?? 0) >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                    {sign(profile?.realizedPnL ?? 0)}{fmtINR(profile?.realizedPnL ?? 0)}
+                  </span>
                 </div>
               </div>
             )}

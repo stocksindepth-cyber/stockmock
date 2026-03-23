@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { Plus, RotateCcw, Sparkles, Target, Zap } from "lucide-react";
+import { Plus, RotateCcw, Sparkles, Target, Zap, BookMarked, Check, Save } from "lucide-react";
 import PayoffChart from "@/components/PayoffChart";
 import StrategyLegRow from "@/components/StrategyLegRow";
 import GreeksPanel from "@/components/GreeksPanel";
@@ -9,6 +9,9 @@ import TradeMetricsBar from "@/components/TradeMetricsBar";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { generatePayoffData, netPremium, calculatePOP } from "@/lib/options/payoff";
 import { getAllTemplates, generateStrategyLegs } from "@/lib/options/strategies";
+import { useAuth } from "@/context/AuthContext";
+import { db } from "@/lib/firebase/config";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -63,11 +66,14 @@ export default function BuilderPage() {
 // ─── Main content ─────────────────────────────────────────────────────────────
 
 function BuilderContent() {
+  const { currentUser } = useAuth();
   const [underlying, setUnderlying] = useState("NIFTY");
   const [spotPrice,  setSpotPrice]  = useState(22500);
   const [legs, setLegs] = useState([{
     type: "CE", action: "BUY", strike: 22500, premium: 150, lots: 1, lotSize: 75,
   }]);
+  const [saveMsg,    setSaveMsg]    = useState(null); // null | "saving" | "saved" | "error"
+  const [stratName,  setStratName]  = useState("");
 
   const templates      = getAllTemplates();
   const underlyingMeta = useMemo(
@@ -96,7 +102,30 @@ function BuilderContent() {
   const resetAll = useCallback(() => {
     const atm = Math.round(spotPrice / underlyingMeta.step) * underlyingMeta.step;
     setLegs([{ type: "CE", action: "BUY", strike: atm, premium: 150, lots: 1, lotSize: underlyingMeta.lotSize }]);
+    setStratName("");
   }, [spotPrice, underlyingMeta]);
+
+  const handleSaveStrategy = useCallback(async () => {
+    if (!currentUser || !legs.length) return;
+    setSaveMsg("saving");
+    try {
+      const name = stratName.trim() ||
+        `${underlying} Strategy – ${new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`;
+      await addDoc(collection(db, "users", currentUser.uid, "savedStrategies"), {
+        name,
+        underlying,
+        spotPrice,
+        legs,
+        createdAt: serverTimestamp(),
+      });
+      setSaveMsg("saved");
+      setTimeout(() => setSaveMsg(null), 2500);
+    } catch (e) {
+      console.error("Save strategy failed", e);
+      setSaveMsg("error");
+      setTimeout(() => setSaveMsg(null), 3000);
+    }
+  }, [currentUser, legs, underlying, spotPrice, stratName]);
 
   // ── Analytics ─────────────────────────────────────────────────────────────
   const payoffResult  = useMemo(() => generatePayoffData(legs, spotPrice, 10, 200), [legs, spotPrice]);
@@ -219,7 +248,7 @@ function BuilderContent() {
                 </div>
               )}
 
-              <div className="flex gap-2 mt-3">
+              <div className="flex gap-2 mt-3 flex-wrap">
                 <button
                   onClick={addLeg}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold transition-all shadow-lg shadow-blue-900/30 active:scale-[0.98]"
@@ -233,6 +262,40 @@ function BuilderContent() {
                   <RotateCcw className="w-3.5 h-3.5" /> Reset
                 </button>
               </div>
+
+              {/* ── Save to Portfolio ── */}
+              {currentUser && legs.length > 0 && (
+                <div className="mt-3 border-t border-white/8 pt-3 space-y-2">
+                  <input
+                    type="text"
+                    value={stratName}
+                    onChange={(e) => setStratName(e.target.value)}
+                    placeholder={`${underlying} Custom – give it a name (optional)`}
+                    className="w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-600 focus:outline-none focus:border-blue-500 transition-colors"
+                  />
+                  <button
+                    onClick={handleSaveStrategy}
+                    disabled={saveMsg === "saving"}
+                    className={`w-full flex items-center justify-center gap-2 py-2.5 rounded-lg text-xs font-bold transition-all ${
+                      saveMsg === "saved"
+                        ? "bg-emerald-600/80 text-white border border-emerald-500/40"
+                        : saveMsg === "error"
+                          ? "bg-rose-600/80 text-white border border-rose-500/40"
+                          : "bg-violet-600 hover:bg-violet-500 text-white shadow-md shadow-violet-900/30 active:scale-[0.98]"
+                    }`}
+                  >
+                    {saveMsg === "saving" ? (
+                      <><Save className="w-3.5 h-3.5 animate-pulse" /> Saving…</>
+                    ) : saveMsg === "saved" ? (
+                      <><Check className="w-3.5 h-3.5" /> Saved to Portfolio!</>
+                    ) : saveMsg === "error" ? (
+                      <>Failed – try again</>
+                    ) : (
+                      <><BookMarked className="w-3.5 h-3.5" /> Save to Portfolio</>
+                    )}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 

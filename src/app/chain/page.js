@@ -1,6 +1,17 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
+
+const REFRESH_INTERVAL_MS = 15_000; // 15 seconds
+
+function isMarketOpenClient() {
+  const now = new Date();
+  const ist = new Date(now.getTime() + (5 * 60 + 30) * 60 * 1000);
+  const day = ist.getUTCDay();
+  if (day === 0 || day === 6) return false;
+  const mins = ist.getUTCHours() * 60 + ist.getUTCMinutes();
+  return mins >= 9 * 60 + 15 && mins < 15 * 60 + 30;
+}
 
 function formatNum(n) {
   if (n === undefined || n === null) return "—";
@@ -34,6 +45,64 @@ function ChainContent() {
   const [showGreeks, setShowGreeks] = useState(false);
   const [dataSource, setDataSource] = useState("loading");
   const [loading, setLoading] = useState(true);
+  const [lastUpdated, setLastUpdated] = useState(null); // Date object
+  const [secondsSince, setSecondsSince] = useState(0);
+  const [marketOpen, setMarketOpen] = useState(false);
+  const [liveSpot, setLiveSpot] = useState(null);
+  const [wsConnected, setWsConnected] = useState(false);
+  const [underlyingSecId, setUnderlyingSecId] = useState(null);
+  // Tracks whether chain REST fetch has completed for current symbol+expiry
+  const chainLoadedRef = useRef(false);
+  const abortRef = useRef(null);
+  const atmRowRef = useRef(null);
+  const isAutoRefresh = useRef(false);
+
+  // Update market-open status every minute
+  useEffect(() => {
+    const tick = () => setMarketOpen(isMarketOpenClient());
+    tick();
+    const id = setInterval(tick, 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Live "X seconds ago" counter
+  useEffect(() => {
+    if (!lastUpdated) return;
+    const id = setInterval(() => {
+      setSecondsSince(Math.round((Date.now() - lastUpdated.getTime()) / 1000));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [lastUpdated]);
+
+  const fetchChain = useCallback(async (sym, exp, showLoader = false, autoRefresh = false) => {
+    if (!exp) return;
+    abortRef.current?.abort();
+    abortRef.current = new AbortController();
+    isAutoRefresh.current = autoRefresh;
+    if (showLoader) setLoading(true);
+    try {
+      const data = await fetch(`/api/chain?symbol=${sym}&expiry=${exp}`, { signal: abortRef.current.signal }).then((r) => r.json());
+      setChainData(data);
+      setDataSource(data.source || "live");
+      setLastUpdated(new Date());
+      setSecondsSince(0);
+      if (showLoader) setLoading(false);
+      chainLoadedRef.current = true;
+    } catch (err) {
+      if (err.name !== "AbortError") {
+        if (showLoader) setLoading(false);
+        setDataSource("error");
+      }
+    }
+  }, []);
+
+  // Scroll to ATM on initial load / symbol / expiry change (not on auto-refresh)
+  useEffect(() => {
+    if (!chainData || isAutoRefresh.current) return;
+    if (atmRowRef.current) {
+      atmRowRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [chainData]);
 
   // Fetch expiries when symbol changes
   useEffect(() => {
@@ -54,42 +123,109 @@ function ChainContent() {
     return () => { cancelled = true; };
   }, [symbol]);
 
-  // Fetch chain data when symbol or expiry changes
+  // Fetch chain when symbol or expiry changes (initial load)
   useEffect(() => {
-    if (!expiry) return;
-    let cancelled = false;
-    setLoading(true);
-    async function load() {
-      try {
-        const data = await fetch(`/api/chain?symbol=${symbol}&expiry=${expiry}`).then((r) => r.json());
-        if (cancelled) return;
-        setChainData(data);
-        setDataSource(data.source || "live");
-        setLoading(false);
-      } catch {
-        if (!cancelled) { setLoading(false); setDataSource("error"); }
-      }
-    }
-    load().catch(() => {});
-    return () => { cancelled = true; };
-  }, [symbol, expiry]);
+    chainLoadedRef.current = false; // reset so EventSource waits for new data
+    fetchChain(symbol, expiry, true);
+  }, [symbol, expiry, fetchChain]);
 
-  // Auto-refresh every 30 seconds
+  // REST fallback polling: runs only when WS feed is not connected
+  // Keeps chain updating every 15s if WebSocket fails
+  useEffect(() => {
+    if (!expiry || wsConnected) return;
+    const id = setInterval(() => fetchChain(symbol, expiry, false, true), REFRESH_INTERVAL_MS);
+    return () => clearInterval(id);
+  }, [symbol, expiry, wsConnected, fetchChain]);
+
+  // Real-time feed via Dhan WebSocket → SSE
+  // Delayed 300ms so the initial REST chain fetch populates the shared cache first,
+  // preventing /api/feed from double-calling the Dhan API.
   useEffect(() => {
     if (!expiry) return;
-    let refreshController = null;
-    const interval = setInterval(() => {
-      refreshController?.abort();
-      refreshController = new AbortController();
-      fetch(`/api/chain?symbol=${symbol}&expiry=${expiry}`, { signal: refreshController.signal })
-        .then((r) => r.json())
-        .then((data) => {
-          setChainData(data);
-          setDataSource(data.source || "live");
-        })
-        .catch((err) => { if (err.name !== "AbortError") console.error("[chain refresh]", err); });
-    }, 30000);
-    return () => { clearInterval(interval); refreshController?.abort(); };
+
+    setWsConnected(false);
+    let es = null;
+    let spotInterval = null; // declared in outer scope so cleanup can reach it
+
+    async function pollSpot() {
+      try {
+        const res = await fetch(`/api/spot?symbol=${symbol}`);
+        const d = await res.json();
+        if (d.spot) setLiveSpot(d.spot);
+      } catch {}
+    }
+
+    const timer = setTimeout(() => {
+      es = new EventSource(`/api/feed?symbol=${symbol}&expiry=${expiry}`);
+
+      es.addEventListener("snapshot", (e) => {
+        const data = JSON.parse(e.data);
+        setChainData(data);
+        setLiveSpot(data.spot);
+        setUnderlyingSecId(data.underlyingSecId ?? null);
+        setLastUpdated(new Date());
+        setSecondsSince(0);
+        setLoading(false);
+        isAutoRefresh.current = false;
+      });
+
+      es.addEventListener("tick", (e) => {
+        const { secId, ltp, oi, oiChange, volume } = JSON.parse(e.data);
+        setLastUpdated(new Date());
+        setSecondsSince(0);
+
+        setUnderlyingSecId((uid) => {
+          if (uid !== null && secId === uid) setLiveSpot(ltp);
+          return uid;
+        });
+
+        setChainData((prev) => {
+          if (!prev?.chain) return prev;
+          let hit = false;
+          const newChain = prev.chain.map((row) => {
+            if (row.ce.securityId === secId) {
+              hit = true;
+              return { ...row, ce: { ...row.ce, ltp,
+                ...(oi       !== undefined && { oi }),
+                ...(oiChange !== undefined && { oiChange }),
+                ...(volume   !== undefined && { volume }),
+              }};
+            }
+            if (row.pe.securityId === secId) {
+              hit = true;
+              return { ...row, pe: { ...row.pe, ltp,
+                ...(oi       !== undefined && { oi }),
+                ...(oiChange !== undefined && { oiChange }),
+                ...(volume   !== undefined && { volume }),
+              }};
+            }
+            return row;
+          });
+          return hit ? { ...prev, chain: newChain } : prev;
+        });
+      });
+
+      es.addEventListener("status", (e) => {
+        const { connected } = JSON.parse(e.data);
+        setWsConnected(connected);
+      });
+
+      es.onerror = () => setWsConnected(false);
+
+      // Spot fallback: poll /api/spot every 5s when WS isn't streaming ticks
+      spotInterval = setInterval(() => {
+        setWsConnected((connected) => {
+          if (!connected) pollSpot();
+          return connected;
+        });
+      }, 5000);
+    }, 300);
+
+    return () => {
+      clearTimeout(timer);
+      if (es) es.close();
+      if (spotInterval) clearInterval(spotInterval);
+    };
   }, [symbol, expiry]);
 
   return (
@@ -101,16 +237,30 @@ function ChainContent() {
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Option Chain</h1>
             <p className="text-slate-400">
               {loading ? "Loading..." : (
-                <>
-                  Option chain with OI, IV, Greeks for{" "}
-                  <span className="text-blue-400 font-semibold">{symbol}</span> — Spot: ₹
-                  {chainData?.spot?.toLocaleString() || "—"}
-                  <span className={`ml-3 text-xs px-2 py-0.5 rounded-full ${
-                    dataSource === "live" ? "bg-emerald-500/20 text-emerald-400" : "bg-amber-500/20 text-amber-400"
-                  }`}>
-                    {dataSource === "live" ? "● LIVE" : "● CACHED (60s)"}
+                <span className="flex flex-wrap items-center gap-2">
+                  Option chain for{" "}
+                  <span className="text-blue-400 font-semibold">{symbol}</span>
+                  {" "}— Spot:{" "}
+                  <span className="text-sky-300 font-semibold font-mono">
+                    ₹{(liveSpot ?? chainData?.spot)?.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || "—"}
                   </span>
-                </>
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    marketOpen ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-500/20 text-slate-400"
+                  }`}>
+                    {marketOpen ? "● Market Open" : "○ Market Closed"}
+                  </span>
+                  {wsConnected ? (
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 animate-pulse">
+                      ⚡ Live
+                    </span>
+                  ) : lastUpdated && (
+                    <span className={`text-xs px-2 py-0.5 rounded-full ${
+                      secondsSince < 20 ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-400"
+                    }`}>
+                      Updated {secondsSince}s ago
+                    </span>
+                  )}
+                </span>
               )}
             </p>
           </div>
@@ -135,6 +285,23 @@ function ChainContent() {
                 <option key={exp} value={exp}>{exp}</option>
               ))}
             </select>
+            <button
+              onClick={() => fetchChain(symbol, expiry, false)}
+              title="Refresh now"
+              className="px-3 py-2 rounded-lg text-sm text-slate-400 hover:text-white glass transition-all"
+            >
+              ↻
+            </button>
+            {(liveSpot ?? chainData?.spot) && (
+              <button
+                onClick={() => atmRowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                className="px-3 py-2 rounded-lg text-sm font-mono font-semibold bg-sky-500/10 text-sky-300 hover:bg-sky-500/20 border border-sky-500/20 transition-all"
+                title="Jump to ATM"
+              >
+                ₹{(liveSpot ?? chainData.spot).toLocaleString("en-IN", { maximumFractionDigits: 2 })}
+                <span className="ml-1.5 text-[10px] text-sky-500 font-normal">↓ ATM</span>
+              </button>
+            )}
             <button
               onClick={() => setShowGreeks(!showGreeks)}
               className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -198,12 +365,73 @@ function ChainContent() {
                   </tr>
                 </thead>
                 <tbody>
-                  {chainData.chain.map((row) => {
-                    const isITMCE = row.strike < chainData.spot;
-                    const isITMPE = row.strike > chainData.spot;
+                  {chainData.chain.map((row, idx) => {
+                    const spot = liveSpot ?? chainData.spot;
+                    const isITMCE = row.strike < spot;
+                    const isITMPE = row.strike > spot;
+                    // Insert live spot line just before the strike that's >= spot
+                    const prevRow = chainData.chain[idx - 1];
+                    const showSpotMarker = prevRow && spot > prevRow.strike && spot <= row.strike;
+                    const totalCols = showGreeks ? 17 : 11;
                     return (
+                      <React.Fragment key={row.strike}>
+                        {showSpotMarker && (
+                          <tr key="spot-marker" style={{ height: 0 }}>
+                            <td
+                              colSpan={totalCols}
+                              style={{ padding: 0, borderTop: "2px solid #38bdf8", position: "relative", height: 0, lineHeight: 0 }}
+                            >
+                              {/* Dhan-style price badge on the line */}
+                              <span style={{
+                                position: "absolute",
+                                left: "50%",
+                                top: "50%",
+                                transform: "translate(-50%, -50%)",
+                                background: "#0ea5e9",
+                                color: "#fff",
+                                fontSize: "11px",
+                                fontWeight: 700,
+                                fontFamily: "monospace",
+                                padding: "2px 8px",
+                                borderRadius: "4px",
+                                whiteSpace: "nowrap",
+                                letterSpacing: "0.02em",
+                                boxShadow: "0 0 0 2px #0c4a6e",
+                                zIndex: 10,
+                                pointerEvents: "none",
+                              }}>
+                                ₹{spot.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              </span>
+                              {/* Left triangle marker */}
+                              <span style={{
+                                position: "absolute",
+                                left: 0,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                width: 0,
+                                height: 0,
+                                borderTop: "5px solid transparent",
+                                borderBottom: "5px solid transparent",
+                                borderLeft: "7px solid #38bdf8",
+                              }} />
+                              {/* Right triangle marker */}
+                              <span style={{
+                                position: "absolute",
+                                right: 0,
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                                width: 0,
+                                height: 0,
+                                borderTop: "5px solid transparent",
+                                borderBottom: "5px solid transparent",
+                                borderRight: "7px solid #38bdf8",
+                              }} />
+                            </td>
+                          </tr>
+                        )}
                       <tr
                         key={row.strike}
+                        ref={row.isATM ? atmRowRef : null}
                         className={`border-b border-white/5 hover:bg-white/[0.02] transition-colors ${
                           row.isATM ? "bg-blue-500/10 border-blue-500/20" : ""
                         }`}
@@ -259,6 +487,7 @@ function ChainContent() {
                           </>
                         )}
                       </tr>
+                      </React.Fragment>
                     );
                   })}
                 </tbody>
@@ -266,6 +495,13 @@ function ChainContent() {
             </div>
           </div>
         )}
+
+        {/* Data freshness note */}
+        <p className="mt-3 text-xs text-slate-600 text-center">
+          {wsConnected
+            ? "⚡ LTP updates in real-time via WebSocket · OI & Volume refresh every ~15s (Dhan API limit: 1 req / 3s)"
+            : "LTP & Spot poll every 15s · OI & Volume refresh every ~15s (Dhan API limit: 1 req / 3s)"}
+        </p>
       </main>
     </div>
   );

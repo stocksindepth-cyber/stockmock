@@ -120,7 +120,7 @@ export default function PayoffChart({ data, breakevens = [], spotPrice, liveSpot
             strokeWidth={2}
             activeDot={{ r: 5, fill: "#ffffff" }}
             baseValue={0}
-            isAnimationActive={true}
+            isAnimationActive={false}
           />
           {/* T+0 real-time P&L line */}
           <Area

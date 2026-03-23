@@ -19,23 +19,10 @@
 
 import { runQuery, DATASET, PROJECT_ID } from "./client";
 
-// NSE lot sizes (current, as of 2024)
-export const LOT_SIZES = {
-  NIFTY: 75,
-  BANKNIFTY: 30,
-  FINNIFTY: 65,
-  MIDCPNIFTY: 120,
-  SENSEX: 20,
-};
-
-// Strike intervals for ATM rounding
-export const STRIKE_INTERVALS = {
-  NIFTY: 50,
-  BANKNIFTY: 100,
-  FINNIFTY: 50,
-  MIDCPNIFTY: 75,
-  SENSEX: 100,
-};
+// Import and re-export from the browser-safe constants file so they are
+// available both as local variables within this module and as named exports.
+import { LOT_SIZES, STRIKE_INTERVALS } from "@/lib/nse/constants";
+export { LOT_SIZES, STRIKE_INTERVALS };
 
 /**
  * Returns the data coverage (earliest trade_date) in BigQuery for a given underlying.
@@ -159,23 +146,32 @@ export async function fetchBacktestData({
   // For monthly: entry can be 1 week or 1 month before
   const entryDaysBack = expiryType === "Monthly" ? 7 : 1;
 
-  const expiryDayOfWeek = 5; // Thursday
-
   const sql = `
     WITH
 
-    -- Step 1: All valid expiry dates in range (Thursdays only / last-Thursday for monthly)
-    expiry_dates AS (
+    -- Step 1: All valid expiry dates in range
+    -- We trust the data's own expiry_date field — NSE settlement dates differ by underlying
+    -- (NIFTY=Thu, BANKNIFTY=Wed, FINNIFTY=Wed, MIDCPNIFTY=Mon, SENSEX=Fri).
+    -- For Monthly: pick the last expiry_date per calendar month.
+    -- For Weekly: all expiry_dates in range.
+    all_expiry_dates AS (
       SELECT DISTINCT expiry_date
       FROM \`${PROJECT_ID}.${DATASET}.options_eod\`
       WHERE underlying = @underlying
         AND expiry_date BETWEEN @startDate AND @endDate
-        AND EXTRACT(DAYOFWEEK FROM expiry_date) = ${expiryDayOfWeek}
-        ${
-          expiryType === "Monthly"
-            ? `AND DATE_ADD(expiry_date, INTERVAL 7 DAY) > LAST_DAY(expiry_date, MONTH)`
-            : ""
-        }
+    ),
+    expiry_dates AS (
+      ${
+        expiryType === "Monthly"
+          ? `SELECT expiry_date
+             FROM (
+               SELECT expiry_date,
+                      ROW_NUMBER() OVER (PARTITION BY DATE_TRUNC(expiry_date, MONTH) ORDER BY expiry_date DESC) AS rn
+               FROM all_expiry_dates
+             )
+             WHERE rn = 1`
+          : `SELECT expiry_date FROM all_expiry_dates`
+      }
     ),
 
     -- Step 2: Find the entry date — closest trading day before each expiry
@@ -272,7 +268,7 @@ export async function fetchBacktestData({
  * @param {number} opts.lotSize
  * @returns {{ trades: Array, summary: Object, dataSource: "real" }}
  */
-export function computeBacktest(rows, strategyLegs, opts) {
+export function computeBacktest(rows, strategyLegs, opts, onCycle = null) {
   const { underlying, slippage = 0.005, lotSize } = opts;
   const lot = lotSize || LOT_SIZES[underlying] || 50;
   const strikeInterval = STRIKE_INTERVALS[underlying] || 50;
@@ -363,6 +359,8 @@ export function computeBacktest(rows, strategyLegs, opts) {
         strike: roundedStrike,
         type: leg.type,
         action: leg.action,
+        lots: leg.lots || 1,
+        qty,
         entry: Math.round(entryWithSlip * 100) / 100,
         exit: Math.round(exitWithSlip * 100) / 100,
         pnl: Math.round(correctedLegPnl),
@@ -403,6 +401,15 @@ export function computeBacktest(rows, strategyLegs, opts) {
       pnl: tradePnL,
       cumulativePnl: Math.round(cumulativePnL),
     });
+
+    if (onCycle) {
+      onCycle({
+        cycle: trades.length,
+        total: expiries.length,
+        latestTrade: trades[trades.length - 1],
+        cumulativePnL: Math.round(cumulativePnL),
+      });
+    }
   }
 
   const totalTrades = trades.length;
