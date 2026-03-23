@@ -58,8 +58,8 @@ export async function GET(request) {
       return NextResponse.json({ configured: false });
     }
 
-    const { updatedAt } = doc.data();
-    return NextResponse.json({ configured: true, updatedAt });
+    const { updatedAt, renewedAt, lastRenewStatus, lastRenewError } = doc.data();
+    return NextResponse.json({ configured: true, updatedAt, renewedAt, lastRenewStatus, lastRenewError });
   } catch (err) {
     console.error("[dhan-token GET]", err);
     return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });

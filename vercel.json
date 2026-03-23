@@ -5,6 +5,16 @@
   "env": {
     "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "optionsindepth"
   },
+  "crons": [
+    {
+      "path": "/api/cron/dhan-renew",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/dhan-renew",
+      "schedule": "0 14 * * *"
+    }
+  ],
   "headers": [
     {
       "source": "/(.*)",
