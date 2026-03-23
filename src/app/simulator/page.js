@@ -406,7 +406,7 @@ function SimulatorContent() {
                 ? "bg-emerald-500/15 border-emerald-500/25 text-emerald-400"
                 : "bg-amber-500/15 border-amber-500/25 text-amber-400"
             }`}>
-              {dataSource === "real" ? "📊 Real NSE Bhavcopy Data" : "🔬 GBM Simulation (BigQuery unavailable)"}
+              {dataSource === "real" ? "📊 Real NSE Bhavcopy Data" : "🔬 GBM Simulation"}
             </span>
           )}
         </div>

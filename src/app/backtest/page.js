@@ -111,10 +111,7 @@ function DataSourceBadge({ dataSource, dataNote, coverage }) {
           )}
           {!isReal && (
             <p className="text-slate-500 mt-1">
-              To enable real NSE data: Add <code className="text-slate-300 bg-slate-800 px-1 rounded">BIGQUERY_PROJECT_ID</code> and
-              {" "}<code className="text-slate-300 bg-slate-800 px-1 rounded">BIGQUERY_CREDENTIALS_JSON</code> to{" "}
-              <code className="text-slate-300 bg-slate-800 px-1 rounded">.env.local</code>
-              , then run the ingestion pipeline.
+              Historical NSE data not available. Contact support to enable full backtest access.
             </p>
           )}
         </div>
@@ -615,17 +612,13 @@ function BacktestContent() {
                 />
               </div>
 
-              {/* BigQuery not configured */}
+              {/* Data pipeline not configured */}
               {streamError?.code === "not_configured" && (
                 <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 text-sm">
-                  <p className="text-amber-300 font-semibold mb-2">BigQuery Not Configured</p>
-                  <p className="text-amber-400/80 text-xs mb-3">{streamError.message}</p>
-                  <div className="space-y-1 text-xs text-slate-400 font-mono bg-slate-900/60 rounded-lg p-3">
-                    <p className="text-slate-500"># Add to .env.local</p>
-                    <p className="text-blue-300">BIGQUERY_PROJECT_ID=your-project-id</p>
-                    <p className="text-blue-300">{"BIGQUERY_CREDENTIALS_JSON={\"type\":\"service_account\",...}"}</p>
-                    <p className="text-blue-300">BIGQUERY_DATASET=optionsgyani</p>
-                  </div>
+                  <p className="text-amber-300 font-semibold mb-2">Historical Data Unavailable</p>
+                  <p className="text-amber-400/80 text-xs">
+                    NSE Bhavcopy data is not configured for this environment. Please contact support.
+                  </p>
                 </div>
               )}
 
