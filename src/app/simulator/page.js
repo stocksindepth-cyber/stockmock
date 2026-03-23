@@ -116,26 +116,73 @@ function SimulatorContent() {
 
   useEffect(() => {
     setMounted(true);
-    // If navigated from backtest replay, seed legs from sessionStorage
     if (searchParams?.get("from") === "backtest") {
       try {
         const raw = sessionStorage.getItem("backtestReplay");
         if (raw) {
           const payload = JSON.parse(raw);
           sessionStorage.removeItem("backtestReplay");
+
+          // Calculate real DTE from entryDate → expiryDate
+          const entryDTE = Math.max(
+            Math.ceil((new Date(payload.expiryDate) - new Date(payload.entryDate)) / 86400000),
+            1
+          );
+          const seeded = stampEntryIV(payload.legs, payload.entrySpot || 22500, entryDTE);
+
+          // Set state (async — values won't be available yet in the IIFE below)
           if (payload.underlying) setUnderlying(payload.underlying);
-          if (payload.entryDate) setTargetDate(payload.entryDate);
+          if (payload.entryDate)  setTargetDate(payload.entryDate);
           if (payload.expiryDate) setExpiryDate(payload.expiryDate);
-          if (payload.legs?.length) {
-            const seeded = stampEntryIV(payload.legs, payload.entrySpot || 22500, 1);
-            setLegs(seeded);
-            setInitialLegs(seeded);
-            return; // skip default historical load
-          }
+          setLegs(seeded);
+          setInitialLegs(seeded);
+
+          // Load real price data directly from payload (not from state — state hasn't updated yet)
+          (async () => {
+            setIsLoading(true);
+            setCurrentMinute(0);
+            setIsPlaying(false);
+
+            const { underlying: sym, entryDate, expiryDate: expiry, entrySpot } = payload;
+            let campaignData   = null;
+            let resolvedSource = "simulation";
+
+            try {
+              const p = new URLSearchParams({
+                underlying: sym,
+                startDate:  entryDate,
+                endDate:    expiry,
+                expiryDate: expiry,
+              });
+              const res  = await fetch(`/api/simulator/day?${p}`);
+              const json = await res.json();
+              if (json.dataSource === "real" && json.days?.length > 0) {
+                campaignData   = generateCampaignFromRealCloses(json.days);
+                resolvedSource = "real";
+              }
+            } catch (_) { /* fall through to simulation */ }
+
+            if (!campaignData) {
+              const base = sym === "BANKNIFTY" ? 46000 : sym === "FINNIFTY" ? 20000 : (entrySpot || 22500);
+              campaignData   = generateHistoricalCampaign(entryDate, entryDTE, base);
+              resolvedSource = "simulation";
+            }
+
+            setDataSource(resolvedSource);
+            setPlaybackData(campaignData);
+            setIsLoading(false);
+            setAdjustments([{
+              day: 1, time: "09:15", spot: campaignData[0].spot,
+              action: "START",
+              message: `${resolvedSource === "real" ? "📊 Backtest replay" : "🔬 Simulated"}: ${entryDate} → ${expiry}`,
+            }]);
+          })();
+          return;
         }
-      } catch {}
+      } catch (_) { /* fall through */ }
     }
     loadHistoricalDay();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Load simulation ────────────────────────────────────────────────────────

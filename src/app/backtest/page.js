@@ -7,7 +7,7 @@ import {
   BarChart, Bar, Cell
 } from "recharts";
 import {
-  Play, TrendingUp, TrendingDown, Activity, StopCircle,
+  Play, TrendingUp, TrendingDown, Activity, StopCircle, Calendar,
   Database, Wifi, WifiOff, Info, ChevronDown, ChevronUp, ExternalLink
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -183,25 +183,106 @@ function TradePayoffChart({ trade }) {
   );
 }
 
+// ─── Month Group ──────────────────────────────────────────────────────────────
+
+function MonthGroup({ group, underlying, expandedTrade, setExpandedTrade }) {
+  const [open, setOpen] = useState(true);
+  const winPct = group.winRate;
+
+  return (
+    <div>
+      {/* Month header */}
+      <div
+        className="flex items-center justify-between px-5 py-3 bg-slate-900/50 cursor-pointer hover:bg-white/2 transition-colors"
+        onClick={() => setOpen((v) => !v)}
+      >
+        <div className="flex items-center gap-3">
+          <ChevronDown className={`w-3.5 h-3.5 text-slate-500 transition-transform ${open ? "rotate-180" : ""}`} />
+          <div>
+            <span className="text-sm font-semibold text-white">{group.label}</span>
+            <span className="text-xs text-slate-500 ml-2">
+              {group.trades.length} trade{group.trades.length !== 1 ? "s" : ""}
+            </span>
+          </div>
+        </div>
+        <div className="flex items-center gap-4 text-xs">
+          <span className="text-slate-500">
+            <span className="text-emerald-400 font-mono">{group.wins}W</span>
+            <span className="text-slate-600 mx-1">/</span>
+            <span className="text-rose-400 font-mono">{group.losses}L</span>
+            <span className="text-slate-500 ml-1">({winPct}%)</span>
+          </span>
+          <span className={`font-mono font-semibold ${group.totalPnL >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+            {group.totalPnL >= 0 ? "+" : ""}₹{group.totalPnL.toLocaleString("en-IN")}
+          </span>
+        </div>
+      </div>
+
+      {/* Trades within month */}
+      {open && (
+        <div className="divide-y divide-white/3 pl-4">
+          <div className="grid grid-cols-5 md:grid-cols-6 gap-3 px-4 py-1.5 text-[10px] text-slate-700 uppercase tracking-widest font-semibold">
+            <span>#</span><span>Entry Date</span>
+            <span className="hidden md:block">Expiry</span>
+            <span className="hidden lg:block">Entry Spot</span>
+            <span>P&L</span><span>Cumulative</span>
+          </div>
+          {group.trades.map((trade) => (
+            <TradeRow
+              key={trade.cycle}
+              trade={trade}
+              underlying={underlying}
+              expanded={expandedTrade === trade.cycle}
+              onToggle={() => setExpandedTrade(expandedTrade === trade.cycle ? null : trade.cycle)}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Trade Detail Row ─────────────────────────────────────────────────────────
 
 function TradeRow({ trade, expanded, onToggle, underlying }) {
   const router = useRouter();
+  const [weekDays, setWeekDays] = useState(null);
+  const [loadingDays, setLoadingDays] = useState(false);
+
+  // Lazy-load real daily spot path when trade is expanded
+  useEffect(() => {
+    if (!expanded || weekDays !== null || loadingDays) return;
+    setLoadingDays(true);
+    (async () => {
+      try {
+        const p = new URLSearchParams({
+          underlying,
+          startDate:  trade.entryDate,
+          endDate:    trade.expiryDate,
+          expiryDate: trade.expiryDate,
+        });
+        const res  = await fetch(`/api/simulator/day?${p}`);
+        const json = await res.json();
+        setWeekDays(json.dataSource === "real" && json.days?.length > 0 ? json.days : []);
+      } catch { setWeekDays([]); }
+      setLoadingDays(false);
+    })();
+  }, [expanded, underlying, trade.entryDate, trade.expiryDate, weekDays, loadingDays]);
 
   function openInSimulator(e) {
     e.stopPropagation();
     const payload = {
       underlying,
-      entryDate: trade.entryDate,
+      entryDate:  trade.entryDate,
       expiryDate: trade.expiryDate,
-      entrySpot: trade.entrySpot,
-      atmStrike: trade.atmStrike,
+      entrySpot:  trade.entrySpot,
+      atmStrike:  trade.atmStrike,
       legs: trade.legs.map((l) => ({
-        type: l.type,
-        action: l.action,
-        strike: l.strike,
+        type:    l.type,
+        action:  l.action,
+        strike:  l.strike,
         premium: l.entry,
-        lots: l.lots || 1,
+        lots:    l.lots || 1,
         lotSize: l.qty ? Math.round(l.qty / (l.lots || 1)) : 75,
       })),
     };
@@ -229,22 +310,76 @@ function TradeRow({ trade, expanded, onToggle, underlying }) {
           <ChevronDown className={`w-3 h-3 text-slate-500 transition-transform flex-shrink-0 ${expanded ? "rotate-180" : ""}`} />
         </span>
       </div>
+
       {expanded && trade.legs && (
-        <div className="px-4 py-3 bg-slate-900/60 border-t border-white/5">
-          <div className="grid grid-cols-5 gap-2 text-xs text-slate-500 mb-2 font-medium uppercase tracking-wider">
-            <span>Strike</span><span>Type</span><span>Action</span><span>Entry</span><span>Exit · P&L</span>
-          </div>
-          {trade.legs.map((leg, i) => (
-            <div key={i} className="grid grid-cols-5 gap-2 text-xs text-slate-300 py-1 border-t border-white/5">
-              <span className="font-mono">{leg.strike}</span>
-              <span className={leg.type === "CE" ? "text-blue-400" : "text-amber-400"}>{leg.type}</span>
-              <span className={leg.action === "SELL" ? "text-rose-400" : "text-emerald-400"}>{leg.action}</span>
-              <span className="font-mono">₹{leg.entry?.toFixed(1)}</span>
-              <span className="font-mono">₹{leg.exit?.toFixed(1)} · <span className={leg.pnl >= 0 ? "text-emerald-400" : "text-rose-400"}>{leg.pnl >= 0 ? "+" : ""}₹{leg.pnl?.toLocaleString()}</span></span>
+        <div className="px-4 py-3 bg-slate-900/60 border-t border-white/5 space-y-3">
+
+          {/* Leg detail table */}
+          <div>
+            <div className="grid grid-cols-5 gap-2 text-xs text-slate-500 mb-2 font-medium uppercase tracking-wider">
+              <span>Strike</span><span>Type</span><span>Action</span><span>Entry</span><span>Exit · P&L</span>
             </div>
-          ))}
+            {trade.legs.map((leg, i) => (
+              <div key={i} className="grid grid-cols-5 gap-2 text-xs text-slate-300 py-1 border-t border-white/5">
+                <span className="font-mono">{leg.strike}</span>
+                <span className={leg.type === "CE" ? "text-blue-400" : "text-amber-400"}>{leg.type}</span>
+                <span className={leg.action === "SELL" ? "text-rose-400" : "text-emerald-400"}>{leg.action}</span>
+                <span className="font-mono">₹{leg.entry?.toFixed(1)}</span>
+                <span className="font-mono">
+                  ₹{leg.exit?.toFixed(1)} ·{" "}
+                  <span className={leg.pnl >= 0 ? "text-emerald-400" : "text-rose-400"}>
+                    {leg.pnl >= 0 ? "+" : ""}₹{leg.pnl?.toLocaleString()}
+                  </span>
+                </span>
+              </div>
+            ))}
+          </div>
+
+          {/* Day-by-day spot path */}
+          <div className="pt-2 border-t border-white/5">
+            <p className="text-[10px] text-slate-500 uppercase tracking-wider mb-2 font-semibold flex items-center gap-1.5">
+              <Calendar className="w-3 h-3" /> Week Spot Path
+              {loadingDays && <span className="text-slate-600 normal-case tracking-normal ml-1">fetching…</span>}
+            </p>
+            {weekDays && weekDays.length > 0 ? (
+              <div className="grid gap-0.5">
+                {weekDays.map((day, i) => {
+                  const isEntry  = day.date === trade.entryDate;
+                  const isExpiry = day.date === trade.expiryDate;
+                  const delta    = day.close - weekDays[0].close;
+                  const pct      = ((delta / weekDays[0].close) * 100).toFixed(2);
+                  return (
+                    <div
+                      key={day.date}
+                      className={`flex items-center justify-between text-xs px-2 py-1 rounded ${
+                        isEntry  ? "bg-blue-500/10 text-blue-300" :
+                        isExpiry ? "bg-emerald-500/10 text-emerald-300" :
+                                   "text-slate-400"
+                      }`}
+                    >
+                      <span className="font-mono w-32">
+                        {new Date(day.date + "T12:00:00").toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })}
+                        {isEntry  && <span className="ml-1.5 text-[9px] bg-blue-500/20 text-blue-400 px-1 py-0.5 rounded">Entry</span>}
+                        {isExpiry && <span className="ml-1.5 text-[9px] bg-emerald-500/20 text-emerald-400 px-1 py-0.5 rounded">Expiry</span>}
+                      </span>
+                      <span className="font-mono">{day.close.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</span>
+                      <span className={`font-mono text-right w-20 ${delta >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
+                        {delta >= 0 ? "+" : ""}{delta.toFixed(0)} ({pct}%)
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : weekDays !== null && !loadingDays ? (
+              <p className="text-xs text-slate-600">Spot data not available for this date range.</p>
+            ) : null}
+          </div>
+
+          {/* Payoff chart */}
           <TradePayoffChart trade={trade} />
-          <div className="mt-3 pt-3 border-t border-white/5 flex items-center gap-3">
+
+          {/* Replay button */}
+          <div className="pt-2 border-t border-white/5 flex items-center gap-3">
             <button
               onClick={openInSimulator}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-medium transition-colors"
@@ -252,7 +387,9 @@ function TradeRow({ trade, expanded, onToggle, underlying }) {
               <ExternalLink className="w-3 h-3" />
               Replay in Simulator
             </button>
-            <span className="text-[10px] text-slate-600">Practice this exact setup with live price replay</span>
+            <span className="text-[10px] text-slate-600">
+              Practice this exact setup · {trade.entryDate} → {trade.expiryDate} · ATM {trade.atmStrike?.toLocaleString()}
+            </span>
           </div>
         </div>
       )}
@@ -294,6 +431,7 @@ function BacktestContent() {
   const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [expandedTrade, setExpandedTrade] = useState(null);
   const [showTradeLog,  setShowTradeLog]  = useState(false);
+  const [tradeLogView,  setTradeLogView]  = useState("list"); // "list" | "month"
 
   const abortRef = useRef(null);
   const { currentUser } = useAuth();
@@ -337,6 +475,32 @@ function BacktestContent() {
     }
     return { dayPatternData: dPattern, monthPatternData: mPattern, aiMacroContext: ctx };
   }, [trades, startDate]);
+
+  // Group trades by expiry month for the "By Month" view
+  const tradesByMonth = useMemo(() => {
+    if (!trades.length) return [];
+    const groups = {};
+    trades.forEach((t) => {
+      const key = (t.expiryDate || t.entryDate || "").slice(0, 7); // "YYYY-MM"
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(t);
+    });
+    return Object.entries(groups)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, ts]) => ({
+        key,
+        label: (() => {
+          try {
+            return new Date(key + "-15").toLocaleDateString("en-IN", { month: "long", year: "numeric" });
+          } catch { return key; }
+        })(),
+        trades: ts,
+        totalPnL: ts.reduce((s, t) => s + (t.pnl || 0), 0),
+        wins:     ts.filter((t) => t.pnl >= 0).length,
+        losses:   ts.filter((t) => t.pnl < 0).length,
+        winRate:  Math.round(ts.filter((t) => t.pnl >= 0).length / ts.length * 100),
+      }));
+  }, [trades]);
 
   const handleRunBacktest = useCallback(async () => {
     if (isRunning) {
@@ -860,6 +1024,7 @@ function BacktestContent() {
             {/* Trade log */}
             {trades.length > 0 && (
               <div className="glass-card rounded-2xl overflow-hidden mb-8">
+                {/* Header with view toggle */}
                 <div
                   className="flex items-center justify-between px-6 py-4 border-b border-white/5 cursor-pointer hover:bg-white/2 transition-colors"
                   onClick={() => setShowTradeLog((v) => !v)}
@@ -882,25 +1047,63 @@ function BacktestContent() {
                 </div>
 
                 {showTradeLog && (
-                  <div className="divide-y divide-white/3 max-h-[600px] overflow-y-auto">
-                    <div className="grid grid-cols-5 md:grid-cols-6 gap-3 px-4 py-2 text-[10px] text-slate-600 uppercase tracking-widest font-semibold">
-                      <span>#</span>
-                      <span>Entry Date</span>
-                      <span className="hidden md:block">Expiry</span>
-                      <span className="hidden lg:block">Entry Spot</span>
-                      <span>P&amp;L</span>
-                      <span>Cumulative</span>
+                  <>
+                    {/* View toggle */}
+                    <div className="flex items-center gap-2 px-6 py-3 border-b border-white/5 bg-slate-900/30">
+                      <span className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold mr-2">View:</span>
+                      {["list", "month"].map((v) => (
+                        <button
+                          key={v}
+                          onClick={(e) => { e.stopPropagation(); setTradeLogView(v); setExpandedTrade(null); }}
+                          className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${
+                            tradeLogView === v
+                              ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
+                              : "text-slate-500 hover:text-slate-300"
+                          }`}
+                        >
+                          {v === "list" ? "All Trades" : "By Month"}
+                        </button>
+                      ))}
                     </div>
-                    {trades.map((trade) => (
-                      <TradeRow
-                        key={trade.cycle}
-                        trade={trade}
-                        underlying={underlying}
-                        expanded={expandedTrade === trade.cycle}
-                        onToggle={() => setExpandedTrade(expandedTrade === trade.cycle ? null : trade.cycle)}
-                      />
-                    ))}
-                  </div>
+
+                    {/* ── All Trades (flat list) ── */}
+                    {tradeLogView === "list" && (
+                      <div className="divide-y divide-white/3 max-h-[600px] overflow-y-auto">
+                        <div className="grid grid-cols-5 md:grid-cols-6 gap-3 px-4 py-2 text-[10px] text-slate-600 uppercase tracking-widest font-semibold sticky top-0 bg-slate-950/95">
+                          <span>#</span>
+                          <span>Entry Date</span>
+                          <span className="hidden md:block">Expiry</span>
+                          <span className="hidden lg:block">Entry Spot</span>
+                          <span>P&L</span>
+                          <span>Cumulative</span>
+                        </div>
+                        {trades.map((trade) => (
+                          <TradeRow
+                            key={trade.cycle}
+                            trade={trade}
+                            underlying={underlying}
+                            expanded={expandedTrade === trade.cycle}
+                            onToggle={() => setExpandedTrade(expandedTrade === trade.cycle ? null : trade.cycle)}
+                          />
+                        ))}
+                      </div>
+                    )}
+
+                    {/* ── By Month (grouped) ── */}
+                    {tradeLogView === "month" && (
+                      <div className="max-h-[700px] overflow-y-auto divide-y divide-white/5">
+                        {tradesByMonth.map((group) => (
+                          <MonthGroup
+                            key={group.key}
+                            group={group}
+                            underlying={underlying}
+                            expandedTrade={expandedTrade}
+                            setExpandedTrade={setExpandedTrade}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </>
                 )}
               </div>
             )}
