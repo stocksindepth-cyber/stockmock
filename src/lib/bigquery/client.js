@@ -33,11 +33,14 @@ function normalizePrivateKey(pem) {
   if (!pem) return pem;
   // Fix any literal \n sequences Vercel may inject
   const fixed = pem.replace(/\\n/g, "\n");
-  if (!fixed.includes("BEGIN RSA PRIVATE KEY")) return fixed; // already PKCS#8
-  // Convert PKCS#1 → PKCS#8
+  const isPKCS1 = fixed.includes("BEGIN RSA PRIVATE KEY");
+  console.log(`[BigQuery] key format: ${isPKCS1 ? "PKCS#1 (converting)" : "PKCS#8 (ok)"} — Node ${process.version}`);
+  if (!isPKCS1) return fixed;
+  // Convert PKCS#1 → PKCS#8: OpenSSL 3 (Node 18+/Vercel) rejects PKCS#1 PEM
+  // strings passed directly to crypto.createSign().sign() but supports PKCS#8.
   const keyObj = crypto.createPrivateKey({ key: fixed, format: "pem" });
   const pkcs8  = keyObj.export({ type: "pkcs8", format: "pem" }).toString();
-  console.log("[BigQuery] Converted PKCS#1 key → PKCS#8 for OpenSSL 3 compatibility");
+  console.log("[BigQuery] PKCS#1 → PKCS#8 conversion done ✓");
   return pkcs8;
 }
 
