@@ -24,24 +24,53 @@
 import crypto from "crypto";
 import { BigQuery } from "@google-cloud/bigquery";
 
-/**
- * If the private_key is in PKCS#1 format ("BEGIN RSA PRIVATE KEY"), convert it
- * to PKCS#8 ("BEGIN PRIVATE KEY") so OpenSSL 3.0 on Node 18+ can use it.
- * PKCS#8 is supported by OpenSSL 3's default provider; PKCS#1 is not.
- */
+// ── Pure-JS PKCS#1 → PKCS#8 conversion ───────────────────────────────────────
+// OpenSSL 3 (Node 18+, Node 24 on Vercel) rejects PKCS#1 RSA keys
+// ("BEGIN RSA PRIVATE KEY") both when passed to createSign().sign() AND when
+// loading with createPrivateKey() — the legacy provider is disabled by default.
+//
+// Fix: wrap the raw PKCS#1 DER bytes in a PKCS#8 ASN.1 shell using only
+// Buffer operations. No OpenSSL calls → works on every Node version.
+//
+// PKCS#8 PrivateKeyInfo structure (RFC 5958):
+//   SEQUENCE {
+//     INTEGER 0                       -- version
+//     SEQUENCE {                      -- AlgorithmIdentifier
+//       OID 1.2.840.113549.1.1.1      -- rsaEncryption
+//       NULL
+//     }
+//     OCTET STRING { <pkcs1 DER> }    -- privateKey
+//   }
+
+function asn1Len(tag, len) {
+  if (len < 0x80)   return Buffer.from([tag, len]);
+  if (len < 0x100)  return Buffer.from([tag, 0x81, len]);
+  return Buffer.from([tag, 0x82, len >> 8, len & 0xff]);
+}
+
+function pkcs1ToPkcs8(pkcs1Der) {
+  // AlgorithmIdentifier for rsaEncryption (fixed 15-byte sequence)
+  const algId   = Buffer.from("300d06092a864886f70d0101010500", "hex");
+  const ver     = Buffer.from([0x02, 0x01, 0x00]);                      // INTEGER 0
+  const octet   = Buffer.concat([asn1Len(0x04, pkcs1Der.length), pkcs1Der]);
+  const inner   = Buffer.concat([ver, algId, octet]);
+  return Buffer.concat([asn1Len(0x30, inner.length), inner]);
+}
+
 function normalizePrivateKey(pem) {
   if (!pem) return pem;
-  // Fix any literal \n sequences Vercel may inject
   const fixed = pem.replace(/\\n/g, "\n");
   const isPKCS1 = fixed.includes("BEGIN RSA PRIVATE KEY");
-  console.log(`[BigQuery] key format: ${isPKCS1 ? "PKCS#1 (converting)" : "PKCS#8 (ok)"} — Node ${process.version}`);
+  console.log(`[BigQuery] key: ${isPKCS1 ? "PKCS#1→converting" : "PKCS#8 ok"} Node ${process.version}`);
   if (!isPKCS1) return fixed;
-  // Convert PKCS#1 → PKCS#8: OpenSSL 3 (Node 18+/Vercel) rejects PKCS#1 PEM
-  // strings passed directly to crypto.createSign().sign() but supports PKCS#8.
-  const keyObj = crypto.createPrivateKey({ key: fixed, format: "pem" });
-  const pkcs8  = keyObj.export({ type: "pkcs8", format: "pem" }).toString();
-  console.log("[BigQuery] PKCS#1 → PKCS#8 conversion done ✓");
-  return pkcs8;
+
+  // Extract raw DER (strip PEM header/footer, decode base64)
+  const b64     = fixed.replace(/-----[^-]+-----/g, "").replace(/\s/g, "");
+  const der     = Buffer.from(b64, "base64");
+  const pkcs8   = pkcs1ToPkcs8(der);
+  const wrapped = pkcs8.toString("base64").match(/.{1,64}/g).join("\n");
+  console.log("[BigQuery] PKCS#1→PKCS#8 (pure-JS) done ✓");
+  return `-----BEGIN PRIVATE KEY-----\n${wrapped}\n-----END PRIVATE KEY-----\n`;
 }
 
 let _client = null;
