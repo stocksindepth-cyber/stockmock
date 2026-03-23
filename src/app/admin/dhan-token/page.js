@@ -35,10 +35,15 @@ export default function DhanTokenAdmin() {
       const res = await fetch("/api/admin/dhan-token", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-secret": secret },
-        body: JSON.stringify({ accessToken: token }),
+        body: JSON.stringify({ accessToken: token.trim() }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed");
+
+      // Safely parse JSON — empty body causes "Unexpected end of JSON" otherwise
+      const text = await res.text();
+      let data = {};
+      try { data = text ? JSON.parse(text) : {}; } catch { /* ignore */ }
+
+      if (!res.ok) throw new Error(data.error || `Server error (${res.status})`);
       setStatus("ok");
       setLastUpdated(data.updatedAt);
       setToken("");
