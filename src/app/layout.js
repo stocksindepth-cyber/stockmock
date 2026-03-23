@@ -15,8 +15,8 @@ export const viewport = {
 
 export const metadata = {
   title: "OptionsGyani — Free NSE Options Backtesting Tool",
-  description: "Free options analytics for NSE traders. Build strategies, backtest on 8+ years of real data, analyze open interest. NIFTY & BANKNIFTY.",
-  keywords: "options strategy builder NSE, free option chain analyzer, options backtesting India, nifty weekly expiry strategy, iron condor nifty, short straddle banknifty, india vix options, options simulator with historical data, banknifty options strategy, nifty options tool",
+  description: "Free options analytics for NSE traders. Backtest Iron Condor, Short Straddle, and 10+ strategies on 8+ years of real NIFTY & BANKNIFTY data. Live option chain with IV, Greeks, IVP/IVR.",
+  keywords: "options backtesting India, free NSE options tool, iron condor nifty backtest, short straddle banknifty, option chain IV analysis, IV percentile IVP NIFTY, options strategy builder NSE, nifty weekly expiry strategy, india vix options, options simulator historical data, banknifty options analytics, free options analytics platform India",
   metadataBase: new URL("https://optionsgyani.com"),
   manifest: "/manifest.json",
   appleWebApp: {
@@ -25,8 +25,8 @@ export const metadata = {
     title: "OptionsGyani",
   },
   openGraph: {
-    title: "OptionsGyani — Free Options Strategy Builder & Backtesting for NSE",
-    description: "Build, backtest, and paper trade options strategies on NIFTY & BANKNIFTY. Real NSE data from 2016. Free.",
+    title: "OptionsGyani — Free NSE Options Analytics & Backtesting Platform",
+    description: "Backtest Iron Condor, Short Straddle, and 10+ strategies on 8+ years of real NIFTY & BANKNIFTY data. Live option chain, IVP/IVR, OI analysis. Free for Indian traders.",
     url: "https://optionsgyani.com",
     siteName: "OptionsGyani",
     images: [
@@ -42,22 +42,29 @@ export const metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "OptionsGyani — Free NSE Options Backtesting & Strategy Builder",
-    description: "Iron Condors, Short Straddles, Bull Spreads — backtested on 8 years of real NSE data. Free for Indian traders.",
+    title: "OptionsGyani — Free NSE Options Backtesting & Analytics",
+    description: "Iron Condor, Short Straddle, Bull Spread — backtested on 8 years of real NSE data. Live IV, Greeks, IVP/IVR. Free for Indian options traders.",
     images: ["/og-image.png"],
     creator: "@OptionsGyani",
   },
   alternates: {
     canonical: "https://optionsgyani.com",
+    // LLMs.txt discovery
+    types: {
+      "text/plain": "https://optionsgyani.com/llms.txt",
+    },
   },
   robots: {
     index: true,
     follow: true,
+    nocache: false,
     googleBot: {
       index: true,
       follow: true,
+      noimageindex: false,
       "max-image-preview": "large",
       "max-snippet": -1,
+      "max-video-preview": -1,
     },
   },
 };
@@ -69,6 +76,51 @@ export default function RootLayout({ children }) {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        {/* LLMs.txt discovery — helps ChatGPT, Claude, Perplexity, Gemini find our content */}
+        <link rel="ai-content" type="text/plain" href="https://optionsgyani.com/llms.txt" />
+        {/* JSON-LD structured data for AI/LLM understanding */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              "name": "OptionsGyani",
+              "url": "https://optionsgyani.com",
+              "logo": "https://optionsgyani.com/logo.png",
+              "description": "India's free options analytics platform. Backtest Iron Condor, Short Straddle, and 10+ strategies on 8+ years of real NSE Bhavcopy data. Live option chain with IV Percentile, Greeks, OI analysis.",
+              "applicationCategory": "FinanceApplication",
+              "operatingSystem": "Web",
+              "offers": [
+                { "@type": "Offer", "name": "Free Plan", "price": "0", "priceCurrency": "INR" },
+                { "@type": "Offer", "name": "Pro Plan", "price": "499", "priceCurrency": "INR", "billingPeriod": "P1M" }
+              ],
+              "featureList": [
+                "Options backtesting on NSE historical data",
+                "Live NIFTY BANKNIFTY option chain",
+                "IV Percentile (IVP) and IV Rank (IVR)",
+                "ATM Straddle Premium tracker",
+                "Option Greeks: Delta, Gamma, Theta, Vega",
+                "Open Interest and PCR analysis",
+                "A/B strategy comparison",
+                "Trade simulator with historical replay",
+                "Paper trading with live NSE prices"
+              ],
+              "audience": {
+                "@type": "Audience",
+                "audienceType": "Indian options traders, NSE F&O traders, retail investors"
+              },
+              "inLanguage": "en-IN",
+              "provider": {
+                "@type": "Organization",
+                "name": "OptionsGyani Analytics",
+                "url": "https://optionsgyani.com",
+                "email": "support@optionsgyani.com",
+                "sameAs": ["https://optionsgyani.com"]
+              }
+            })
+          }}
+        />
       </head>
       <body className="antialiased bg-[#0B0F19] text-slate-100" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
         <AuthProvider>

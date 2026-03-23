@@ -1,0 +1,69 @@
+# OptionsGyani — robots.txt
+# https://optionsgyani.com
+
+# Standard crawlers
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /api/
+Disallow: /profile
+Disallow: /dashboard
+
+# Sitemap
+Sitemap: https://optionsgyani.com/sitemap.xml
+
+# ── AI / LLM crawlers — explicitly allowed ────────────────────────────────────
+# OpenAI GPTBot
+User-agent: GPTBot
+Allow: /
+
+# OpenAI ChatGPT browsing
+User-agent: ChatGPT-User
+Allow: /
+
+# Anthropic Claude
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-Web
+Allow: /
+User-agent: anthropic-ai
+Allow: /
+
+# Google Gemini / Bard
+User-agent: Google-Extended
+Allow: /
+
+# Perplexity
+User-agent: PerplexityBot
+Allow: /
+
+# Meta AI
+User-agent: FacebookBot
+Allow: /
+
+# Cohere
+User-agent: cohere-ai
+Allow: /
+
+# Common Crawl (used to train many LLMs)
+User-agent: CCBot
+Allow: /
+
+# You.com
+User-agent: YouBot
+Allow: /
+
+# Bing / Copilot
+User-agent: bingbot
+Allow: /
+User-agent: msnbot
+Allow: /
+
+# Apple
+User-agent: Applebot
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+# LLMs.txt discovery
+# See: https://optionsgyani.com/llms.txt
