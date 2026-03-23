@@ -71,5 +71,29 @@ export default function sitemap() {
     priority: 0.7,
   }));
 
-  return [...staticPages, ...strategyPages, ...learnPages];
+  // All broker guide slugs
+  const brokerSlugs = [
+    "dhan-review", "zerodha-review", "upstox-review", "angel-one-review",
+    "groww-review", "fyers-review",
+    "dhan-vs-zerodha", "dhan-vs-upstox", "dhan-vs-angel-one", "zerodha-vs-upstox",
+    "best-broker-options-trading-india", "lowest-brokerage-fno-india",
+    "best-broker-nifty-weekly-options", "best-free-demat-account-india",
+    "how-to-open-dhan-account", "switch-from-zerodha-to-dhan",
+  ];
+
+  const brokerHubPage = {
+    url: `${baseUrl}/brokers`,
+    lastModified: new Date(),
+    changeFrequency: "weekly",
+    priority: 0.9,
+  };
+
+  const brokerPages = brokerSlugs.map((slug) => ({
+    url: `${baseUrl}/brokers/${slug}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly",
+    priority: 0.8,
+  }));
+
+  return [...staticPages, ...strategyPages, ...learnPages, brokerHubPage, ...brokerPages];
 }

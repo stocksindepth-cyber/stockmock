@@ -39,6 +39,17 @@ const LINKS = [
     ],
   },
   {
+    heading: "Broker Guides",
+    items: [
+      { label: "All Broker Guides", href: "/brokers" },
+      { label: "Dhan Review 2025", href: "/brokers/dhan-review" },
+      { label: "Dhan vs Zerodha", href: "/brokers/dhan-vs-zerodha" },
+      { label: "Best Broker for F&O", href: "/brokers/best-broker-options-trading-india" },
+      { label: "Lowest F&O Brokerage", href: "/brokers/lowest-brokerage-fno-india" },
+      { label: "Open Dhan Account", href: "/brokers/how-to-open-dhan-account" },
+    ],
+  },
+  {
     heading: "Company",
     items: [
       { label: "About Us", href: "/about" },
@@ -75,7 +86,7 @@ export default function Footer() {
 
       {/* Main footer grid */}
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">
