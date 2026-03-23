@@ -379,7 +379,7 @@ function TradeRow({ trade, expanded, onToggle, underlying }) {
           <TradePayoffChart trade={trade} />
 
           {/* Replay button */}
-          <div className="pt-2 border-t border-white/5 flex items-center gap-3">
+          <div className="pt-2 border-t border-white/5 flex items-center gap-3 flex-wrap">
             <button
               onClick={openInSimulator}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 text-xs font-medium transition-colors"
@@ -387,6 +387,13 @@ function TradeRow({ trade, expanded, onToggle, underlying }) {
               <ExternalLink className="w-3 h-3" />
               Replay in Simulator
             </button>
+            {trade.slTpTag && (
+              <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${
+                trade.slTpTag.startsWith('TP') ? 'bg-emerald-500/15 text-emerald-400' : 'bg-rose-500/15 text-rose-400'
+              }`}>
+                {trade.slTpTag.startsWith('TP') ? '🎯' : '🛑'} {trade.slTpTag}
+              </span>
+            )}
             <span className="text-[10px] text-slate-600">
               Practice this exact setup · {trade.entryDate} → {trade.expiryDate} · ATM {trade.atmStrike?.toLocaleString()}
             </span>
@@ -418,6 +425,8 @@ function BacktestContent() {
   const [customEndDate, setCustomEndDate] = useState(new Date().toISOString().split("T")[0]);
   const [expiryType, setExpiryType] = useState("Weekly");
   const [slippage, setSlippage] = useState(0.5);
+  const [slPercent,   setSlPercent]   = useState(0);    // 0 = disabled
+  const [tpPercent,   setTpPercent]   = useState(0);    // TP = 0 means disabled
 
   // Streaming state — populated progressively as SSE events arrive
   const [trades,      setTrades]      = useState([]);   // accumulates on "trades" events
@@ -432,6 +441,13 @@ function BacktestContent() {
   const [expandedTrade, setExpandedTrade] = useState(null);
   const [showTradeLog,  setShowTradeLog]  = useState(false);
   const [tradeLogView,  setTradeLogView]  = useState("list"); // "list" | "month"
+
+  const [compareMode,    setCompareMode]    = useState(false);
+  const [strategyB,      setStrategyB]      = useState("short-straddle");
+  const [tradesB,        setTradesB]        = useState([]);
+  const [summaryB,       setSummaryB]       = useState(null);
+  const [isRunningB,     setIsRunningB]     = useState(false);
+  const abortRefB = useRef(null);
 
   const abortRef = useRef(null);
   const { currentUser } = useAuth();
@@ -502,6 +518,18 @@ function BacktestContent() {
       }));
   }, [trades]);
 
+  // Merge A and B trades for comparison chart
+  const comparisonData = useMemo(() => {
+    if (!compareMode || !trades.length) return trades;
+    const len = Math.max(trades.length, tradesB.length);
+    return Array.from({ length: len }, (_, i) => ({
+      cycle: (trades[i] || tradesB[i])?.cycle || i + 1,
+      cumulativePnl:  trades[i]?.cumulativePnl  ?? null,
+      cumulativePnlB: tradesB[i]?.cumulativePnl ?? null,
+      entryDate:      trades[i]?.entryDate,
+    }));
+  }, [compareMode, trades, tradesB]);
+
   const handleRunBacktest = useCallback(async () => {
     if (isRunning) {
       abortRef.current?.abort();
@@ -522,15 +550,54 @@ function BacktestContent() {
     setShowTradeLog(false);
     setIsRunning(true);
     setStatusMsg("Initiating backtest…");
+    setTradesB([]);
+    setSummaryB(null);
 
     const abort = new AbortController();
     abortRef.current = abort;
 
     try {
+      // Fire strategy B in parallel if compare mode is on
+      if (compareMode) {
+        setIsRunningB(true);
+        const abortB = new AbortController();
+        abortRefB.current = abortB;
+        (async () => {
+          try {
+            const resB = await fetch("/api/backtest", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ strategy: strategyB, underlying, startDate, endDate, expiryType, slippage }),
+              signal: abortB.signal,
+            });
+            if (!resB.ok) return;
+            const readerB  = resB.body.getReader();
+            const decoderB = new TextDecoder();
+            let bufB = "";
+            while (true) {
+              const { done, value } = await readerB.read();
+              if (done) break;
+              bufB += decoderB.decode(value, { stream: true });
+              const chunks = bufB.split("\n\n");
+              bufB = chunks.pop();
+              for (const chunk of chunks) {
+                const line = chunk.trim();
+                if (!line.startsWith("data: ")) continue;
+                let ev;
+                try { ev = JSON.parse(line.slice(6)); } catch { continue; }
+                if (ev.type === "trades") setTradesB(prev => [...prev, ...ev.trades]);
+                if (ev.type === "complete") setSummaryB(ev.summary);
+              }
+            }
+          } catch {}
+          setIsRunningB(false);
+        })();
+      }
+
       const response = await fetch("/api/backtest", {
         method:  "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ strategy: selectedStrategy, underlying, startDate, endDate, expiryType, slippage }),
+        body: JSON.stringify({ strategy: selectedStrategy, underlying, startDate, endDate, expiryType, slippage, slPercent, tpPercent }),
         signal: abort.signal,
       });
 
@@ -595,7 +662,7 @@ function BacktestContent() {
     } finally {
       setIsRunning(false);
     }
-  }, [selectedStrategy, underlying, startDate, endDate, expiryType, slippage, currentUser, isRunning]);
+  }, [selectedStrategy, underlying, startDate, endDate, expiryType, slippage, slPercent, tpPercent, currentUser, isRunning, compareMode, strategyB]);
 
   const isComplete = !!summary;
 
@@ -624,6 +691,21 @@ function BacktestContent() {
         {/* Controls */}
         <div className="glass-card rounded-2xl p-6 mb-8">
           <h3 className="text-white font-semibold mb-4">Configuration</h3>
+          <div className="flex items-center gap-2 mb-4">
+            <button
+              onClick={() => { setCompareMode(v => !v); setTradesB([]); setSummaryB(null); }}
+              className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
+                compareMode
+                  ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
+                  : "bg-white/5 text-slate-400 hover:text-white border border-white/10"
+              }`}
+            >
+              <span>{compareMode ? "✓" : "+"}</span> A/B Compare
+            </button>
+            {compareMode && (
+              <span className="text-xs text-slate-500">Compare two strategies on the same data</span>
+            )}
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
 
             <div className="col-span-2 md:col-span-2">
@@ -638,6 +720,21 @@ function BacktestContent() {
                 ))}
               </select>
             </div>
+
+            {compareMode && (
+              <div className="col-span-2 md:col-span-2">
+                <label className="text-[10px] text-violet-400 uppercase tracking-wider block mb-1">Strategy B (Compare)</label>
+                <select
+                  value={strategyB}
+                  onChange={(e) => setStrategyB(e.target.value)}
+                  className="w-full bg-violet-500/10 border border-violet-500/20 text-violet-200 px-3 py-2.5 rounded-lg text-sm"
+                >
+                  {templates.map((t) => (
+                    <option key={t.key} value={t.key}>{t.name}</option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             <div className="col-span-1">
               <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">Underlying</label>
@@ -715,6 +812,36 @@ function BacktestContent() {
                 max="5"
               />
             </div>
+
+            <div className="col-span-1">
+              <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">
+                Stop Loss (% premium)
+                <span className="ml-1 text-slate-600 normal-case tracking-normal">0=off</span>
+              </label>
+              <input
+                type="number"
+                value={slPercent}
+                onChange={(e) => setSlPercent(Number(e.target.value))}
+                className="w-full bg-white/5 border border-white/10 text-white px-3 py-2.5 rounded-lg text-sm"
+                min="0" max="500" step="10"
+                placeholder="e.g. 100"
+              />
+            </div>
+
+            <div className="col-span-1">
+              <label className="text-[10px] text-slate-500 uppercase tracking-wider block mb-1">
+                Profit Target (% premium)
+                <span className="ml-1 text-slate-600 normal-case tracking-normal">0=off</span>
+              </label>
+              <input
+                type="number"
+                value={tpPercent}
+                onChange={(e) => setTpPercent(Number(e.target.value))}
+                className="w-full bg-white/5 border border-white/10 text-white px-3 py-2.5 rounded-lg text-sm"
+                min="0" max="200" step="10"
+                placeholder="e.g. 50"
+              />
+            </div>
           </div>
 
           {/* Footer row */}
@@ -725,6 +852,13 @@ function BacktestContent() {
               {startDate} → {endDate} ·{" "}
               <span className="text-blue-400">{expiryType} expiry</span> ·{" "}
               {slippage}% slippage
+              {slPercent > 0 && <span className="text-rose-400">· SL {slPercent}%</span>}
+              {tpPercent > 0 && <span className="text-emerald-400">· TP {tpPercent}%</span>}
+              {(slPercent > 0 || tpPercent > 0) && (
+                <span className="text-[10px] text-slate-600 block mt-1">
+                  ⚠ SL/TP applied at expiry prices (theoretical). Intraday triggers coming soon.
+                </span>
+              )}
             </div>
             <button
               onClick={handleRunBacktest}
@@ -930,28 +1064,77 @@ function BacktestContent() {
               </>
             )}
 
+            {/* A/B Comparison summary table */}
+            {compareMode && summaryB && summary && (
+              <div className="glass-card rounded-2xl p-5 mb-8 border border-violet-500/20">
+                <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Strategy Comparison</h3>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="text-[10px] text-slate-500 uppercase tracking-wider">
+                        <th className="text-left pb-2">Metric</th>
+                        <th className="text-right pb-2 text-blue-400">{selectedStrategy.replace(/-/g, " ")}</th>
+                        <th className="text-right pb-2 text-violet-400">{strategyB.replace(/-/g, " ")}</th>
+                        <th className="text-right pb-2">Winner</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-white/5">
+                      {[
+                        { label: "Total P&L", a: summary.totalPnL, b: summaryB.totalPnL, fmt: (v) => `₹${v?.toLocaleString("en-IN")}`, higherBetter: true },
+                        { label: "Win Rate", a: summary.winRate, b: summaryB.winRate, fmt: (v) => `${v}%`, higherBetter: true },
+                        { label: "Expectancy", a: summary.expectancy, b: summaryB.expectancy, fmt: (v) => `₹${v?.toLocaleString("en-IN")}`, higherBetter: true },
+                        { label: "Max Drawdown", a: summary.maxDrawdown, b: summaryB.maxDrawdown, fmt: (v) => `₹${v?.toLocaleString("en-IN")}`, higherBetter: false },
+                        { label: "Avg Win", a: summary.avgWin, b: summaryB.avgWin, fmt: (v) => `₹${v?.toLocaleString("en-IN")}`, higherBetter: true },
+                        { label: "Avg Loss", a: summary.avgLoss, b: summaryB.avgLoss, fmt: (v) => `₹${v?.toLocaleString("en-IN")}`, higherBetter: false },
+                      ].map(({ label, a, b, fmt, higherBetter }) => {
+                        const aWins = higherBetter ? a > b : a < b;
+                        return (
+                          <tr key={label}>
+                            <td className="py-2 text-slate-400">{label}</td>
+                            <td className={`py-2 text-right font-mono font-semibold ${aWins ? "text-blue-400" : "text-slate-400"}`}>{fmt(a)}</td>
+                            <td className={`py-2 text-right font-mono font-semibold ${!aWins ? "text-violet-400" : "text-slate-400"}`}>{fmt(b)}</td>
+                            <td className="py-2 text-right text-xs">{aWins ? <span className="text-blue-400">A ↑</span> : <span className="text-violet-400">B ↑</span>}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             {/* Equity curve — draws live as trades stream in */}
             {trades.length > 1 && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <div className="glass-card rounded-2xl p-4 md:p-6 lg:col-span-2">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">
-                      Cumulative P&amp;L Curve
+                      {compareMode ? "Strategy Comparison — Equity Curves" : "Cumulative P&L Curve"}
                     </h3>
                     {isRunning && (
                       <span className="text-[10px] text-blue-400 animate-pulse font-medium">● streaming</span>
                     )}
                   </div>
                   <ResponsiveContainer width="100%" height={320}>
-                    <LineChart data={trades}>
+                    <LineChart data={comparisonData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
                       <XAxis dataKey="cycle" stroke="#64748B" fontSize={11} minTickGap={30} />
                       <YAxis stroke="#64748B" fontSize={11} tickFormatter={(v) => `₹${(v / 1000).toFixed(0)}K`} />
                       <Tooltip content={<BacktestTooltip />} />
                       <ReferenceLine y={0} stroke="#475569" strokeDasharray="4 4" />
-                      <Line type="monotone" dataKey="cumulativePnl" stroke="#3B82F6" strokeWidth={2}
+                      <Line
+                        type="monotone" dataKey="cumulativePnl" stroke="#3B82F6" strokeWidth={2}
                         dot={false} isAnimationActive={false}
-                        activeDot={{ r: 6, fill: "#3B82F6", stroke: "#000", strokeWidth: 2 }} />
+                        activeDot={{ r: 6, fill: "#3B82F6", stroke: "#000", strokeWidth: 2 }}
+                        name={selectedStrategy.replace(/-/g, " ")}
+                      />
+                      {compareMode && (
+                        <Line
+                          type="monotone" dataKey="cumulativePnlB" stroke="#a855f7" strokeWidth={2}
+                          dot={false} isAnimationActive={false} strokeDasharray="5 3"
+                          name={strategyB.replace(/-/g, " ")}
+                        />
+                      )}
                     </LineChart>
                   </ResponsiveContainer>
                 </div>

@@ -46,6 +46,8 @@ export async function POST(request) {
     endDate,
     expiryType = "Weekly",
     slippage   = 0.5,
+    slPercent  = 0,
+    tpPercent  = 0,
   } = body;
 
   const stream = new ReadableStream({
@@ -166,7 +168,7 @@ export async function POST(request) {
         const result = computeBacktest(
           rows,
           stratLegs,
-          { underlying, slippage: slippageFraction, lotSize },
+          { underlying, slippage: slippageFraction, lotSize, slPercent, tpPercent },
           (partial) => {
             batchBuffer.push(partial.latestTrade);
             const pct = 62 + Math.round((partial.cycle / partial.total) * 33);

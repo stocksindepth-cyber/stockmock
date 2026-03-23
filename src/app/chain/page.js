@@ -51,6 +51,7 @@ function ChainContent() {
   const [liveSpot, setLiveSpot] = useState(null);
   const [wsConnected, setWsConnected] = useState(false);
   const [underlyingSecId, setUnderlyingSecId] = useState(null);
+  const [ivStats, setIvStats] = useState(null);
   // Tracks whether chain REST fetch has completed for current symbol+expiry
   const chainLoadedRef = useRef(false);
   const abortRef = useRef(null);
@@ -128,6 +129,15 @@ function ChainContent() {
     chainLoadedRef.current = false; // reset so EventSource waits for new data
     fetchChain(symbol, expiry, true);
   }, [symbol, expiry, fetchChain]);
+
+  // Fetch IVP/IVR stats from BigQuery
+  useEffect(() => {
+    setIvStats(null);
+    fetch(`/api/chain/iv-stats?underlying=${symbol}`)
+      .then(r => r.json())
+      .then(d => { if (d.ivp !== undefined) setIvStats(d); })
+      .catch(() => {});
+  }, [symbol]);
 
   // REST fallback polling: runs only when WS feed is not connected
   // Keeps chain updating every 15s if WebSocket fails
@@ -292,6 +302,27 @@ function ChainContent() {
             >
               ↻
             </button>
+            {/* IVP / IVR */}
+            {ivStats && (
+              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium ${
+                ivStats.ivp >= 75 ? "bg-red-500/10 border-red-500/20 text-red-300" :
+                ivStats.ivp <= 25 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300" :
+                                    "bg-slate-700/40 border-white/10 text-slate-300"
+              }`}>
+                <span className="text-slate-500 font-normal">IVP</span>
+                <span className="font-mono font-bold">{ivStats.ivp}%</span>
+                <span className="text-slate-600 mx-1">·</span>
+                <span className="text-slate-500 font-normal">IVR</span>
+                <span className="font-mono font-bold">{ivStats.ivr}%</span>
+                <span className={`ml-1 text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${
+                  ivStats.ivp >= 75 ? "bg-red-500/20 text-red-400" :
+                  ivStats.ivp <= 25 ? "bg-emerald-500/20 text-emerald-400" :
+                                      "bg-slate-600/40 text-slate-400"
+                }`}>
+                  {ivStats.ivp >= 75 ? "RICH" : ivStats.ivp <= 25 ? "CHEAP" : "NORMAL"}
+                </span>
+              </div>
+            )}
             {(liveSpot ?? chainData?.spot) && (
               <button
                 onClick={() => atmRowRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
@@ -322,17 +353,62 @@ function ChainContent() {
           </div>
         ) : (
           <div className="glass-card rounded-2xl overflow-hidden">
+            {/* ── Straddle Premium Tracker ─────────────────────────── */}
+            {chainData?.chain && (() => {
+              const spot = liveSpot ?? chainData.spot;
+              if (!spot) return null;
+              const interval = symbol === "BANKNIFTY" ? 100 : symbol === "FINNIFTY" ? 50 : symbol === "MIDCPNIFTY" ? 25 : 50;
+              const atm = Math.round(spot / interval) * interval;
+              const atmRow = chainData.chain.find(r => r.strike === atm);
+              if (!atmRow) return null;
+              const ceLtp = typeof atmRow.ce?.ltp === "number" ? atmRow.ce.ltp : 0;
+              const peLtp = typeof atmRow.pe?.ltp === "number" ? atmRow.pe.ltp : 0;
+              const straddle = ceLtp + peLtp;
+              const upper = spot + straddle;
+              const lower = spot - straddle;
+              return (
+                <div className="mb-4 flex flex-wrap gap-3 items-center px-1">
+                  <div className="flex items-center gap-2 bg-violet-500/10 border border-violet-500/20 rounded-xl px-4 py-2.5">
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">ATM Straddle Premium</p>
+                      <p className="text-xl font-bold font-mono text-violet-300">₹{straddle.toFixed(1)}</p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">
+                        {atm} CE ₹{ceLtp.toFixed(1)} + PE ₹{peLtp.toFixed(1)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 bg-slate-800/60 border border-white/10 rounded-xl px-4 py-2.5">
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Breakeven Range</p>
+                      <p className="text-sm font-mono text-white font-semibold">
+                        {lower.toFixed(0)} <span className="text-slate-500 mx-1">–</span> {upper.toFixed(0)}
+                      </p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">± {straddle.toFixed(0)} pts from spot</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 bg-slate-800/60 border border-white/10 rounded-xl px-4 py-2.5">
+                    <div>
+                      <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Move Needed</p>
+                      <p className="text-sm font-mono text-white font-semibold">
+                        {((straddle / spot) * 100).toFixed(2)}%
+                      </p>
+                      <p className="text-[10px] text-slate-500 mt-0.5">for straddle to break even</p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/10">
-                    <th colSpan={showGreeks ? 8 : 5} className="text-center py-3 bg-emerald-500/10 text-emerald-400 font-semibold text-xs uppercase tracking-wider">
+                    <th colSpan={showGreeks ? 9 : 5} className="text-center py-3 bg-emerald-500/10 text-emerald-400 font-semibold text-xs uppercase tracking-wider">
                       CALLS (CE)
                     </th>
                     <th className="py-3 px-4 bg-blue-500/10 text-blue-400 font-semibold text-xs uppercase tracking-wider">
                       STRIKE
                     </th>
-                    <th colSpan={showGreeks ? 8 : 5} className="text-center py-3 bg-rose-500/10 text-rose-400 font-semibold text-xs uppercase tracking-wider">
+                    <th colSpan={showGreeks ? 9 : 5} className="text-center py-3 bg-rose-500/10 text-rose-400 font-semibold text-xs uppercase tracking-wider">
                       PUTS (PE)
                     </th>
                   </tr>
@@ -347,6 +423,7 @@ function ChainContent() {
                         <th className="py-2 px-3 text-right">Delta</th>
                         <th className="py-2 px-3 text-right">Gamma</th>
                         <th className="py-2 px-3 text-right">Theta</th>
+                        <th className="py-2 px-3 text-right">Vega</th>
                       </>
                     )}
                     <th className="py-2 px-3 text-center font-bold text-blue-400">STRIKE</th>
@@ -360,6 +437,7 @@ function ChainContent() {
                         <th className="py-2 px-3 text-left">Delta</th>
                         <th className="py-2 px-3 text-left">Gamma</th>
                         <th className="py-2 px-3 text-left">Theta</th>
+                        <th className="py-2 px-3 text-left">Vega</th>
                       </>
                     )}
                   </tr>
@@ -372,7 +450,7 @@ function ChainContent() {
                     // Insert live spot line just before the strike that's >= spot
                     const prevRow = chainData.chain[idx - 1];
                     const showSpotMarker = prevRow && spot > prevRow.strike && spot <= row.strike;
-                    const totalCols = showGreeks ? 17 : 11;
+                    const totalCols = showGreeks ? 19 : 11;
                     return (
                       <React.Fragment key={row.strike}>
                         {showSpotMarker && (
@@ -456,6 +534,7 @@ function ChainContent() {
                             <td className="py-2.5 px-3 text-right tabular-nums text-blue-400">{row.ce.delta}</td>
                             <td className="py-2.5 px-3 text-right tabular-nums text-blue-400">{row.ce.gamma}</td>
                             <td className="py-2.5 px-3 text-right tabular-nums text-amber-400">{row.ce.theta}</td>
+                            <td className="py-2.5 px-3 text-right tabular-nums text-violet-400">{row.ce.vega}</td>
                           </>
                         )}
 
@@ -484,6 +563,7 @@ function ChainContent() {
                             <td className="py-2.5 px-3 text-left tabular-nums text-blue-400">{row.pe.delta}</td>
                             <td className="py-2.5 px-3 text-left tabular-nums text-blue-400">{row.pe.gamma}</td>
                             <td className="py-2.5 px-3 text-left tabular-nums text-amber-400">{row.pe.theta}</td>
+                            <td className="py-2.5 px-3 text-left tabular-nums text-violet-400">{row.pe.vega}</td>
                           </>
                         )}
                       </tr>

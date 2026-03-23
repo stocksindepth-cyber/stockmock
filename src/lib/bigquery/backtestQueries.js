@@ -269,7 +269,7 @@ export async function fetchBacktestData({
  * @returns {{ trades: Array, summary: Object, dataSource: "real" }}
  */
 export function computeBacktest(rows, strategyLegs, opts, onCycle = null) {
-  const { underlying, slippage = 0.005, lotSize } = opts;
+  const { underlying, slippage = 0.005, lotSize, slPercent = 0, tpPercent = 0 } = opts;
   const lot = lotSize || LOT_SIZES[underlying] || 50;
   const strikeInterval = STRIKE_INTERVALS[underlying] || 50;
 
@@ -370,6 +370,30 @@ export function computeBacktest(rows, strategyLegs, opts, onCycle = null) {
     // Skip cycles where data is missing for required legs
     if (!hasAllLegs) continue;
 
+    // ── Apply SL/TP ─────────────────────────────────────────────────────────────
+    // netPremium = total premium collected (SELL legs) - premium paid (BUY legs)
+    const netPremium = legsDetail.reduce((sum, l) => {
+      return sum + (l.action === "SELL" ? l.entry * l.qty : -l.entry * l.qty);
+    }, 0);
+
+    let slTpTag = null;
+
+    if (tpPercent > 0 && netPremium > 0) {
+      const tpTarget = netPremium * (tpPercent / 100);
+      if (tradePnL >= tpTarget) {
+        tradePnL = tpTarget;
+        slTpTag = `TP@${tpPercent}%`;
+      }
+    }
+
+    if (slPercent > 0 && netPremium > 0) {
+      const slFloor = -netPremium * (slPercent / 100);
+      if (tradePnL < slFloor) {
+        tradePnL = slFloor;
+        slTpTag = `SL@${slPercent}%`;
+      }
+    }
+
     tradePnL = Math.round(tradePnL);
     cumulativePnL += tradePnL;
 
@@ -398,6 +422,7 @@ export function computeBacktest(rows, strategyLegs, opts, onCycle = null) {
       exitSpot: Math.round(cycle.exit_spot),
       atmStrike: atm,
       legs: legsDetail,
+      slTpTag,
       pnl: tradePnL,
       cumulativePnl: Math.round(cumulativePnL),
     });

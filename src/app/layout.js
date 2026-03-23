@@ -1,15 +1,29 @@
 import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import Script from "next/script";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
+
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#0a0f1e",
+};
 
 export const metadata = {
   title: "OptionsGyani — Free NSE Options Backtesting Tool",
   description: "Free options analytics for NSE traders. Build strategies, backtest on 8+ years of real data, analyze open interest. NIFTY & BANKNIFTY.",
   keywords: "options strategy builder NSE, free option chain analyzer, options backtesting India, nifty weekly expiry strategy, iron condor nifty, short straddle banknifty, india vix options, options simulator with historical data, banknifty options strategy, nifty options tool",
   metadataBase: new URL("https://optionsgyani.com"),
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "OptionsGyani",
+  },
   openGraph: {
     title: "OptionsGyani — Free Options Strategy Builder & Backtesting for NSE",
     description: "Build, backtest, and paper trade options strategies on NIFTY & BANKNIFTY. Real NSE data from 2016. Free.",
@@ -70,6 +84,9 @@ export default function RootLayout({ children }) {
         <Script id="clarity-init" strategy="afterInteractive">
           {`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","vzsdgibu91");`}
         </Script>
+
+        {/* PWA service worker registration */}
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );

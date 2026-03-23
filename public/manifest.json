@@ -1,0 +1,54 @@
+{
+  "name": "OptionsGyani — NSE Options Analytics",
+  "short_name": "OptionsGyani",
+  "description": "India's sharpest options backtesting and analytics platform. Real NSE data, live option chain, strategy simulator.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#0a0f1e",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshot-backtest.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Backtest real NSE options strategies"
+    }
+  ],
+  "categories": ["finance", "business"],
+  "shortcuts": [
+    {
+      "name": "Option Chain",
+      "short_name": "Chain",
+      "url": "/chain",
+      "description": "Live NIFTY & BANKNIFTY option chain"
+    },
+    {
+      "name": "Backtest",
+      "short_name": "Backtest",
+      "url": "/backtest",
+      "description": "Test strategies on real NSE data"
+    },
+    {
+      "name": "Simulator",
+      "short_name": "Simulate",
+      "url": "/simulator",
+      "description": "Replay historical market sessions"
+    }
+  ]
+}

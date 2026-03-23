@@ -60,6 +60,20 @@ function OIAnalysisContent() {
   const [symbol, setSymbol] = useState("NIFTY");
   const [chainData, setChainData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [pcrHistory, setPcrHistory] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    setPcrHistory([]);
+    (async () => {
+      try {
+        const res = await fetch(`/api/chain/pcr-history?underlying=${symbol}&days=30`);
+        const json = await res.json();
+        if (!cancelled && Array.isArray(json.data)) setPcrHistory(json.data);
+      } catch {}
+    })();
+    return () => { cancelled = true; };
+  }, [symbol]);
 
   useEffect(() => {
     let cancelled = false;
@@ -231,6 +245,59 @@ function OIAnalysisContent() {
             </BarChart>
           </ResponsiveContainer>
         </div>
+
+        {/* PCR History Chart */}
+        {pcrHistory.length > 1 && (
+          <div className="glass-card rounded-2xl p-4 md:p-6 mt-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-300 uppercase tracking-wider">PCR Trend — Last 30 Days</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Put-Call Ratio by Open Interest · {`>`}1 = more put OI (bearish hedge) · {`<`}1 = more call OI (bullish)
+                </p>
+              </div>
+              <div className="text-right">
+                <p className="text-xs text-slate-500">Latest</p>
+                <p className={`text-lg font-bold font-mono ${
+                  pcrHistory[pcrHistory.length-1]?.pcr > 1.3 ? "text-rose-400" :
+                  pcrHistory[pcrHistory.length-1]?.pcr < 0.7 ? "text-emerald-400" : "text-white"
+                }`}>
+                  {pcrHistory[pcrHistory.length-1]?.pcr?.toFixed(2)}
+                </p>
+              </div>
+            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart data={pcrHistory} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis
+                  dataKey="date"
+                  stroke="#64748B"
+                  fontSize={10}
+                  tickFormatter={(d) => d?.slice(5)}
+                  minTickGap={20}
+                />
+                <YAxis stroke="#64748B" fontSize={10} domain={[0.5, 2]} />
+                <Tooltip
+                  formatter={(v) => [v?.toFixed(3), "PCR"]}
+                  labelFormatter={(d) => d}
+                  contentStyle={{ background: "#0f172a", border: "1px solid #1e293b", borderRadius: 8, fontSize: 11 }}
+                />
+                <ReferenceLine y={1} stroke="#64748b" strokeDasharray="4 2" label={{ value: "Neutral", fill: "#64748b", fontSize: 9 }} />
+                <ReferenceLine y={1.3} stroke="#f87171" strokeDasharray="2 2" label={{ value: "Bearish", fill: "#f87171", fontSize: 9 }} />
+                <ReferenceLine y={0.7} stroke="#34d399" strokeDasharray="2 2" label={{ value: "Bullish", fill: "#34d399", fontSize: 9 }} />
+                <Line
+                  type="monotone"
+                  dataKey="pcr"
+                  stroke="#60a5fa"
+                  strokeWidth={2}
+                  dot={false}
+                  isAnimationActive={false}
+                  activeDot={{ r: 4, fill: "#60a5fa" }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </main>
     </div>
   );
