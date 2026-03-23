@@ -16,6 +16,7 @@ const SUBJECTS = {
   welcomePremium:    "You're now OptionsGyani Pro — Let's make it count 🚀",
   invoice:           'Your OptionsGyani Invoice — Payment Confirmed ✓',
   nudge:             (props) => `You missed something on OptionsGyani, ${props.name || 'trader'}`,
+  alert:             (props) => `🔔 ${props.symbol || 'NIFTY'} ${(props.metric || 'IVP').toUpperCase()} Alert — ${props.condition === 'above' ? 'crossed above' : 'dropped below'} ${props.threshold}`,
   // marketUpdate uses the subject prop passed in directly
 };
 
@@ -27,6 +28,7 @@ const TEMPLATE_LOADERS = {
   invoice:           () => import('./templates/InvoiceEmail.jsx'),
   marketUpdate:      () => import('./templates/MarketUpdateEmail.jsx'),
   nudge:             () => import('./templates/NudgeEmail.jsx'),
+  alert:             () => import('./templates/AlertEmail.jsx'),
 };
 
 /**
@@ -46,6 +48,8 @@ export async function sendEmail(type, to, props = {}) {
   let subject;
   if (type === 'marketUpdate') {
     subject = props.subject || 'OptionsGyani Market Update';
+  } else if (type === 'alert') {
+    subject = typeof SUBJECTS.alert === 'function' ? SUBJECTS.alert(props) : SUBJECTS.alert;
   } else if (typeof SUBJECTS[type] === 'function') {
     subject = SUBJECTS[type](props);
   } else {
