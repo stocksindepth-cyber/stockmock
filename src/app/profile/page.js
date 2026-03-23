@@ -154,6 +154,9 @@ function ProfileContent() {
                     <Check className="w-5 h-5 text-emerald-400" />
                     Renews: {userProfile?.subscriptionExpiry ? new Date(userProfile.subscriptionExpiry).toLocaleDateString() : 'Auto-renewing'}
                   </div>
+                  <Link href="/billing" className="inline-flex items-center gap-1.5 text-sm text-blue-400 hover:text-blue-300 transition-colors mt-1">
+                    View billing history & invoices <ArrowRight className="w-3.5 h-3.5" />
+                  </Link>
                 </div>
               ) : (
                 <p className="text-slate-400 text-sm leading-relaxed">
