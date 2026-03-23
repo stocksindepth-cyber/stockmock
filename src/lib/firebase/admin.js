@@ -11,6 +11,7 @@
 // never taken from serviceAccount.project_id, to avoid cross-project Firestore errors.
 // ─────────────────────────────────────────────────────────────────────────────
 import admin from "firebase-admin";
+import { getFirestore } from "firebase-admin/firestore";
 
 // Always use the Firebase project ID, regardless of which SA JSON we load.
 const FIREBASE_PROJECT_ID =
@@ -57,5 +58,8 @@ export function getAdminApp() {
 }
 
 export function getAdminFirestore() {
-  return admin.firestore(getAdminApp());
+  // Use the named "optionsindepth" database (asia-south1) — same as client SDK.
+  // admin.firestore() with no databaseId defaults to "(default)" in nam5 (US).
+  // getFirestore(app, databaseId) requires firebase-admin >= 11.5.
+  return getFirestore(getAdminApp(), process.env.FIRESTORE_DATABASE_ID || "optionsindepth");
 }
