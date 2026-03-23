@@ -58,8 +58,28 @@ export async function GET(request) {
       return NextResponse.json({ configured: false });
     }
 
-    const { updatedAt } = doc.data();
-    return NextResponse.json({ configured: true, updatedAt });
+    const { accessToken, updatedAt } = doc.data();
+
+    // Show first/last 6 chars of the stored token so you can verify it matches Dhan portal
+    const preview = accessToken
+      ? `${accessToken.slice(0, 6)}...${accessToken.slice(-6)} (${accessToken.length} chars)`
+      : "empty";
+
+    // Check whether env var override is active (overrides Firestore)
+    const envTokenSet  = !!process.env.DHAN_ACCESS_TOKEN;
+    const envPreview   = envTokenSet
+      ? `${process.env.DHAN_ACCESS_TOKEN.slice(0, 6)}...${process.env.DHAN_ACCESS_TOKEN.slice(-6)} (${process.env.DHAN_ACCESS_TOKEN.length} chars)`
+      : null;
+
+    return NextResponse.json({
+      configured:   true,
+      updatedAt,
+      tokenPreview: preview,
+      clientId:     process.env.NEXT_PUBLIC_DHAN_CLIENT_ID || "NOT SET",
+      envTokenOverride: envTokenSet
+        ? { active: true, preview: envPreview, warning: "DHAN_ACCESS_TOKEN env var is overriding Firestore — delete it from Vercel to use Firestore token" }
+        : { active: false },
+    });
   } catch (err) {
     console.error("[dhan-token GET]", err);
     return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
