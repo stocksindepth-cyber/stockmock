@@ -37,6 +37,12 @@ export function getBigQueryClient() {
     } catch {
       throw new Error("BIGQUERY_CREDENTIALS_JSON is not valid JSON");
     }
+    // Vercel stores env vars as plain strings — escaped \n in the private key
+    // become literal backslash-n, which breaks OpenSSL's key parser (ERR_OSSL_UNSUPPORTED).
+    // Replace any remaining literal \n sequences with real newlines.
+    if (credentials.private_key) {
+      credentials.private_key = credentials.private_key.replace(/\\n/g, "\n");
+    }
     _client = new BigQuery({ projectId, credentials });
   } else {
     // Local dev: uses GOOGLE_APPLICATION_CREDENTIALS path or ADC
