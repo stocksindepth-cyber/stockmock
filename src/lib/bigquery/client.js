@@ -231,6 +231,9 @@ export async function runQuery(sql, params = {}) {
     }
   }
 
-  const [rows] = await bq.query({ query: sql, params: queryParams, types, location: "asia-south1" });
+  const queryOpts = { query: sql, params: queryParams, types };
+  const location  = process.env.BIGQUERY_LOCATION;
+  if (location) queryOpts.location = location;
+  const [rows] = await bq.query(queryOpts);
   return rows;
 }
