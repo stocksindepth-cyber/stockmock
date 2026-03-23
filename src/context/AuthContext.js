@@ -43,6 +43,15 @@ export function AuthProvider({ children }) {
             setUserProfile(initialProfile);
             // Log signup event
             await logUserActivity(user.uid, "ACCOUNT_CREATED", { initialPlan: "free" });
+            // Send welcome email (fire-and-forget — don't block auth flow)
+            fetch("/api/email/welcome", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                email: user.email,
+                name: user.displayName || "",
+              }),
+            }).catch(() => {/* silent — email failure never blocks login */});
           }
         } catch (error) {
           if (error.code !== 'permission-denied') {

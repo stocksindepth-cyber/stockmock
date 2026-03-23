@@ -46,13 +46,19 @@ export async function GET(request) {
     // Fetch daily ATM IV for the last `lookback` days.
     // ATM IV = average of CE IV and PE IV for the strike nearest to that day's spot close.
     // We use the nearest expiry on each day to get consistent near-month data.
+    // Anchor to MAX available trade_date so this works even when dataset lags behind today.
     const sql = `
       WITH
-      spot_daily AS (
-        SELECT trade_date, close AS spot
+      latest AS (
+        SELECT MAX(trade_date) AS max_date
         FROM \`${PROJECT_ID}.${DATASET}.spot_prices\`
         WHERE underlying = @underlying
-          AND trade_date >= DATE_SUB(CURRENT_DATE(), INTERVAL @lookback DAY)
+      ),
+      spot_daily AS (
+        SELECT s.trade_date, s.close AS spot
+        FROM \`${PROJECT_ID}.${DATASET}.spot_prices\` s, latest
+        WHERE s.underlying = @underlying
+          AND s.trade_date >= DATE_SUB(latest.max_date, INTERVAL @lookback DAY)
       ),
       nearest_expiry AS (
         SELECT
@@ -105,7 +111,12 @@ export async function GET(request) {
       }, { status: 200 });
     }
 
-    const ivValues = rows.map(r => parseFloat(r.avg_iv));
+    // BigQuery stores iv as a decimal fraction (e.g. 0.36 = 36%).
+    // Normalise: if the median value is < 2 it's stored as a fraction → multiply by 100.
+    const rawValues = rows.map(r => parseFloat(r.avg_iv));
+    const median = rawValues.slice().sort((a,b)=>a-b)[Math.floor(rawValues.length/2)];
+    const scale  = median < 2 ? 100 : 1;
+    const ivValues = rawValues.map(v => v * scale);
     const currentIV = ivValues[ivValues.length - 1];
     const iv52wHigh = Math.max(...ivValues);
     const iv52wLow  = Math.min(...ivValues);

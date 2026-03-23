@@ -18,6 +18,8 @@
   "dependencies": {
     "@google-cloud/bigquery": "^8.1.1",
     "@next/third-parties": "^16.2.1",
+    "@react-email/components": "^1.0.10",
+    "@react-email/render": "^2.0.4",
     "clsx": "^2.1.1",
     "firebase": "^12.11.0",
     "firebase-admin": "^13.7.0",
@@ -27,6 +29,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "recharts": "^3.8.0",
+    "resend": "^6.9.4",
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {

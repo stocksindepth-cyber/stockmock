@@ -20,17 +20,24 @@ export async function GET(request) {
   }
 
   try {
+    // Anchor to the latest available date in the table (not CURRENT_DATE which may
+    // be beyond the dataset's coverage) so this always returns data.
     const sql = `
-      WITH daily_oi AS (
-        SELECT
-          trade_date,
-          SUM(CASE WHEN option_type = 'PE' THEN oi ELSE 0 END) AS put_oi,
-          SUM(CASE WHEN option_type = 'CE' THEN oi ELSE 0 END) AS call_oi
+      WITH latest AS (
+        SELECT MAX(trade_date) AS max_date
         FROM \`${PROJECT_ID}.${DATASET}.options_eod\`
         WHERE underlying = @underlying
-          AND trade_date >= DATE_SUB(CURRENT_DATE(), INTERVAL @days DAY)
-          AND oi > 0
-        GROUP BY trade_date
+      ),
+      daily_oi AS (
+        SELECT
+          o.trade_date,
+          SUM(CASE WHEN o.option_type = 'PE' THEN o.oi ELSE 0 END) AS put_oi,
+          SUM(CASE WHEN o.option_type = 'CE' THEN o.oi ELSE 0 END) AS call_oi
+        FROM \`${PROJECT_ID}.${DATASET}.options_eod\` o, latest
+        WHERE o.underlying = @underlying
+          AND o.trade_date >= DATE_SUB(latest.max_date, INTERVAL @days DAY)
+          AND o.oi > 0
+        GROUP BY o.trade_date
       )
       SELECT
         trade_date,

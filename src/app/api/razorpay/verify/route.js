@@ -71,6 +71,42 @@ export async function POST(request) {
       timestamp: admin.firestore.FieldValue.serverTimestamp(),
     });
 
+    // ── 4. Send welcome premium + invoice emails ──────────────────────────────
+    try {
+      const { sendEmail } = await import('@/lib/email/sender');
+      // Get user details from Firestore
+      const userDoc = await db.doc(`users/${userId}`).get();
+      const userData = userDoc.data();
+
+      if (userData?.email) {
+        // Welcome premium email
+        await sendEmail('welcomePremium', userData.email, {
+          name: userData.displayName || userData.email.split('@')[0],
+          email: userData.email,
+          plan: planId,
+          expiryDate: expiryDate.toISOString().split('T')[0],
+          features: planId === 'pro'
+            ? ['Unlimited backtests', 'All 12 strategies', 'A/B comparison', 'SL/TP controls', 'Priority support']
+            : ['Everything in Pro', 'API access', 'Custom strategies', 'White-glove support'],
+        });
+
+        // Invoice email
+        await sendEmail('invoice', userData.email, {
+          name: userData.displayName || userData.email.split('@')[0],
+          email: userData.email,
+          invoiceId: `OG-${Date.now()}`,
+          plan: planId,
+          amount: days === 365 ? (planId === 'pro' ? 4999 : 9999) : (planId === 'pro' ? 499 : 999),
+          paymentId: razorpay_payment_id,
+          paymentDate: new Date().toISOString().split('T')[0],
+          expiryDate: expiryDate.toISOString().split('T')[0],
+        });
+      }
+    } catch (emailErr) {
+      console.error('[Email] Failed to send post-payment emails:', emailErr.message);
+      // Don't fail the payment verification for email errors
+    }
+
     console.log(`[Razorpay Verify] ✓ User ${userId} upgraded to ${planId} (${days} days). Payment: ${razorpay_payment_id}`);
 
     return NextResponse.json({
