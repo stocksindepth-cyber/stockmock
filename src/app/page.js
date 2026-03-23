@@ -196,6 +196,26 @@ export default function Home() {
         </div>
       </section>
 
+      {/* ── Founder trust strip ── */}
+      <section className="relative z-10 py-8 px-6">
+        <div className="max-w-4xl mx-auto">
+          <Link href="/about" className="group flex flex-col sm:flex-row items-center gap-4 p-5 rounded-2xl bg-white/[0.03] border border-white/[0.07] hover:border-white/[0.12] hover:bg-white/[0.05] transition-all duration-200">
+            <div className="shrink-0 w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-lg font-bold shadow-lg shadow-blue-500/20 border border-white/10">
+              R
+            </div>
+            <div className="text-center sm:text-left flex-1">
+              <p className="text-white text-sm font-semibold">Built by a trader, not a marketer</p>
+              <p className="text-slate-400 text-xs mt-0.5">
+                Rahul Dubey — 5 years trading NIFTY &amp; BANKNIFTY F&amp;O · ex-Morgan Stanley · Engineering Manager at Intuit, WalmartLabs, IBM Labs
+              </p>
+            </div>
+            <span className="text-xs text-slate-500 group-hover:text-slate-300 transition-colors whitespace-nowrap shrink-0">
+              About the founder →
+            </span>
+          </Link>
+        </div>
+      </section>
+
       {/* ── Features section ── */}
       <section className="relative py-24 bg-[#0a0f1c] z-10">
         <div className="max-w-7xl mx-auto px-6">

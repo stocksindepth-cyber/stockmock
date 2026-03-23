@@ -27,6 +27,10 @@ import {
 } from "@/lib/data/dhanFeed";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 300; // opt-in to Vercel Pro max execution time
+
+const GRACEFUL_CLOSE_MS = 250_000; // self-close at 250s — before Vercel's 300s hard kill
+const HEARTBEAT_MS      =  25_000; // SSE comment ping every 25s to keep connection alive
 
 // ── Credentials helper (mirrors dhanApi.js token logic) ──────────────────────
 async function getCredentials() {
@@ -89,8 +93,20 @@ export async function GET(request) {
     return encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);
   }
 
+  let heartbeatTimer = null;
+  let gracefulTimer  = null;
+
+  function cleanup() {
+    if (listenerId !== null)  { unsubscribe(listenerId); listenerId = null; }
+    if (heartbeatTimer !== null) { clearInterval(heartbeatTimer); heartbeatTimer = null; }
+    if (gracefulTimer  !== null) { clearTimeout(gracefulTimer);   gracefulTimer  = null; }
+  }
+
   const stream = new ReadableStream({
     start(controller) {
+      // Tell browser to reconnect after 3s if connection drops
+      controller.enqueue(encoder.encode(`retry: 3000\n\n`));
+
       // Send initial snapshot immediately
       controller.enqueue(sse("snapshot", {
         chain:           chainData.chain,
@@ -101,6 +117,25 @@ export async function GET(request) {
 
       // Send WS connection status
       controller.enqueue(sse("status", { connected: isConnected() }));
+
+      // Heartbeat: SSE comment every 25s — prevents proxy/Vercel idle timeout
+      heartbeatTimer = setInterval(() => {
+        try {
+          controller.enqueue(encoder.encode(`: ping\n\n`));
+        } catch {
+          cleanup();
+        }
+      }, HEARTBEAT_MS);
+
+      // Graceful self-close at 250s — send reconnect hint then close cleanly
+      // The browser will auto-reconnect after the retry delay above
+      gracefulTimer = setTimeout(() => {
+        try {
+          controller.enqueue(sse("status", { connected: false, reconnecting: true }));
+          controller.close();
+        } catch { /* already closed */ }
+        cleanup();
+      }, GRACEFUL_CLOSE_MS);
 
       // Register tick listener
       listenerId = subscribe(instruments, (tick) => {
@@ -113,14 +148,14 @@ export async function GET(request) {
             ...(tick.volume   !== undefined && { volume:   tick.volume }),
           }));
         } catch {
-          // Controller closed — client disconnected
+          cleanup();
         }
       });
     },
 
     cancel() {
-      // Client disconnected — clean up listener
-      if (listenerId !== null) unsubscribe(listenerId);
+      // Client disconnected — clean up everything
+      cleanup();
     },
   });
 

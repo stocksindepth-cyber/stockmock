@@ -36,12 +36,14 @@ export function ArticleMeta({ readTime, lastUpdated, author = "OptionsGyani Rese
 export function AuthorBox() {
   return (
     <div className="flex items-start gap-4 p-4 rounded-xl bg-white/[0.03] border border-white/[0.07] mb-8">
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-600 to-violet-700 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">OG</div>
+      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 border border-white/10">
+        R
+      </div>
       <div>
-        <p className="text-white font-semibold text-sm">OptionsGyani Research Team</p>
+        <p className="text-white font-semibold text-sm">Rahul Dubey <span className="text-slate-500 font-normal">· Founder, OptionsGyani</span></p>
         <p className="text-slate-400 text-xs leading-relaxed mt-1">
-          Our research team comprises active NSE F&O traders with combined experience of 15+ years. We test every broker we review — opening real accounts, executing real trades, and testing APIs. We have a referral partnership with Dhan; all opinions are our own.{" "}
-          <Link href="/about" className="text-indigo-400 hover:text-indigo-300">About us →</Link>
+          5-year active F&amp;O trader (NIFTY &amp; BANKNIFTY) · Engineering Manager · ex-Morgan Stanley, Intuit, WalmartLabs, IBM Labs. Every broker in this guide has been personally evaluated — real accounts, real trades, real API testing. We have a referral partnership with Dhan; all opinions are our own.{" "}
+          <Link href="/about" className="text-indigo-400 hover:text-indigo-300">About the founder →</Link>
         </p>
       </div>
     </div>

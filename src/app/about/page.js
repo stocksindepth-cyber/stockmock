@@ -1,10 +1,10 @@
-import { Target, Database, TrendingUp, Shield, Zap, Users } from "lucide-react";
+import { Target, Database, TrendingUp, Shield, Zap, Briefcase, BarChart2, Code2, Building2 } from "lucide-react";
 import Link from "next/link";
 
 export const metadata = {
   alternates: { canonical: "https://optionsgyani.com/about" },
-  title: "About Us | OptionsGyani",
-  description: "OptionsGyani is India's free options analytics platform built for retail derivatives traders. Learn about our mission, data sources, and team.",
+  title: "About OptionsGyani — Built by a Trader, Engineered for Scale",
+  description: "OptionsGyani was built by a 5-year F&O trader and Engineering Manager with experience at Morgan Stanley, Intuit, WalmartLabs, and IBM Labs. Real data, serious tools, no fluff.",
 };
 
 const VALUES = [
@@ -30,6 +30,14 @@ const VALUES = [
   },
 ];
 
+const COMPANIES = [
+  { name: "Morgan Stanley", role: "Financial Systems & Trading", color: "text-blue-400",   bg: "bg-blue-500/10",   border: "border-blue-500/20"   },
+  { name: "Intuit",         role: "Engineering Manager",        color: "text-green-400",  bg: "bg-green-500/10",  border: "border-green-500/20"  },
+  { name: "WalmartLabs",    role: "Engineering Manager",        color: "text-yellow-400", bg: "bg-yellow-500/10", border: "border-yellow-500/20" },
+  { name: "IBM Labs",       role: "Software Engineer",          color: "text-indigo-400", bg: "bg-indigo-500/10", border: "border-indigo-500/20" },
+  { name: "SAP Labs",       role: "Software Engineer",          color: "text-slate-300",  bg: "bg-slate-500/10",  border: "border-slate-500/20"  },
+];
+
 export default function AboutPage() {
   return (
     <div className="min-h-screen bg-[#080C16] pt-24 pb-20 px-4">
@@ -44,8 +52,79 @@ export default function AboutPage() {
           </div>
           <h1 className="text-4xl font-extrabold text-white mb-4 tracking-tight">About OptionsGyani</h1>
           <p className="text-slate-400 text-lg leading-relaxed">
-            India's free options analytics and backtesting platform — built by traders, for traders.
+            India&apos;s free options analytics and backtesting platform — built by a trader who got tired of paying ₹2,500/month for tools that didn&apos;t work.
           </p>
+        </div>
+
+        {/* ── Founder Section ────────────────────────────────────────────────── */}
+        <div className="bg-gradient-to-br from-slate-900/80 to-[#0C1221] border border-slate-700/50 rounded-2xl p-7 mb-10">
+          <div className="flex items-start gap-5">
+            {/* Avatar */}
+            <div className="shrink-0 w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center text-white text-2xl font-bold shadow-lg shadow-blue-500/20 border border-white/10">
+              R
+            </div>
+            <div className="flex-1 min-w-0">
+              <div className="flex flex-wrap items-center gap-2 mb-1">
+                <h2 className="text-xl font-bold text-white">Rahul Dubey</h2>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 uppercase tracking-wider">
+                  Founder
+                </span>
+              </div>
+              <p className="text-slate-400 text-sm mb-4">
+                Engineering Manager · 5-Year F&amp;O Trader · ex-Morgan Stanley, Intuit, WalmartLabs, IBM Labs, SAP Labs
+              </p>
+              <p className="text-slate-300 text-sm leading-relaxed mb-3">
+                I spent 5 years actively trading NIFTY and BANKNIFTY options — Iron Condors, Short Straddles, spreads — and hit the same wall every serious retail trader eventually hits: the data is expensive, the tools are mediocre, and the good infrastructure is locked inside institutions.
+              </p>
+              <p className="text-slate-300 text-sm leading-relaxed mb-3">
+                My background is in large-scale engineering — financial systems at Morgan Stanley, product infrastructure at Intuit and WalmartLabs, research systems at IBM Labs and SAP Labs. I know how to build things that scale and handle real data correctly. So I built OptionsGyani the way I always wished the tools existed: real NSE Bhavcopy data, proper Black-Scholes IV computation, and a backtesting engine that doesn&apos;t lie to you with synthetic prices.
+              </p>
+              <p className="text-slate-400 text-sm leading-relaxed italic border-l-2 border-indigo-500/40 pl-3">
+                &quot;Every feature on this platform is something I personally needed as a trader and couldn&apos;t find anywhere at a reasonable price. So I built it.&quot;
+              </p>
+            </div>
+          </div>
+
+          {/* Company badges */}
+          <div className="mt-6 pt-5 border-t border-slate-700/50">
+            <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-3">Experience from</p>
+            <div className="flex flex-wrap gap-2">
+              {COMPANIES.map((c) => (
+                <div
+                  key={c.name}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${c.bg} border ${c.border} ${c.color}`}
+                >
+                  <Building2 className="w-3 h-3" />
+                  {c.name}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 3 credential pills */}
+          <div className="mt-5 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              <BarChart2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div>
+                <p className="text-white text-xs font-semibold">5 Years Trading</p>
+                <p className="text-slate-500 text-[11px]">NIFTY &amp; BANKNIFTY F&amp;O</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              <Code2 className="w-4 h-4 text-blue-400 shrink-0" />
+              <div>
+                <p className="text-white text-xs font-semibold">Engineering Manager</p>
+                <p className="text-slate-500 text-[11px]">Fintech &amp; enterprise scale</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
+              <Briefcase className="w-4 h-4 text-amber-400 shrink-0" />
+              <div>
+                <p className="text-white text-xs font-semibold">ex-Morgan Stanley</p>
+                <p className="text-slate-500 text-[11px]">Financial systems &amp; trading</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Mission */}
@@ -53,11 +132,11 @@ export default function AboutPage() {
           <h2 className="text-xl font-bold text-white mb-3">Our Mission</h2>
           <p className="text-slate-300 leading-relaxed mb-4">
             Indian retail options traders are some of the most active in the world. Yet the tools available to them are either
-            too expensive (₹2,000+/month), too complex (requires coding), or use synthetic data that doesn't reflect what
+            too expensive (₹2,000+/month), too complex (requires coding), or use synthetic data that doesn&apos;t reflect what
             actually happened in the market.
           </p>
           <p className="text-slate-300 leading-relaxed mb-4">
-            OptionsGyani was built to fix that. We ingest NSE's official Bhavcopy data every evening after market close,
+            OptionsGyani was built to fix that. We ingest NSE&apos;s official Bhavcopy data every evening after market close,
             compute implied volatility using the Black-Scholes model, and store it in a high-performance database —
             so you can backtest any options strategy on real historical prices within seconds.
           </p>
