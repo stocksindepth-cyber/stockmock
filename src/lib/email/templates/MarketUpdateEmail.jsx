@@ -14,280 +14,44 @@ import {
   Preview,
 } from "@react-email/components";
 
-const styles = {
-  body: {
-    backgroundColor: "#0f172a",
-    margin: 0,
-    padding: 0,
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  },
-  container: {
-    maxWidth: "600px",
-    margin: "0 auto",
-    backgroundColor: "#1e293b",
-    borderRadius: "12px",
-    overflow: "hidden",
-  },
-  header: {
-    backgroundColor: "#0f172a",
-    padding: "24px 32px",
-    borderBottom: "1px solid #334155",
-  },
-  logoRow: {
-    verticalAlign: "middle",
-  },
-  brandName: {
-    display: "inline-block",
-    verticalAlign: "middle",
-    color: "#ffffff",
-    fontSize: "20px",
-    fontWeight: "bold",
-    margin: "0 0 0 10px",
-  },
-  liveBadge: {
-    backgroundColor: "#064e3b",
-    border: "1px solid #10b981",
-    borderRadius: "6px",
-    padding: "3px 10px",
-    display: "inline-block",
-    margin: "0 0 0 12px",
-    verticalAlign: "middle",
-  },
-  liveBadgeText: {
-    color: "#10b981",
-    fontSize: "11px",
-    fontWeight: "bold",
-    margin: 0,
-    letterSpacing: "0.5px",
-  },
-  heroBanner: {
-    backgroundColor: "#0f172a",
-    padding: "28px 32px 20px",
-    borderBottom: "1px solid #1e3a2e",
-  },
-  heroTitle: {
-    color: "#ffffff",
-    fontSize: "22px",
-    fontWeight: "bold",
-    margin: "0 0 4px",
-  },
-  heroDate: {
-    color: "#64748b",
-    fontSize: "13px",
-    margin: 0,
-  },
-  statCardsSection: {
-    padding: "24px 32px 16px",
-  },
-  statCardsTitle: {
-    color: "#94a3b8",
-    fontSize: "11px",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: "1px",
-    margin: "0 0 14px",
-  },
-  statCardsRow: {
-    width: "100%",
-  },
-  statCardLeft: {
-    width: "48%",
-    verticalAlign: "top",
-    paddingRight: "8px",
-  },
-  statCardRight: {
-    width: "48%",
-    verticalAlign: "top",
-    paddingLeft: "8px",
-  },
-  statCard: {
-    backgroundColor: "#0f172a",
-    borderRadius: "10px",
-    border: "1px solid #334155",
-    padding: "16px",
-  },
-  statCardIndex: {
-    color: "#94a3b8",
-    fontSize: "11px",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
-    margin: "0 0 8px",
-  },
-  statCardValue: {
-    color: "#ffffff",
-    fontSize: "22px",
-    fontWeight: "bold",
-    margin: "0 0 4px",
-    lineHeight: "1.2",
-  },
-  statChangeGreen: {
-    color: "#10b981",
-    fontSize: "13px",
-    fontWeight: "bold",
-    margin: 0,
-  },
-  statChangeRed: {
-    color: "#ef4444",
-    fontSize: "13px",
-    fontWeight: "bold",
-    margin: 0,
-  },
-  ivSection: {
-    padding: "0 32px 24px",
-  },
-  ivRow: {
-    width: "100%",
-  },
-  ivCellLeft: {
-    width: "48%",
-    verticalAlign: "top",
-    paddingRight: "8px",
-  },
-  ivCellRight: {
-    width: "48%",
-    verticalAlign: "top",
-    paddingLeft: "8px",
-  },
-  ivCard: {
-    backgroundColor: "#0f172a",
-    borderRadius: "10px",
-    border: "1px solid #334155",
-    padding: "16px",
-  },
-  ivLabel: {
-    color: "#64748b",
-    fontSize: "11px",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
-    margin: "0 0 6px",
-  },
-  ivValue: {
-    color: "#06b6d4",
-    fontSize: "20px",
-    fontWeight: "bold",
-    margin: "0 0 2px",
-  },
-  ivSubtext: {
-    color: "#94a3b8",
-    fontSize: "11px",
-    margin: 0,
-  },
-  straddleValue: {
-    color: "#f59e0b",
-    fontSize: "20px",
-    fontWeight: "bold",
-    margin: "0 0 2px",
-  },
-  aiInsightSection: {
-    margin: "0 32px 24px",
-  },
-  aiInsightCard: {
-    backgroundColor: "#0d1f3c",
-    borderLeft: "4px solid #06b6d4",
-    borderRadius: "0 10px 10px 0",
-    padding: "20px 24px",
-  },
-  aiInsightLabel: {
-    color: "#06b6d4",
-    fontSize: "11px",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: "1px",
-    margin: "0 0 10px",
-  },
-  aiInsightText: {
-    color: "#cbd5e1",
-    fontSize: "14px",
-    margin: 0,
-    lineHeight: "1.7",
-    fontStyle: "italic",
-  },
-  topTradeSection: {
-    margin: "0 32px 28px",
-  },
-  topTradeSectionTitle: {
-    color: "#ffffff",
-    fontSize: "16px",
-    fontWeight: "bold",
-    margin: "0 0 12px",
-  },
-  topTradeCard: {
-    backgroundColor: "#0f172a",
-    borderRadius: "10px",
-    border: "1px solid #334155",
-    padding: "20px 24px",
-  },
-  topTradeStrategy: {
-    color: "#f59e0b",
-    fontSize: "16px",
-    fontWeight: "bold",
-    margin: "0 0 8px",
-  },
-  topTradeDetail: {
-    color: "#94a3b8",
-    fontSize: "13px",
-    margin: "0 0 6px",
-    lineHeight: "1.5",
-  },
-  topTradeHighlight: {
-    color: "#10b981",
-    fontWeight: "bold",
-  },
-  ctaSection: {
-    padding: "4px 32px 36px",
-    textAlign: "center",
-  },
-  ctaButton: {
-    backgroundColor: "#06b6d4",
-    color: "#ffffff",
-    borderRadius: "8px",
-    padding: "12px 32px",
-    fontSize: "15px",
-    fontWeight: "bold",
-    textDecoration: "none",
-    display: "inline-block",
-  },
-  divider: {
-    borderColor: "#334155",
-    margin: "0",
-  },
-  footer: {
-    padding: "24px 32px",
-    textAlign: "center",
-    backgroundColor: "#0f172a",
-  },
-  footerText: {
-    color: "#64748b",
-    fontSize: "12px",
-    margin: "0 0 6px",
-    lineHeight: "1.5",
-  },
-  footerLink: {
-    color: "#06b6d4",
-    textDecoration: "none",
-  },
-  unsubscribeText: {
-    color: "#475569",
-    fontSize: "11px",
-    margin: "8px 0 0",
-  },
-};
-
 function getChangeStyle(change) {
-  if (change === undefined || change === null) return styles.statChangeGreen;
-  const val = parseFloat(String(change).replace("%", ""));
-  return val >= 0 ? styles.statChangeGreen : styles.statChangeRed;
+  const val = parseFloat(String(change || "0").replace(/[%,]/g, ""));
+  return val >= 0 ? "#22c55e" : "#ef4444";
 }
 
 function formatChange(change) {
-  if (change === undefined || change === null) return "—";
-  const str = String(change);
-  const val = parseFloat(str.replace("%", ""));
+  if (change === undefined || change === null || change === "") return "—";
+  // If already formatted string like "-0.3%" or "+0.8%", display as-is with arrow
+  const str = String(change).trim();
+  const val = parseFloat(str.replace(/[%,+]/g, ""));
+  if (isNaN(val)) return str; // pass through whatever was given
   const prefix = val >= 0 ? "▲" : "▼";
-  const absStr = Math.abs(val).toFixed(2);
-  return `${prefix} ${absStr}%`;
+  const abs = Math.abs(val);
+  // If original already had 1 decimal place, keep it; else show 2
+  const decimals = str.includes(".") ? str.split(".")[1].replace("%","").length : 2;
+  return `${prefix} ${abs.toFixed(Math.min(decimals, 2))}%`;
+}
+
+// Safely format a spot price string that may already contain commas (e.g. "22,512")
+function formatSpot(spot) {
+  if (!spot && spot !== 0) return "—";
+  const clean = String(spot).replace(/,/g, "");
+  const num = Number(clean);
+  return isNaN(num) ? String(spot) : num.toLocaleString("en-IN");
+}
+
+function getIVPColor(ivp) {
+  const val = parseFloat(String(ivp || "50"));
+  if (val >= 75) return "#ef4444";
+  if (val <= 25) return "#22c55e";
+  return "#f59e0b";
+}
+
+function getIVPLabel(ivp) {
+  const val = parseFloat(String(ivp || "50"));
+  if (val >= 75) return "HIGH — elevated premium";
+  if (val <= 25) return "LOW — cheap options";
+  return "NEUTRAL — normal range";
 }
 
 export function MarketUpdateEmail({
@@ -302,59 +66,228 @@ export function MarketUpdateEmail({
   topTrade,
   date,
 }) {
+  const fontStack = "-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif";
+  const mono = "'SF Mono', 'Fira Code', monospace";
+  const niftyUp = parseFloat(String(niftyChange || "0").replace("%", "")) >= 0;
+  const bankNiftyUp = parseFloat(String(bankNiftyChange || "0").replace("%", "")) >= 0;
+
   return (
     <Html lang="en">
       <Head />
-      <Preview>{subject || `📈 Market Brief — ${date || "Today"} | NIFTY ${niftySpot || ""}`}</Preview>
-      <Body style={styles.body}>
-        <Container style={styles.container}>
-          {/* Header */}
-          <Section style={styles.header}>
+      <Preview>
+        {subject || `Market Brief — ${date || "Today"} | NIFTY ${niftySpot || ""}`}
+      </Preview>
+      <Body
+        style={{
+          backgroundColor: "#09090b",
+          margin: "0",
+          padding: "32px 0",
+          fontFamily: fontStack,
+        }}
+      >
+        <Container
+          style={{
+            maxWidth: "600px",
+            margin: "0 auto",
+            backgroundColor: "#0f0f0f",
+            borderRadius: "16px",
+            border: "1px solid #1c1c1e",
+            overflow: "hidden",
+          }}
+        >
+          {/* Logo Bar */}
+          <Section
+            style={{
+              padding: "20px 40px",
+              borderBottom: "1px solid #1c1c1e",
+            }}
+          >
             <Row>
-              <Column style={styles.logoRow}>
+              <Column style={{ verticalAlign: "middle" }}>
                 <Img
                   src="https://optionsgyani.com/logo.png"
-                  width="40"
-                  height="40"
-                  alt="OptionsGyani Logo"
+                  width="36"
+                  height="36"
+                  alt="OptionsGyani"
                   style={{ display: "inline-block", verticalAlign: "middle" }}
                 />
-                <Text style={styles.brandName}>OptionsGyani</Text>
-                <span style={styles.liveBadge}>
-                  <Text style={styles.liveBadgeText}>MARKET BRIEF</Text>
-                </span>
+                <Text
+                  style={{
+                    display: "inline-block",
+                    verticalAlign: "middle",
+                    color: "#f4f4f5",
+                    fontSize: "17px",
+                    fontWeight: "600",
+                    margin: "0 0 0 10px",
+                    fontFamily: fontStack,
+                  }}
+                >
+                  OptionsGyani
+                </Text>
+              </Column>
+              <Column style={{ verticalAlign: "middle", textAlign: "right" }}>
+                <Text
+                  style={{
+                    color: "#52525b",
+                    fontSize: "12px",
+                    margin: "0",
+                    fontFamily: fontStack,
+                    backgroundColor: "#161618",
+                    border: "1px solid #1c1c1e",
+                    borderRadius: "20px",
+                    padding: "3px 12px",
+                    display: "inline-block",
+                  }}
+                >
+                  {date || "Today"}
+                </Text>
               </Column>
             </Row>
           </Section>
 
           {/* Hero */}
-          <Section style={styles.heroBanner}>
-            <Text style={styles.heroTitle}>📈 Market Brief</Text>
-            <Text style={styles.heroDate}>{date || "Today's Summary"}</Text>
+          <Section
+            style={{
+              padding: "36px 40px 28px",
+              borderBottom: "2px solid #22d3ee",
+            }}
+          >
+            <Text
+              style={{
+                color: "#f4f4f5",
+                fontSize: "32px",
+                fontWeight: "700",
+                letterSpacing: "-0.5px",
+                margin: "0 0 8px",
+                fontFamily: fontStack,
+              }}
+            >
+              Market Brief
+            </Text>
+            <Text
+              style={{
+                color: "#52525b",
+                fontSize: "14px",
+                margin: "0",
+                fontFamily: fontStack,
+              }}
+            >
+              {date || "Daily Summary"}
+            </Text>
           </Section>
 
-          {/* NIFTY + BANKNIFTY Stat Cards */}
-          <Section style={styles.statCardsSection}>
-            <Text style={styles.statCardsTitle}>Index Snapshot</Text>
-            <Row style={styles.statCardsRow}>
-              <Column style={styles.statCardLeft}>
-                <Section style={styles.statCard}>
-                  <Text style={styles.statCardIndex}>NIFTY 50</Text>
-                  <Text style={styles.statCardValue}>
-                    {niftySpot ? Number(niftySpot).toLocaleString("en-IN") : "—"}
+          {/* Market Stats — 2 columns */}
+          <Section style={{ padding: "28px 40px 0" }}>
+            <Row>
+              {/* NIFTY */}
+              <Column style={{ width: "48%", verticalAlign: "top", paddingRight: "8px" }}>
+                <Section
+                  style={{
+                    backgroundColor: "#161618",
+                    border: "1px solid #1c1c1e",
+                    borderRadius: "10px",
+                    padding: "20px",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#52525b",
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      margin: "0 0 10px",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    NIFTY 50
                   </Text>
-                  <Text style={getChangeStyle(niftyChange)}>
+                  <Text
+                    style={{
+                      color: "#f4f4f5",
+                      fontSize: "26px",
+                      fontWeight: "700",
+                      margin: "0 0 8px",
+                      lineHeight: "1.1",
+                      letterSpacing: "-0.5px",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    {formatSpot(niftySpot)}
+                  </Text>
+                  <Text
+                    style={{
+                      backgroundColor: niftyUp
+                        ? "rgba(34,197,94,0.1)"
+                        : "rgba(239,68,68,0.1)",
+                      border: `1px solid ${niftyUp ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`,
+                      borderRadius: "6px",
+                      padding: "3px 10px",
+                      color: getChangeStyle(niftyChange),
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      display: "inline-block",
+                      margin: "0",
+                      fontFamily: fontStack,
+                    }}
+                  >
                     {formatChange(niftyChange)}
                   </Text>
                 </Section>
               </Column>
-              <Column style={styles.statCardRight}>
-                <Section style={styles.statCard}>
-                  <Text style={styles.statCardIndex}>BANKNIFTY</Text>
-                  <Text style={styles.statCardValue}>
-                    {bankNiftySpot ? Number(bankNiftySpot).toLocaleString("en-IN") : "—"}
+
+              {/* BANKNIFTY */}
+              <Column style={{ width: "48%", verticalAlign: "top", paddingLeft: "8px" }}>
+                <Section
+                  style={{
+                    backgroundColor: "#161618",
+                    border: "1px solid #1c1c1e",
+                    borderRadius: "10px",
+                    padding: "20px",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#52525b",
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      margin: "0 0 10px",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    BANKNIFTY
                   </Text>
-                  <Text style={getChangeStyle(bankNiftyChange)}>
+                  <Text
+                    style={{
+                      color: "#f4f4f5",
+                      fontSize: "26px",
+                      fontWeight: "700",
+                      margin: "0 0 8px",
+                      lineHeight: "1.1",
+                      letterSpacing: "-0.5px",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    {formatSpot(bankNiftySpot)}
+                  </Text>
+                  <Text
+                    style={{
+                      backgroundColor: bankNiftyUp
+                        ? "rgba(34,197,94,0.1)"
+                        : "rgba(239,68,68,0.1)",
+                      border: `1px solid ${bankNiftyUp ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`,
+                      borderRadius: "6px",
+                      padding: "3px 10px",
+                      color: getChangeStyle(bankNiftyChange),
+                      fontSize: "13px",
+                      fontWeight: "600",
+                      display: "inline-block",
+                      margin: "0",
+                      fontFamily: fontStack,
+                    }}
+                  >
                     {formatChange(bankNiftyChange)}
                   </Text>
                 </Section>
@@ -362,97 +295,231 @@ export function MarketUpdateEmail({
             </Row>
           </Section>
 
-          {/* IVP + Straddle */}
-          <Section style={styles.ivSection}>
-            <Row style={styles.ivRow}>
-              <Column style={styles.ivCellLeft}>
-                <Section style={styles.ivCard}>
-                  <Text style={styles.ivLabel}>IV Percentile (IVP)</Text>
-                  <Text style={styles.ivValue}>{ivpNifty !== undefined ? `${ivpNifty}%` : "—"}</Text>
-                  <Text style={styles.ivSubtext}>NIFTY current IVP</Text>
+          {/* IV Sentiment row */}
+          <Section style={{ padding: "16px 40px 0" }}>
+            <Row>
+              {/* IV Percentile */}
+              <Column style={{ width: "48%", verticalAlign: "top", paddingRight: "8px" }}>
+                <Section
+                  style={{
+                    backgroundColor: "#161618",
+                    border: "1px solid #1c1c1e",
+                    borderRadius: "10px",
+                    padding: "16px 20px",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#52525b",
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      margin: "0 0 8px",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    IV Percentile
+                  </Text>
+                  <Text
+                    style={{
+                      color: getIVPColor(ivpNifty),
+                      fontSize: "24px",
+                      fontWeight: "700",
+                      margin: "0 0 4px",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    {ivpNifty !== undefined ? `${ivpNifty}%` : "—"}
+                  </Text>
+                  <Text
+                    style={{
+                      color: "#52525b",
+                      fontSize: "11px",
+                      margin: "0",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    {getIVPLabel(ivpNifty)}
+                  </Text>
                 </Section>
               </Column>
-              <Column style={styles.ivCellRight}>
-                <Section style={styles.ivCard}>
-                  <Text style={styles.ivLabel}>ATM Straddle Premium</Text>
-                  <Text style={styles.straddleValue}>
-                    ₹{straddlePremium !== undefined ? straddlePremium : "—"}
+
+              {/* ATM Straddle */}
+              <Column style={{ width: "48%", verticalAlign: "top", paddingLeft: "8px" }}>
+                <Section
+                  style={{
+                    backgroundColor: "#161618",
+                    border: "1px solid #1c1c1e",
+                    borderRadius: "10px",
+                    padding: "16px 20px",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#52525b",
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      margin: "0 0 8px",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    ATM Straddle
                   </Text>
-                  <Text style={styles.ivSubtext}>Weekly expiry</Text>
+                  <Text
+                    style={{
+                      color: "#f59e0b",
+                      fontSize: "24px",
+                      fontWeight: "700",
+                      margin: "0 0 4px",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    &#8377;{straddlePremium !== undefined ? straddlePremium : "—"}
+                  </Text>
+                  <Text
+                    style={{
+                      color: "#52525b",
+                      fontSize: "11px",
+                      margin: "0",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    Weekly expiry premium
+                  </Text>
                 </Section>
               </Column>
             </Row>
           </Section>
 
           {/* AI Insight */}
-          <Section style={styles.aiInsightSection}>
-            <Section style={styles.aiInsightCard}>
-              <Text style={styles.aiInsightLabel}>🤖 AI Insight</Text>
-              <Text style={styles.aiInsightText}>
-                {aiInsight || "No AI insight available for today."}
+          <Section style={{ padding: "28px 40px 0" }}>
+            <Section
+              style={{
+                backgroundColor: "rgba(34,211,238,0.04)",
+                borderLeft: "3px solid #22d3ee",
+                borderRadius: "0 10px 10px 0",
+                padding: "20px 24px",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#22d3ee",
+                  fontSize: "10px",
+                  fontWeight: "700",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.15em",
+                  margin: "0 0 12px",
+                  fontFamily: fontStack,
+                }}
+              >
+                AI Insight
+              </Text>
+              <Text
+                style={{
+                  color: "#f4f4f5",
+                  fontSize: "15px",
+                  lineHeight: "1.7",
+                  margin: "0",
+                  fontFamily: fontStack,
+                }}
+              >
+                {aiInsight || "No AI insight available for today. Check the live chain for current market conditions."}
               </Text>
             </Section>
           </Section>
 
-          {/* Top Trade of the Day */}
-          <Section style={styles.topTradeSection}>
-            <Text style={styles.topTradeSectionTitle}>Top Strategy of the Day</Text>
-            <Section style={styles.topTradeCard}>
-              {topTrade ? (
-                <>
-                  <Text style={styles.topTradeStrategy}>
-                    {topTrade.strategy || "Strategy TBD"}
-                  </Text>
-                  {topTrade.description && (
-                    <Text style={styles.topTradeDetail}>{topTrade.description}</Text>
-                  )}
-                  {topTrade.strikes && (
-                    <Text style={styles.topTradeDetail}>
-                      Strikes: <strong style={{ color: "#cbd5e1" }}>{topTrade.strikes}</strong>
-                    </Text>
-                  )}
-                  {topTrade.maxProfit && (
-                    <Text style={styles.topTradeDetail}>
-                      Max Profit:{" "}
-                      <span style={styles.topTradeHighlight}>{topTrade.maxProfit}</span>
-                    </Text>
-                  )}
-                  {topTrade.maxLoss && (
-                    <Text style={styles.topTradeDetail}>
-                      Max Loss:{" "}
-                      <span style={{ color: "#ef4444", fontWeight: "bold" }}>
-                        {topTrade.maxLoss}
-                      </span>
-                    </Text>
-                  )}
-                </>
-              ) : (
-                <Text style={styles.topTradeDetail}>
-                  No featured strategy for today. Check the live chain for opportunities.
-                </Text>
-              )}
+          {/* Strategy of the Day */}
+          <Section style={{ padding: "28px 40px 0" }}>
+            <Text
+              style={{
+                color: "#52525b",
+                fontSize: "10px",
+                fontWeight: "700",
+                textTransform: "uppercase",
+                letterSpacing: "0.15em",
+                margin: "0 0 14px",
+                fontFamily: fontStack,
+              }}
+            >
+              Strategy of the Day
+            </Text>
+            <Section
+              style={{
+                borderLeft: "3px solid #f59e0b",
+                backgroundColor: "rgba(245,158,11,0.04)",
+                borderRadius: "0 10px 10px 0",
+                padding: "20px 24px",
+              }}
+            >
+              <Text
+                style={{
+                  color: "#a1a1aa",
+                  fontSize: "15px",
+                  lineHeight: "1.7",
+                  margin: "0",
+                  fontFamily: fontStack,
+                }}
+              >
+                {topTrade
+                  ? typeof topTrade === "string"
+                    ? topTrade
+                    : topTrade.strategy
+                    ? `${topTrade.strategy}${topTrade.description ? " — " + topTrade.description : ""}${topTrade.strikes ? " | Strikes: " + topTrade.strikes : ""}`
+                    : "No strategy available today."
+                  : "No featured strategy today. Open the live chain to explore current setups."}
+              </Text>
             </Section>
           </Section>
 
           {/* CTA */}
-          <Section style={styles.ctaSection}>
+          <Section style={{ padding: "32px 40px", textAlign: "center" }}>
             <Button
               href="https://optionsgyani.com/chain"
-              style={styles.ctaButton}
+              style={{
+                backgroundColor: "#22d3ee",
+                color: "#000000",
+                borderRadius: "8px",
+                padding: "13px 28px",
+                fontSize: "14px",
+                fontWeight: "600",
+                letterSpacing: "0.01em",
+                textDecoration: "none",
+                display: "inline-block",
+                fontFamily: fontStack,
+              }}
             >
-              Open Live Chain →
+              Open Live Chain &rarr;
             </Button>
           </Section>
 
-          <Hr style={styles.divider} />
-
           {/* Footer */}
-          <Section style={styles.footer}>
-            <Text style={styles.footerText}>
-              © 2026 OptionsGyani Analytics · Not SEBI registered · Educational use only
+          <Hr style={{ border: "none", borderTop: "1px solid #1c1c1e", margin: "0" }} />
+          <Section style={{ padding: "24px 40px", textAlign: "center" }}>
+            <Text
+              style={{
+                color: "#52525b",
+                fontSize: "13px",
+                margin: "0 0 6px",
+                fontFamily: fontStack,
+              }}
+            >
+              &copy; 2026 OptionsGyani &middot; Not SEBI registered &middot; Educational use only
             </Text>
-            <Text style={styles.unsubscribeText}>
-              <Link href="https://optionsgyani.com/profile" style={styles.footerLink}>
+            <Text
+              style={{
+                color: "#52525b",
+                fontSize: "13px",
+                margin: "0",
+                fontFamily: fontStack,
+              }}
+            >
+              <Link
+                href="https://optionsgyani.com/profile"
+                style={{ color: "#52525b", textDecoration: "underline" }}
+              >
                 Unsubscribe from market updates
               </Link>
             </Text>

@@ -14,349 +14,331 @@ import {
   Preview,
 } from "@react-email/components";
 
-const styles = {
-  body: {
-    backgroundColor: "#0f172a",
-    margin: 0,
-    padding: 0,
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
-  },
-  container: {
-    maxWidth: "600px",
-    margin: "0 auto",
-    backgroundColor: "#1e293b",
-    borderRadius: "12px",
-    overflow: "hidden",
-  },
-  header: {
-    backgroundColor: "#0f172a",
-    padding: "24px 32px",
-    borderBottom: "1px solid #334155",
-  },
-  logoRow: {
-    verticalAlign: "middle",
-  },
-  brandName: {
-    display: "inline-block",
-    verticalAlign: "middle",
-    color: "#ffffff",
-    fontSize: "20px",
-    fontWeight: "bold",
-    margin: "0 0 0 10px",
-  },
-  premiumBadge: {
-    backgroundColor: "#451a03",
-    border: "1px solid #f59e0b",
-    borderRadius: "6px",
-    padding: "3px 10px",
-    display: "inline-block",
-    margin: "0 0 0 12px",
-    verticalAlign: "middle",
-  },
-  premiumBadgeText: {
-    color: "#f59e0b",
-    fontSize: "11px",
-    fontWeight: "bold",
-    margin: 0,
-    letterSpacing: "0.5px",
-  },
-  heroBanner: {
-    background: "linear-gradient(135deg, #1c1400 0%, #292100 50%, #1e293b 100%)",
-    borderBottom: "2px solid #f59e0b",
-    padding: "40px 32px 32px",
-    textAlign: "center",
-  },
-  crownIcon: {
-    fontSize: "48px",
-    margin: "0 0 16px",
-    display: "block",
-  },
-  heroTitle: {
-    color: "#ffffff",
-    fontSize: "28px",
-    fontWeight: "bold",
-    margin: "0 0 10px",
-    lineHeight: "1.3",
-  },
-  heroHighlight: {
-    color: "#f59e0b",
-  },
-  heroSubtitle: {
-    color: "#d97706",
-    fontSize: "15px",
-    margin: "0 0 8px",
-    lineHeight: "1.5",
-  },
-  greetingSection: {
-    padding: "28px 32px 20px",
-  },
-  greetingText: {
-    color: "#cbd5e1",
-    fontSize: "15px",
-    margin: "0 0 20px",
-    lineHeight: "1.6",
-  },
-  planCard: {
-    backgroundColor: "#0f172a",
-    borderRadius: "10px",
-    border: "1px solid #f59e0b",
-    padding: "24px",
-    margin: "0 32px 24px",
-    position: "relative",
-  },
-  planCardTitle: {
-    color: "#94a3b8",
-    fontSize: "11px",
-    fontWeight: "bold",
-    textTransform: "uppercase",
-    letterSpacing: "1px",
-    margin: "0 0 16px",
-  },
-  planRow: {
-    marginBottom: "14px",
-  },
-  planLabel: {
-    color: "#64748b",
-    fontSize: "12px",
-    margin: "0 0 2px",
-    textTransform: "uppercase",
-    letterSpacing: "0.5px",
-  },
-  planValue: {
-    color: "#ffffff",
-    fontSize: "15px",
-    fontWeight: "600",
-    margin: 0,
-  },
-  planValueAccent: {
-    color: "#f59e0b",
-    fontSize: "15px",
-    fontWeight: "600",
-    margin: 0,
-  },
-  planDivider: {
-    borderTop: "1px solid #334155",
-    margin: "14px 0",
-  },
-  featuresSection: {
-    padding: "0 32px 28px",
-  },
-  featuresSectionTitle: {
-    color: "#ffffff",
-    fontSize: "17px",
-    fontWeight: "bold",
-    margin: "0 0 16px",
-  },
-  featureItem: {
-    padding: "10px 0",
-    borderBottom: "1px solid #1e3a2e",
-  },
-  featureCheck: {
-    color: "#10b981",
-    fontSize: "16px",
-    fontWeight: "bold",
-    display: "inline-block",
-    marginRight: "10px",
-    verticalAlign: "middle",
-  },
-  featureText: {
-    color: "#cbd5e1",
-    fontSize: "14px",
-    display: "inline-block",
-    verticalAlign: "middle",
-    margin: 0,
-  },
-  investmentSection: {
-    backgroundColor: "#0f172a",
-    borderRadius: "10px",
-    border: "1px solid #334155",
-    padding: "20px 24px",
-    margin: "0 32px 28px",
-    textAlign: "center",
-  },
-  investmentText: {
-    color: "#94a3b8",
-    fontSize: "14px",
-    margin: "0 0 6px",
-    lineHeight: "1.6",
-    fontStyle: "italic",
-  },
-  investmentHighlight: {
-    color: "#10b981",
-    fontWeight: "bold",
-    fontStyle: "normal",
-  },
-  ctaSection: {
-    padding: "4px 32px 36px",
-    textAlign: "center",
-  },
-  ctaButton: {
-    backgroundColor: "#f59e0b",
-    color: "#0f172a",
-    borderRadius: "8px",
-    padding: "14px 36px",
-    fontSize: "15px",
-    fontWeight: "bold",
-    textDecoration: "none",
-    display: "inline-block",
-  },
-  divider: {
-    borderColor: "#334155",
-    margin: "0",
-  },
-  footer: {
-    padding: "24px 32px",
-    textAlign: "center",
-    backgroundColor: "#0f172a",
-  },
-  footerText: {
-    color: "#64748b",
-    fontSize: "12px",
-    margin: "0 0 6px",
-    lineHeight: "1.5",
-  },
-  footerLink: {
-    color: "#06b6d4",
-    textDecoration: "none",
-  },
-};
+export function WelcomePremiumEmail({ name, email, plan, expiryDate, features }) {
+  const fontStack = "-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif";
 
-export function WelcomePremiumEmail({
-  name,
-  email,
-  plan,
-  expiryDate,
-  features,
-}) {
-  const featureList = features && features.length > 0
-    ? features
-    : [
-        "Unlimited backtesting runs on 8+ years NSE data",
-        "Advanced Greeks analysis (Delta, Gamma, Theta, Vega)",
-        "Live Option Chain with real-time IV percentile",
-        "Strategy Builder with P&L simulator",
-        "Priority email support",
-        "Early access to new features",
-      ];
+  const featureList =
+    features && features.length > 0
+      ? features
+      : [
+          "Unlimited backtesting on 8+ years of NSE data",
+          "Advanced Greeks: Delta, Gamma, Theta, Vega",
+          "Live Option Chain with real-time IV percentile",
+          "Strategy Builder with full P&L simulation",
+          "IVP/IVR sentiment dashboard",
+          "Priority support with 24hr response SLA",
+          "Early access to all upcoming features",
+        ];
 
   return (
     <Html lang="en">
       <Head />
-      <Preview>Welcome to OptionsGyani Pro — your premium trading edge is unlocked!</Preview>
-      <Body style={styles.body}>
-        <Container style={styles.container}>
-          {/* Header */}
-          <Section style={styles.header}>
+      <Preview>
+        You're now Pro, {name || "trader"} — a different level of options analysis awaits
+      </Preview>
+      <Body
+        style={{
+          backgroundColor: "#09090b",
+          margin: "0",
+          padding: "32px 0",
+          fontFamily: fontStack,
+        }}
+      >
+        <Container
+          style={{
+            maxWidth: "600px",
+            margin: "0 auto",
+            backgroundColor: "#0f0f0f",
+            borderRadius: "16px",
+            border: "1px solid #1c1c1e",
+            overflow: "hidden",
+          }}
+        >
+          {/* Logo Bar */}
+          <Section
+            style={{
+              padding: "20px 40px",
+              borderBottom: "1px solid #1c1c1e",
+            }}
+          >
             <Row>
-              <Column style={styles.logoRow}>
+              <Column style={{ verticalAlign: "middle" }}>
                 <Img
                   src="https://optionsgyani.com/logo.png"
-                  width="40"
-                  height="40"
-                  alt="OptionsGyani Logo"
+                  width="36"
+                  height="36"
+                  alt="OptionsGyani"
                   style={{ display: "inline-block", verticalAlign: "middle" }}
                 />
-                <Text style={styles.brandName}>OptionsGyani</Text>
-                <span style={styles.premiumBadge}>
-                  <Text style={styles.premiumBadgeText}>PRO</Text>
-                </span>
+                <Text
+                  style={{
+                    display: "inline-block",
+                    verticalAlign: "middle",
+                    color: "#f4f4f5",
+                    fontSize: "17px",
+                    fontWeight: "600",
+                    margin: "0 0 0 10px",
+                    fontFamily: fontStack,
+                  }}
+                >
+                  OptionsGyani
+                </Text>
+              </Column>
+              <Column style={{ verticalAlign: "middle", textAlign: "right" }}>
+                <Text
+                  style={{
+                    display: "inline-block",
+                    backgroundColor: "rgba(245,158,11,0.1)",
+                    border: "1px solid rgba(245,158,11,0.35)",
+                    borderRadius: "20px",
+                    padding: "3px 12px",
+                    color: "#f59e0b",
+                    fontSize: "11px",
+                    fontWeight: "700",
+                    letterSpacing: "0.08em",
+                    margin: "0",
+                    fontFamily: fontStack,
+                  }}
+                >
+                  PRO
+                </Text>
               </Column>
             </Row>
           </Section>
 
-          {/* Hero Banner */}
-          <Section style={styles.heroBanner}>
-            <Text style={styles.crownIcon}>👑</Text>
-            <Text style={styles.heroTitle}>
-              Welcome to{" "}
-              <span style={styles.heroHighlight}>OptionsGyani Pro</span>{" "}
-              🎉
+          {/* Hero — amber premium gradient */}
+          <Section
+            style={{
+              background: "linear-gradient(135deg, #0f0a00 0%, #1a1000 50%, #0f0a00 100%)",
+              borderTop: "3px solid #f59e0b",
+              padding: "48px 40px 40px",
+              borderBottom: "1px solid #1c1c1e",
+            }}
+          >
+            <Text
+              style={{
+                color: "#f4f4f5",
+                fontSize: "32px",
+                fontWeight: "700",
+                letterSpacing: "-0.5px",
+                lineHeight: "1.2",
+                margin: "0 0 14px",
+                fontFamily: fontStack,
+              }}
+            >
+              You're now Pro, {name || "trader"}.
             </Text>
-            <Text style={styles.heroSubtitle}>
-              You've unlocked the full power of professional options analytics.
-              <br />
-              Let's make every trade count.
+            <Text
+              style={{
+                color: "#a1a1aa",
+                fontSize: "15px",
+                lineHeight: "1.7",
+                margin: "0",
+                fontFamily: fontStack,
+              }}
+            >
+              Welcome to a different level of options analysis. Everything is unlocked.
             </Text>
           </Section>
 
-          {/* Greeting */}
-          <Section style={styles.greetingSection}>
-            <Text style={styles.greetingText}>
-              Hi <strong style={{ color: "#f59e0b" }}>{name || "there"}</strong>, your Pro subscription
-              is now active on <strong style={{ color: "#94a3b8" }}>{email}</strong>. You now have
-              access to every premium feature OptionsGyani has to offer.
+          {/* Plan Card */}
+          <Section style={{ padding: "32px 40px 0" }}>
+            <Section
+              style={{
+                backgroundColor: "rgba(245,158,11,0.04)",
+                border: "1px solid rgba(245,158,11,0.3)",
+                borderRadius: "10px",
+                padding: "24px",
+              }}
+            >
+              <Row>
+                <Column style={{ width: "50%", verticalAlign: "middle" }}>
+                  <Text
+                    style={{
+                      color: "#52525b",
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      margin: "0 0 6px",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    Active Plan
+                  </Text>
+                  <Text
+                    style={{
+                      color: "#f59e0b",
+                      fontSize: "18px",
+                      fontWeight: "700",
+                      margin: "0",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    {plan || "Pro Plan"}
+                  </Text>
+                </Column>
+                <Column style={{ width: "50%", verticalAlign: "middle", textAlign: "right" }}>
+                  <Text
+                    style={{
+                      color: "#52525b",
+                      fontSize: "11px",
+                      fontWeight: "600",
+                      textTransform: "uppercase",
+                      letterSpacing: "0.08em",
+                      margin: "0 0 6px",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    Valid Until
+                  </Text>
+                  <Text
+                    style={{
+                      color: "#f4f4f5",
+                      fontSize: "15px",
+                      fontWeight: "600",
+                      margin: "0",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    {expiryDate || "—"}
+                  </Text>
+                </Column>
+              </Row>
+            </Section>
+          </Section>
+
+          {/* Features List */}
+          <Section style={{ padding: "32px 40px 0" }}>
+            <Text
+              style={{
+                color: "#52525b",
+                fontSize: "11px",
+                fontWeight: "600",
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                margin: "0 0 20px",
+                fontFamily: fontStack,
+              }}
+            >
+              Everything included
             </Text>
-          </Section>
-
-          {/* Plan Details Card */}
-          <Section style={styles.planCard}>
-            <Text style={styles.planCardTitle}>Your Plan Details</Text>
-
-            <Section style={styles.planRow}>
-              <Text style={styles.planLabel}>Plan</Text>
-              <Text style={styles.planValueAccent}>{plan || "Pro Plan"}</Text>
-            </Section>
-
-            <Hr style={styles.planDivider} />
-
-            <Section style={styles.planRow}>
-              <Text style={styles.planLabel}>Account</Text>
-              <Text style={styles.planValue}>{email}</Text>
-            </Section>
-
-            <Hr style={styles.planDivider} />
-
-            <Section style={styles.planRow}>
-              <Text style={styles.planLabel}>Valid Until</Text>
-              <Text style={styles.planValue}>{expiryDate || "—"}</Text>
-            </Section>
-          </Section>
-
-          {/* Unlocked Features */}
-          <Section style={styles.featuresSection}>
-            <Text style={styles.featuresSectionTitle}>Your unlocked features</Text>
             {featureList.map((feature, index) => (
-              <Section key={index} style={styles.featureItem}>
-                <Text style={{ margin: 0 }}>
-                  <span style={styles.featureCheck}>✓</span>
-                  <span style={styles.featureText}>{feature}</span>
-                </Text>
-              </Section>
+              <Row key={index} style={{ marginBottom: "14px" }}>
+                <Column
+                  style={{
+                    width: "28px",
+                    verticalAlign: "top",
+                    paddingTop: "1px",
+                  }}
+                >
+                  <Text
+                    style={{
+                      color: "#f59e0b",
+                      fontSize: "15px",
+                      fontWeight: "700",
+                      margin: "0",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    &#10003;
+                  </Text>
+                </Column>
+                <Column style={{ verticalAlign: "top" }}>
+                  <Text
+                    style={{
+                      color: "#a1a1aa",
+                      fontSize: "15px",
+                      lineHeight: "1.6",
+                      margin: "0",
+                      fontFamily: fontStack,
+                    }}
+                  >
+                    {feature}
+                  </Text>
+                </Column>
+              </Row>
             ))}
           </Section>
 
-          {/* Investment ROI Note */}
-          <Section style={styles.investmentSection}>
-            <Text style={styles.investmentText}>
-              Your investment in Pro — now let it earn back{" "}
-              <span style={styles.investmentHighlight}>10x</span> in smarter trades.
-              <br />
-              One well-timed backtest pays for years of subscription.
-            </Text>
-          </Section>
-
           {/* CTA */}
-          <Section style={styles.ctaSection}>
+          <Section
+            style={{
+              padding: "32px 40px",
+              textAlign: "center",
+              borderTop: "1px solid #1c1c1e",
+              marginTop: "32px",
+            }}
+          >
             <Button
               href="https://optionsgyani.com/backtest"
-              style={styles.ctaButton}
+              style={{
+                backgroundColor: "#f59e0b",
+                color: "#000000",
+                borderRadius: "8px",
+                padding: "13px 28px",
+                fontSize: "14px",
+                fontWeight: "600",
+                letterSpacing: "0.01em",
+                textDecoration: "none",
+                display: "inline-block",
+                fontFamily: fontStack,
+              }}
             >
-              Explore Your Pro Features →
+              Explore Your Pro Features &rarr;
             </Button>
           </Section>
 
-          <Hr style={styles.divider} />
+          {/* Motivational line */}
+          <Section
+            style={{
+              padding: "0 40px 36px",
+              textAlign: "center",
+              borderBottom: "1px solid #1c1c1e",
+            }}
+          >
+            <Text
+              style={{
+                color: "#52525b",
+                fontSize: "14px",
+                fontStyle: "italic",
+                lineHeight: "1.6",
+                margin: "0",
+                fontFamily: fontStack,
+              }}
+            >
+              "The best traders don't guess — they backtest. You now have the tools."
+            </Text>
+          </Section>
 
           {/* Footer */}
-          <Section style={styles.footer}>
-            <Text style={styles.footerText}>
+          <Section style={{ padding: "24px 40px", textAlign: "center" }}>
+            <Text
+              style={{
+                color: "#52525b",
+                fontSize: "13px",
+                margin: "0 0 6px",
+                lineHeight: "1.6",
+                fontFamily: fontStack,
+              }}
+            >
               Need help?{" "}
-              <Link href="mailto:support@optionsgyani.com" style={styles.footerLink}>
+              <Link
+                href="mailto:support@optionsgyani.com"
+                style={{ color: "#22d3ee", textDecoration: "none" }}
+              >
                 support@optionsgyani.com
               </Link>
             </Text>
-            <Text style={styles.footerText}>
-              © 2026 OptionsGyani Analytics · Not SEBI registered · Educational use only
+            <Text
+              style={{
+                color: "#52525b",
+                fontSize: "13px",
+                margin: "0",
+                fontFamily: fontStack,
+              }}
+            >
+              &copy; 2026 OptionsGyani &middot; Not SEBI registered &middot; Educational use only
             </Text>
           </Section>
         </Container>
