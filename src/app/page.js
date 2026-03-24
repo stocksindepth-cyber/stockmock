@@ -139,11 +139,12 @@ export default function Home() {
 
         {/* Hero image */}
         <div className="w-full lg:w-1/2 relative flex justify-center lg:justify-end">
-          <div className="relative w-[500px] h-[500px] rounded-3xl overflow-hidden glass-card border border-white/10 shadow-[0_0_80px_rgba(139,92,246,0.2)]">
+          <div className="relative w-full max-w-[500px] aspect-square rounded-3xl overflow-hidden glass-card border border-white/10 shadow-[0_0_80px_rgba(139,92,246,0.2)]">
             <Image
-              src="/hero-dashboard.png"
+              src="/hero-dashboard.webp"
               alt="OptionsGyani Options Analytics Dashboard"
               fill
+              sizes="(max-width: 768px) calc(100vw - 48px), (max-width: 1024px) 45vw, 500px"
               className="object-cover"
               priority
             />
@@ -278,7 +279,7 @@ export default function Home() {
         <div className="flex flex-col lg:flex-row items-center gap-16">
           <div className="w-full lg:w-1/2">
             <div className="relative w-full aspect-square max-w-[500px] mx-auto rounded-3xl overflow-hidden glass-card border border-white/10 shadow-[0_0_80px_rgba(16,185,129,0.15)]">
-              <Image src="/backtest-nodes.png" alt="Options Backtesting NSE Historical Data" fill className="object-cover" />
+              <Image src="/backtest-nodes.webp" alt="Options Backtesting NSE Historical Data" fill sizes="(max-width: 1024px) 90vw, 500px" className="object-cover" />
             </div>
           </div>
           <div className="w-full lg:w-1/2">
