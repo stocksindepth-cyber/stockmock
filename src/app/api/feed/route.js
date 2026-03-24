@@ -27,10 +27,14 @@ import {
 } from "@/lib/data/dhanFeed";
 
 export const dynamic = "force-dynamic";
-export const maxDuration = 300; // opt-in to Vercel Pro max execution time
+// 55s graceful self-close + 60s maxDuration = clean exit every time.
+// The singleton DhanFeed WebSocket was keeping the function alive past the
+// old 250s graceful timer, causing Vercel's 300s hard kill to fire instead.
+// Browser SSE auto-reconnects via retry:3000 — no visible gap to the user.
+export const maxDuration = 60;
 
-const GRACEFUL_CLOSE_MS = 250_000; // self-close at 250s — before Vercel's 300s hard kill
-const HEARTBEAT_MS      =  25_000; // SSE comment ping every 25s to keep connection alive
+const GRACEFUL_CLOSE_MS = 55_000; // self-close at 55s, well before maxDuration
+const HEARTBEAT_MS      = 10_000; // ping every 10s to prevent proxy idle-timeout
 
 // ── Credentials helper (mirrors dhanApi.js token logic) ──────────────────────
 async function getCredentials() {

@@ -1,3 +1,4 @@
+import { Inter } from "next/font/google";
 import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -5,6 +6,14 @@ import ServiceWorkerRegistrar from "@/components/ServiceWorkerRegistrar";
 import Script from "next/script";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
+
+// next/font self-hosts Inter — zero render-blocking, automatic font-display:swap
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter",
+  preload: true,
+});
 
 export const viewport = {
   width: "device-width",
@@ -71,11 +80,9 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+    <html lang="en" className={`scroll-smooth ${inter.variable}`} suppressHydrationWarning>
       <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        {/* Font preconnects removed — next/font handles Inter natively */}
         {/* LLMs.txt discovery — helps ChatGPT, Claude, Perplexity, Gemini find our content */}
         <link rel="ai-content" type="text/plain" href="https://optionsgyani.com/llms.txt" />
         {/* JSON-LD structured data for AI/LLM understanding */}
@@ -122,7 +129,7 @@ export default function RootLayout({ children }) {
           }}
         />
       </head>
-      <body className="antialiased bg-[#0B0F19] text-slate-100" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+      <body className={`antialiased bg-[#0B0F19] text-slate-100 ${inter.className}`}>
         <AuthProvider>
           <Navbar />
           {children}

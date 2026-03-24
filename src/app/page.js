@@ -1,10 +1,10 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 import { ArrowRight, BarChart2, Shield, Zap, Target, Activity, Database, CheckCircle, Search, History as HistoryIcon, Star, Bell, TrendingUp, Users, Award } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { trackCTAClick, trackToolNavigate } from "@/lib/analytics";
@@ -54,18 +54,16 @@ const STATS = [
 ];
 
 export default function Home() {
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const { currentUser, loading } = useAuth();
 
+  // Redirect logged-in users — do NOT blank the page while checking (kills LCP)
   useEffect(() => {
     if (!loading && currentUser) router.replace("/dashboard");
   }, [currentUser, loading, router]);
 
-  useEffect(() => { setMounted(true); }, []);
-
-  if (loading || currentUser) return null;
-  if (!mounted) return null;
+  // Render immediately for unauthenticated visitors (fast LCP)
+  // Logged-in users see a brief flash before redirect — acceptable tradeoff
 
   const schemaData = {
     "@context": "https://schema.org",
@@ -102,6 +100,7 @@ export default function Home() {
   };
 
   return (
+    <LazyMotion features={domAnimation}>
     <div className="min-h-screen bg-[#080C16] overflow-hidden font-sans">
 
       {/* Background glows */}
@@ -113,30 +112,30 @@ export default function Home() {
       <main className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 flex flex-col lg:flex-row items-center justify-between max-w-7xl mx-auto z-10 gap-12">
 
         <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}
             className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-emerald-500/30 mb-8"
           >
             <Activity className="w-4 h-4 text-emerald-400" />
             <span className="text-sm font-medium text-emerald-200">The Advanced Options Analytics Tool for NSE</span>
-          </motion.div>
+          </m.div>
 
-          <motion.h1
+          <m.h1
             className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.1]"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.1 }}
           >
             Build & Backtest <br className="hidden md:block"/>
             <span className="bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">Option Strategies</span>
-          </motion.h1>
+          </m.h1>
 
-          <motion.p
+          <m.p
             className="text-lg md:text-xl text-slate-400 max-w-2xl mb-10"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.2 }}
           >
             Backtest Iron Condor, Short Straddle, and 12+ strategies on 8+ years of real NSE Bhavcopy data. Live option chain with IVP/IVR, Greeks, OI analysis — all in one free platform.
-          </motion.p>
+          </m.p>
 
-          <motion.div
+          <m.div
             className="flex flex-col sm:flex-row items-center gap-4 w-full"
             initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }}
           >
@@ -147,10 +146,10 @@ export default function Home() {
             <Link href="/chain" onClick={() => trackCTAClick("Live Option Chain", "homepage_hero")} className="flex items-center justify-center gap-2 px-8 py-4 w-full sm:w-auto rounded-full glass hover:bg-white/5 text-white font-semibold text-lg transition-all border border-white/10">
               Live Option Chain
             </Link>
-          </motion.div>
+          </m.div>
 
           {/* Trust Strip */}
-          <motion.div
+          <m.div
             className="flex flex-wrap items-center gap-5 mt-8 pt-8 border-t border-white/5 w-full"
             initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.8, delay: 0.5 }}
           >
@@ -169,18 +168,18 @@ export default function Home() {
               <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
               <span className="text-slate-300 font-medium">Free forever — No card needed</span>
             </div>
-          </motion.div>
+          </m.div>
         </div>
 
         {/* Hero image */}
-        <motion.div
+        <m.div
           className="w-full lg:w-1/2 relative flex justify-center lg:justify-end"
           initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1, delay: 0.4 }}
         >
           <div className="relative w-[500px] h-[500px] rounded-3xl overflow-hidden glass-card border border-white/10 shadow-[0_0_80px_rgba(139,92,246,0.2)]">
             <Image src="/hero-dashboard.png" alt="OptionsGyani Options Analytics Dashboard" fill className="object-cover" priority />
           </div>
-        </motion.div>
+        </m.div>
       </main>
 
       {/* ── Stats bar ── */}
@@ -314,7 +313,7 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             {TESTIMONIALS.map((t) => (
-              <motion.div
+              <m.div
                 key={t.name}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -341,7 +340,7 @@ export default function Home() {
                     <p className="text-slate-500 text-xs">{t.role}</p>
                   </div>
                 </div>
-              </motion.div>
+              </m.div>
             ))}
           </div>
         </div>
@@ -388,14 +387,14 @@ export default function Home() {
       {/* ── Feature deep-dive ── */}
       <section className="relative py-24 px-6 max-w-7xl mx-auto z-10">
         <div className="flex flex-col lg:flex-row items-center gap-16">
-          <motion.div
+          <m.div
             className="w-full lg:w-1/2"
             initial={{ opacity: 0, x: -30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, margin: "-100px" }}
           >
             <div className="relative w-full aspect-square max-w-[500px] mx-auto rounded-3xl overflow-hidden glass-card border border-white/10 shadow-[0_0_80px_rgba(16,185,129,0.15)]">
               <Image src="/backtest-nodes.png" alt="Options Backtesting NSE Historical Data" fill className="object-cover" />
             </div>
-          </motion.div>
+          </m.div>
 
           <div className="w-full lg:w-1/2">
             <h2 className="text-3xl md:text-5xl font-bold text-white mb-6">Quantitatively prove your edge</h2>
@@ -448,5 +447,6 @@ export default function Home() {
 
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }} />
     </div>
+    </LazyMotion>
   );
 }
