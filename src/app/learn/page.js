@@ -4,6 +4,7 @@ import { BookOpen, Target, Infinity, ShieldCheck, BarChart2, Zap, ArrowRight, Br
 export const metadata = {
   title: "OptionsGyani Academy | Learn Options Trading from Scratch",
   description: "The ultimate free options trading course. Master options trading, Option Greeks, Iron Condors, Straddles, Risk Management, and Volatility—designed for the Indian Stock Market.",
+  alternates: { canonical: "https://optionsgyani.com/learn" },
 };
 
 const MODULES = [

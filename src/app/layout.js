@@ -57,8 +57,7 @@ export const metadata = {
     creator: "@OptionsGyani",
   },
   alternates: {
-    canonical: "https://optionsgyani.com",
-    // LLMs.txt discovery
+    // Each page sets its own canonical. Root only declares LLMs.txt.
     types: {
       "text/plain": "https://optionsgyani.com/llms.txt",
     },
