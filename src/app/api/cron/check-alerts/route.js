@@ -1,5 +1,5 @@
 /**
- * POST /api/cron/check-alerts
+ * GET|POST /api/cron/check-alerts
  *
  * Cron job that scans all active IV alerts across all users, checks current
  * IV stats for each relevant symbol, and fires email notifications when a
@@ -76,9 +76,9 @@ async function fetchIVStats(symbol) {
   return data; // { underlying, currentIV, ivp, ivr, iv52wHigh, iv52wLow, dataPoints }
 }
 
-// ── POST handler ───────────────────────────────────────────────────────────────
+// ── Handler (Vercel Cron calls GET, manual trigger uses POST) ─────────────────
 
-export async function POST(request) {
+async function handleCheckAlerts(request) {
   // ── Auth ───────────────────────────────────────────────────────────────────
   const authHeader  = request.headers.get("authorization") || "";
   const adminHeader = request.headers.get("x-admin-secret") || "";
@@ -222,4 +222,14 @@ export async function POST(request) {
   );
 
   return NextResponse.json({ checked, triggered, errors });
+}
+
+// Vercel Cron always fires GET
+export async function GET(request) {
+  return handleCheckAlerts(request);
+}
+
+// Manual admin trigger uses POST
+export async function POST(request) {
+  return handleCheckAlerts(request);
 }

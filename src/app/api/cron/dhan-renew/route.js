@@ -9,14 +9,15 @@ import { invalidateDhanTokenCache } from "@/lib/data/dhanApi";
  * Dhan Token Auto-Renewal
  *
  * Called by Vercel Cron every 12 hours (see vercel.json).
- * Also callable manually from the admin UI with x-admin-secret header.
+ * Vercel Cron always calls via GET — POST is kept for the admin UI manual trigger.
  *
  * Dhan's RenewToken endpoint extends the current token's validity by 24 hours.
  * Must be called while the token is still active — never after it has expired.
  *
- * POST /api/cron/dhan-renew
+ * GET  /api/cron/dhan-renew  ← Vercel Cron (Authorization: Bearer CRON_SECRET)
+ * POST /api/cron/dhan-renew  ← Admin UI    (x-admin-secret header)
  */
-export async function POST(request) {
+async function handleRenewal(request) {
   // ── Auth: accept either Vercel cron secret OR admin secret ─────────────────
   const authHeader = request.headers.get("authorization") || "";
   const adminHeader = request.headers.get("x-admin-secret") || "";
@@ -130,4 +131,14 @@ export async function POST(request) {
 
     return NextResponse.json({ error: err.message || "Internal server error" }, { status: 500 });
   }
+}
+
+// Vercel Cron always calls via GET
+export async function GET(request) {
+  return handleRenewal(request);
+}
+
+// Admin UI manual trigger uses POST
+export async function POST(request) {
+  return handleRenewal(request);
 }
