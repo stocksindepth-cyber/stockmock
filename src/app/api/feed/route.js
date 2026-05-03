@@ -44,8 +44,8 @@ export async function GET(request) {
   // Fetch initial snapshot before opening the stream
   let chainData;
   try {
-    const raw = await fetchOptionChain(symbol);
-    chainData = transformChain(raw, expiry);
+    const raw = await fetchOptionChain(symbol, expiry);
+    chainData = transformChain(raw);
   } catch (err) {
     return Response.json({ error: err.message }, { status: 503 });
   }
@@ -87,8 +87,8 @@ export async function GET(request) {
         pollTimer = setTimeout(async () => {
           if (closed) return;
           try {
-            const raw  = await fetchOptionChain(symbol);
-            const data = transformChain(raw, expiry);
+            const raw  = await fetchOptionChain(symbol, expiry);
+            const data = transformChain(raw);
             controller.enqueue(sse("snapshot", {
               chain:     data.chain,
               spot:      data.spot,

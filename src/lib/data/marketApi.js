@@ -1,57 +1,42 @@
 /**
- * Unified market data router — NSE (NIFTY family) and BSE (SENSEX/BANKEX).
+ * Unified market data router — Yahoo Finance for all symbols.
  *
- * All consumers import from here.  The router tags raw responses with _src
- * so transformChain can pick the right parser without callers needing to
- * know which exchange a symbol belongs to.
+ * Yahoo Finance works from any IP (no Akamai bot protection like NSE).
+ * Data is ~15 min delayed during market hours on the free tier.
  *
- *   NSE symbols: NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY
- *   BSE symbols: SENSEX, BANKEX
+ * Supported: NIFTY, BANKNIFTY, FINNIFTY, SENSEX
+ *
+ * NOTE: fetchOptionChain now takes (symbol, expiry) — Yahoo requires the
+ * expiry to fetch the right chain; it does not return all expiries in one call.
+ * transformChain takes only (raw) — no expiry filtering needed server-side.
  */
 
 import {
-  UNDERLYING as NSE_UNDERLYING,
-  fetchOptionChain as nseChain,
-  fetchExpiryList  as nseExpiries,
-  fetchSpot        as nseSpot,
-  transformChain   as nseTransform,
-} from "./nseApi";
+  YAHOO_UNDERLYING,
+  fetchExpiryList  as yahooExpiries,
+  fetchSpot        as yahooSpot,
+  fetchOptionChain as yahooChain,
+  transformChain   as yahooTransform,
+} from "./yahooApi";
 
-import {
-  BSE_UNDERLYING,
-  fetchOptionChain as bseChain,
-  fetchExpiryList  as bseExpiries,
-  fetchSpot        as bseSpot,
-  transformChain   as bseTransform,
-} from "./bseApi";
+// lotSize lookup for downstream consumers
+export const UNDERLYING = Object.fromEntries(
+  Object.entries(YAHOO_UNDERLYING).map(([k, v]) => [k, { lotSize: v.lotSize }])
+);
 
-// Combined symbol registry for validation and lot-size lookup
-export const UNDERLYING = { ...NSE_UNDERLYING, ...BSE_UNDERLYING };
-
-const isBSE = (symbol) => symbol in BSE_UNDERLYING;
-
-// ── Option chain ──────────────────────────────────────────────────────────────
-// Returns a tagged wrapper so transformChain can dispatch correctly
-export async function fetchOptionChain(symbol) {
-  if (isBSE(symbol)) {
-    return { _src: "bse", raw: await bseChain(symbol) };
-  }
-  return { _src: "nse", raw: await nseChain(symbol) };
-}
-
-// ── Expiry list ───────────────────────────────────────────────────────────────
 export async function fetchExpiryList(symbol) {
-  return isBSE(symbol) ? bseExpiries(symbol) : nseExpiries(symbol);
+  return yahooExpiries(symbol);
 }
 
-// ── Spot price ────────────────────────────────────────────────────────────────
 export async function fetchSpot(symbol) {
-  return isBSE(symbol) ? bseSpot(symbol) : nseSpot(symbol);
+  return yahooSpot(symbol);
 }
 
-// ── Transform ─────────────────────────────────────────────────────────────────
-// tagged is the object returned by fetchOptionChain above
-export function transformChain(tagged, expiry) {
-  if (tagged._src === "bse") return bseTransform(tagged.raw, expiry);
-  return nseTransform(tagged.raw, expiry);
+// expiry: ISO date string "2025-05-29"
+export async function fetchOptionChain(symbol, expiry) {
+  return yahooChain(symbol, expiry);
+}
+
+export function transformChain(raw) {
+  return yahooTransform(raw);
 }

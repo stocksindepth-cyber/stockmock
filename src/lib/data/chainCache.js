@@ -61,8 +61,8 @@ export async function getChain(symbol, expiry) {
   const fetchPromise = (async () => {
     lastFetch.set(key, Date.now());
     try {
-      const raw  = await marketFetch(symbol);
-      const data = marketTransform(raw, expiry);
+      const raw  = await marketFetch(symbol, expiry);
+      const data = marketTransform(raw);
       cache.set(key, { data, timestamp: Date.now() });
       return { data, fromCache: false, source: "live", cacheAgeSeconds: 0 };
     } catch (err) {

@@ -29,8 +29,8 @@ export async function GET(request) {
   }
 
   try {
-    const raw  = await fetchOptionChain(symbol);
-    const data = transformChain(raw, expiry);
+    const raw  = await fetchOptionChain(symbol, expiry);
+    const data = transformChain(raw);
     _cache.set(key, { data, at: now });
     return NextResponse.json({ ...data, cached: false });
   } catch (err) {
