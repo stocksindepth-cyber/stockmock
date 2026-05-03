@@ -1,18 +1,18 @@
 import { NextResponse } from "next/server";
-import { fetchExpiryList, UNDERLYING } from "@/lib/data/dhanApi";
+import { fetchExpiryList } from "@/lib/data/marketApi";
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const symbol = searchParams.get("symbol") || "NIFTY";
+  const symbol = (searchParams.get("symbol") || "NIFTY").toUpperCase();
 
   try {
-    const res = await fetchExpiryList(symbol);
-    if (res.status === "success" && res.data?.length > 0) {
-      return NextResponse.json({ expiries: res.data, source: "live" });
+    const expiries = await fetchExpiryList(symbol);
+    if (!expiries.length) {
+      return NextResponse.json({ error: "No expiry dates returned from NSE" }, { status: 500 });
     }
-    return NextResponse.json({ error: "Failed to fetch live data from Dhan API" }, { status: 500 });
+    return NextResponse.json({ expiries, source: "nse-live" });
   } catch (err) {
-    console.error("[API /expiries] Dhan error:", err.message);
-    return NextResponse.json({ error: "Failed to fetch live data from Dhan API" }, { status: 500 });
+    console.error("[API /expiries] NSE error:", err.message);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

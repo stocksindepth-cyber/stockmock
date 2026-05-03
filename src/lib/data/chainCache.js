@@ -2,24 +2,27 @@
  * Shared in-memory option chain cache.
  *
  * Used by /api/chain (REST) and /api/feed (SSE/WebSocket) so they never
- * both hit the Dhan API simultaneously, preventing 429 rate-limit errors.
+ * both hit the exchange APIs simultaneously.
  *
- * Rate limit: Dhan Option Chain API allows 1 request per 3 seconds.
- * OI data updates slowly compared to LTP — no point refreshing faster than ~15s.
+ * NSE/BSE are rate-sensitive; keep a 3 s minimum between calls per key.
+ * OI data updates slowly — no point refreshing faster than ~15 s.
  *
- * TTL: 15 s during market hours (well above the 3s rate-limit floor), 5 min outside.
- * Deduplication: concurrent requests for the same key share one Dhan call.
+ * TTL: 15 s during market hours, 5 min outside.
+ * Deduplication: concurrent requests for the same key share one API call.
+ *
+ * Fallback strategy: stale cache only — no mock data.
+ * If the exchange is unreachable and no stale data exists, the error
+ * propagates so the client receives a proper 503, not fabricated numbers.
  */
 
-import { fetchOptionChain, transformChain, UNDERLYING } from "./dhanApi";
-import { generateMockChain } from "./mockData";
+import { fetchOptionChain, transformChain, UNDERLYING } from "./marketApi";
 
-const cache      = new Map(); // cacheKey → { data, timestamp }
-const pending    = new Map(); // cacheKey → Promise  (dedup concurrent fetches)
-const lastFetch  = new Map(); // cacheKey → timestamp of last Dhan API call
+const cache     = new Map(); // cacheKey → { data, timestamp }
+const pending   = new Map(); // cacheKey → Promise  (dedup concurrent fetches)
+const lastFetch = new Map(); // cacheKey → timestamp of last API call
 
-// Dhan Option Chain API rate limit: 1 request per 3 seconds
-const DHAN_MIN_INTERVAL_MS = 3_000;
+// Minimum interval between live API calls per symbol+expiry key
+const MIN_FETCH_INTERVAL_MS = 3_000;
 
 function isMarketOpen() {
   const ist = new Date(Date.now() + (5 * 60 + 30) * 60 * 1000);
@@ -30,14 +33,13 @@ function isMarketOpen() {
 }
 
 /**
- * Returns cached chain data if fresh, otherwise fetches from Dhan and caches.
- * Falls back to stale cache or mock data on errors.
+ * Returns cached chain data if fresh, otherwise fetches from the exchange.
+ * Falls back to stale cache on errors. Throws if no data is available at all.
  *
  * @returns {{ data, fromCache: boolean, source: string, cacheAgeSeconds: number }}
  */
 export async function getChain(symbol, expiry) {
-  const ul = UNDERLYING[symbol];
-  if (!ul) throw new Error(`Unknown symbol: ${symbol}`);
+  if (!UNDERLYING[symbol]) throw new Error(`Unknown symbol: ${symbol}`);
 
   const key = `${symbol}_${expiry}`;
   const now = Date.now();
@@ -57,32 +59,30 @@ export async function getChain(symbol, expiry) {
   // 2. Dedup: if a fetch is already in-flight for this key, piggyback on it
   if (pending.has(key)) return pending.get(key);
 
-  // 3. Rate-limit guard: never call Dhan API faster than once per 3s
+  // 3. Rate-limit guard: serve stale cache rather than hammering the exchange
   const last = lastFetch.get(key) ?? 0;
-  if (now - last < DHAN_MIN_INTERVAL_MS) {
-    const stale = cache.get(key);
-    if (stale) {
-      return {
-        data:            stale.data,
-        fromCache:       true,
-        source:          "live-cached",
-        cacheAgeSeconds: Math.round((now - stale.timestamp) / 1000),
-      };
-    }
+  if (now - last < MIN_FETCH_INTERVAL_MS && cached) {
+    return {
+      data:            cached.data,
+      fromCache:       true,
+      source:          "live-cached",
+      cacheAgeSeconds: Math.round((now - cached.timestamp) / 1000),
+    };
   }
 
-  // 4. Start a new fetch and register in pending map
+  // 4. Kick off a fresh fetch
   const fetchPromise = (async () => {
     lastFetch.set(key, Date.now());
     try {
-      const raw  = await fetchOptionChain(symbol, expiry);
-      const data = transformChain(raw);
+      const raw  = await fetchOptionChain(symbol);
+      const data = transformChain(raw, expiry);
       cache.set(key, { data, timestamp: Date.now() });
       return { data, fromCache: false, source: "live", cacheAgeSeconds: 0 };
     } catch (err) {
-      // a. Stale cache is better than nothing
+      // Stale cache is real data — always prefer it over an error
       const stale = cache.get(key);
       if (stale) {
+        console.warn(`[chainCache] ${symbol}/${expiry} fetch failed (${err.message}); serving stale cache`);
         return {
           data:            stale.data,
           fromCache:       true,
@@ -90,38 +90,8 @@ export async function getChain(symbol, expiry) {
           cacheAgeSeconds: Math.round((Date.now() - stale.timestamp) / 1000),
         };
       }
-      // b. Last resort: mock data with correct numeric spot and proper format
-      const mockSpot  = symbol === "BANKNIFTY" ? 52000 : symbol === "FINNIFTY" ? 24000 : 22500;
-      const raw       = generateMockChain(mockSpot, ul.lotSize, 40);
-      const atmStrike = raw.chain.reduce(
-        (best, row) => Math.abs(row.strike - mockSpot) < Math.abs(best - mockSpot) ? row.strike : best,
-        raw.chain[0]?.strike ?? mockSpot
-      );
-      const data = {
-        spot: mockSpot,
-        atmStrike,
-        chain: raw.chain.map((row) => ({
-          strike: row.strike,
-          isATM:  row.strike === atmStrike,
-          ce: {
-            ltp: row.ce.lastPrice,    iv: row.ce.impliedVolatility,
-            oi:  row.ce.openInterest, oiChange: 0, volume: row.ce.volume,
-            delta: 0, gamma: 0, theta: 0, vega: 0,
-            bidPrice: row.ce.bid,  askPrice: row.ce.ask,
-            bidQty:   row.ce.totalBuyQuantity, askQty: row.ce.totalSellQuantity,
-            securityId: 0,
-          },
-          pe: {
-            ltp: row.pe.lastPrice,    iv: row.pe.impliedVolatility,
-            oi:  row.pe.openInterest, oiChange: 0, volume: row.pe.volume,
-            delta: 0, gamma: 0, theta: 0, vega: 0,
-            bidPrice: row.pe.bid,  askPrice: row.pe.ask,
-            bidQty:   row.pe.totalBuyQuantity, askQty: row.pe.totalSellQuantity,
-            securityId: 0,
-          },
-        })),
-      };
-      return { data, fromCache: false, source: "mock-fallback", cacheAgeSeconds: 0 };
+      // No stale data — propagate the error so the API returns 503
+      throw err;
     } finally {
       pending.delete(key);
     }

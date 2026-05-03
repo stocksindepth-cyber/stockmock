@@ -1,13 +1,12 @@
 /**
  * GET /api/spot?symbol=NIFTY
  *
- * Lightweight endpoint: fetches only the index LTP from Dhan.
- * Much faster than /api/chain — used for the real-time spot line.
- * Cache: 5s during market hours, 5min outside.
+ * Lightweight endpoint: fetches the index spot price from NSE allIndices.
+ * Cache: 5 s during market hours, 5 min outside.
  */
 
 import { NextResponse } from "next/server";
-import { fetchLTP, UNDERLYING } from "@/lib/data/dhanApi";
+import { fetchSpot, UNDERLYING } from "@/lib/data/marketApi";
 
 const spotCache = new Map(); // symbol → { spot, timestamp }
 
@@ -21,9 +20,11 @@ function isMarketOpen() {
 
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
-  const symbol = searchParams.get("symbol") || "NIFTY";
-  const ul = UNDERLYING[symbol];
-  if (!ul) return NextResponse.json({ error: "Unknown symbol" }, { status: 400 });
+  const symbol = (searchParams.get("symbol") || "NIFTY").toUpperCase();
+
+  if (!UNDERLYING[symbol]) {
+    return NextResponse.json({ error: "Unknown symbol" }, { status: 400 });
+  }
 
   const now = Date.now();
   const ttl = isMarketOpen() ? 5_000 : 5 * 60_000;
@@ -34,16 +35,10 @@ export async function GET(request) {
   }
 
   try {
-    const res = await fetchLTP({ IDX_I: [ul.secId] });
-    // Dhan LTP response: { data: { IDX_I: { "13": { last_price: 22550 } } } }
-    const spotData = res?.data?.IDX_I?.[String(ul.secId)];
-    const spot = spotData?.last_price;
-    if (!spot) throw new Error("No LTP in response");
-
+    const spot = await fetchSpot(symbol);
     spotCache.set(symbol, { spot, timestamp: now });
-    return NextResponse.json({ symbol, spot, source: "live" });
+    return NextResponse.json({ symbol, spot, source: "nse-live" });
   } catch (err) {
-    // Fall back to cached value if available (even if stale)
     if (cached) {
       return NextResponse.json({ symbol, spot: cached.spot, source: "stale" });
     }
