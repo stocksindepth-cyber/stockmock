@@ -1,22 +1,19 @@
 /**
- * Shared in-memory option chain cache — Dhan primary, stale cache secondary.
- *
- * NSE is blocked on Vercel's cloud IPs. Dhan works from any IP and its token
- * is kept fresh by the /api/cron/dhan-renew cron job.
+ * Shared in-memory option chain cache — NSE/BSE primary, stale cache secondary.
  *
  * On error: serve stale cache (real data, slightly old).
  * On no stale data: throw → caller returns 503. No mock data, ever.
  *
  * TTL: 15 s during market hours, 5 min outside.
- * Dedup: concurrent requests for the same key share one Dhan call.
+ * Dedup: concurrent requests for the same key share one fetch.
  * Rate-limit guard: min 3 s between live calls per symbol+expiry.
  */
 
-import { UNDERLYING } from "./marketApi";
 import {
-  fetchOptionChain as dhanFetch,
-  transformChain   as dhanTransform,
-} from "./dhanApi";
+  UNDERLYING,
+  fetchOptionChain as marketFetch,
+  transformChain   as marketTransform,
+} from "./marketApi";
 
 const cache     = new Map(); // key → { data, timestamp }
 const pending   = new Map(); // key → Promise
@@ -60,19 +57,19 @@ export async function getChain(symbol, expiry) {
              cacheAgeSeconds: Math.round((now - cached.timestamp) / 1000) };
   }
 
-  // 4. Live fetch from Dhan
+  // 4. Live fetch
   const fetchPromise = (async () => {
     lastFetch.set(key, Date.now());
     try {
-      const raw  = await dhanFetch(symbol, expiry);
-      const data = dhanTransform(raw);
+      const raw  = await marketFetch(symbol);
+      const data = marketTransform(raw, expiry);
       cache.set(key, { data, timestamp: Date.now() });
-      return { data, fromCache: false, source: "dhan-live", cacheAgeSeconds: 0 };
+      return { data, fromCache: false, source: "live", cacheAgeSeconds: 0 };
     } catch (err) {
       // Stale cache beats an error — serve real (if slightly old) data
       const stale = cache.get(key);
       if (stale) {
-        console.warn(`[chain] Dhan failed (${err.message}); serving stale cache`);
+        console.warn(`[chain] Fetch failed (${err.message}); serving stale cache`);
         return { data: stale.data, fromCache: true, source: "stale",
                  cacheAgeSeconds: Math.round((Date.now() - stale.timestamp) / 1000) };
       }

@@ -2,10 +2,13 @@
  * GET /api/paper-trade/price?symbol=NIFTY&expiry=2025-03-27
  *
  * Returns the full option chain for a symbol+expiry so the client can
- * price individual legs. Cached 30 s; serves stale on Dhan errors.
+ * price individual legs. Cached 30 s; serves stale on errors.
+ * Runs on Vercel Edge Runtime to bypass NSE Akamai IP blocks.
  */
 import { NextResponse } from "next/server";
-import { fetchOptionChain, transformChain, UNDERLYING } from "@/lib/data/dhanApi";
+import { fetchOptionChain, transformChain, UNDERLYING } from "@/lib/data/marketApi";
+
+export const runtime = "edge";
 
 const _cache = new Map(); // key → { data, at }
 const CACHE_TTL = 30_000;
@@ -26,8 +29,8 @@ export async function GET(request) {
   }
 
   try {
-    const raw  = await fetchOptionChain(symbol, expiry);
-    const data = transformChain(raw);
+    const raw  = await fetchOptionChain(symbol);
+    const data = transformChain(raw, expiry);
     _cache.set(key, { data, at: now });
     return NextResponse.json({ ...data, cached: false });
   } catch (err) {

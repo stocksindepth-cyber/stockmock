@@ -1,12 +1,15 @@
 /**
  * GET /api/spot?symbol=NIFTY
  *
- * Fetches index LTP from Dhan. Cache: 5 s market hours, 5 min outside.
- * Falls back to stale cache on error; returns 503 if no data at all.
+ * Fetches index LTP via NSE (NIFTY family) or BSE (SENSEX/BANKEX).
+ * Runs on Vercel Edge Runtime (Cloudflare edge) to avoid NSE Akamai IP blocks.
+ * Cache: 5 s market hours, 5 min outside. Falls back to stale on error.
  */
 
 import { NextResponse } from "next/server";
-import { fetchLTP, UNDERLYING } from "@/lib/data/dhanApi";
+import { fetchSpot, UNDERLYING } from "@/lib/data/marketApi";
+
+export const runtime = "edge";
 
 const spotCache = new Map(); // symbol → { spot, timestamp }
 
@@ -21,8 +24,7 @@ function isMarketOpen() {
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const symbol = (searchParams.get("symbol") || "NIFTY").toUpperCase();
-  const ul = UNDERLYING[symbol];
-  if (!ul) return NextResponse.json({ error: "Unknown symbol" }, { status: 400 });
+  if (!UNDERLYING[symbol]) return NextResponse.json({ error: "Unknown symbol" }, { status: 400 });
 
   const now = Date.now();
   const ttl = isMarketOpen() ? 5_000 : 5 * 60_000;
@@ -33,11 +35,9 @@ export async function GET(request) {
   }
 
   try {
-    const res  = await fetchLTP({ IDX_I: [ul.secId] });
-    const spot = res?.data?.IDX_I?.[String(ul.secId)]?.last_price;
-    if (!spot) throw new Error("No LTP in Dhan response");
+    const spot = await fetchSpot(symbol);
     spotCache.set(symbol, { spot, timestamp: now });
-    return NextResponse.json({ symbol, spot, source: "dhan-live" });
+    return NextResponse.json({ symbol, spot, source: "live" });
   } catch (err) {
     if (cached) {
       return NextResponse.json({ symbol, spot: cached.spot, source: "stale" });
