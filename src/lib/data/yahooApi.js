@@ -42,24 +42,34 @@ function extractCookies(headers) {
 
 async function doRefresh() {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 12_000);
+  const t = setTimeout(() => ctrl.abort(), 15_000);
   try {
-    // Step 1: Get session cookies from Yahoo Finance homepage
-    const r1 = await fetch("https://finance.yahoo.com/", {
+    // fc.yahoo.com is Yahoo's dedicated first-cookie endpoint — sets the A1/A3
+    // API cookies directly without a GDPR consent wall (unlike finance.yahoo.com)
+    const r1 = await fetch("https://fc.yahoo.com", {
       headers: HEADERS,
       signal: ctrl.signal,
     });
-    _cookies = extractCookies(r1.headers);
+    const jar = extractCookies(r1.headers);
 
-    // Step 2: Exchange cookies for a crumb token
-    const r2 = await fetch(
-      `${YAHOO_BASE}/v1/test/getcrumb`,
-      { headers: { ...HEADERS, Cookie: _cookies }, signal: ctrl.signal }
-    );
-    const crumb = (await r2.text()).trim();
-    if (!crumb || crumb.startsWith("<") || crumb.startsWith("{")) {
-      throw new Error("Yahoo crumb response was not a plain token");
+    // Fetch crumb; try query1 first, fall back to query2
+    const fetchCrumb = async (base) => {
+      const r = await fetch(`${base}/v1/test/getcrumb`, {
+        headers: { ...HEADERS, Cookie: jar },
+        signal: ctrl.signal,
+      });
+      return (await r.text()).trim();
+    };
+
+    let crumb = await fetchCrumb(YAHOO_BASE);
+    if (!crumb || crumb.startsWith("<") || crumb.startsWith("{") || crumb.length < 5) {
+      crumb = await fetchCrumb("https://query2.finance.yahoo.com");
     }
+    if (!crumb || crumb.startsWith("<") || crumb.startsWith("{") || crumb.length < 5) {
+      throw new Error(`Yahoo crumb unavailable (got: ${crumb.slice(0, 60)})`);
+    }
+
+    _cookies   = jar;
     _crumb     = crumb;
     _sessionAt = Date.now();
   } finally {
