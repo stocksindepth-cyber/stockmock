@@ -147,9 +147,8 @@ function ChainContent() {
     return () => clearInterval(id);
   }, [symbol, expiry, wsConnected, fetchChain]);
 
-  // Real-time feed via Dhan WebSocket → SSE
-  // Delayed 300ms so the initial REST chain fetch populates the shared cache first,
-  // preventing /api/feed from double-calling the Dhan API.
+  // SSE feed — polls NSE every 15s, emits snapshot events
+  // Delayed 300ms so the initial REST chain fetch has a head start.
   useEffect(() => {
     if (!expiry) return;
 
@@ -579,8 +578,8 @@ function ChainContent() {
         {/* Data freshness note */}
         <p className="mt-3 text-xs text-slate-600 text-center">
           {wsConnected
-            ? "⚡ LTP updates in real-time via WebSocket · OI & Volume refresh every ~15s (Dhan API limit: 1 req / 3s)"
-            : "LTP & Spot poll every 15s · OI & Volume refresh every ~15s (Dhan API limit: 1 req / 3s)"}
+            ? "⚡ Chain & spot refresh every 15s via NSE live data"
+            : "Chain & spot refresh every 15s via NSE live data"}
         </p>
       </main>
     </div>
