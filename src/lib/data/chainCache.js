@@ -1,27 +1,27 @@
 /**
- * Shared in-memory option chain cache.
+ * Shared in-memory option chain cache — Dhan primary, stale cache secondary.
  *
- * Used by /api/chain (REST) and /api/feed (SSE/WebSocket) so they never
- * both hit the exchange APIs simultaneously.
+ * NSE is blocked on Vercel's cloud IPs. Dhan works from any IP and its token
+ * is kept fresh by the /api/cron/dhan-renew cron job.
  *
- * NSE/BSE are rate-sensitive; keep a 3 s minimum between calls per key.
- * OI data updates slowly — no point refreshing faster than ~15 s.
+ * On error: serve stale cache (real data, slightly old).
+ * On no stale data: throw → caller returns 503. No mock data, ever.
  *
  * TTL: 15 s during market hours, 5 min outside.
- * Deduplication: concurrent requests for the same key share one API call.
- *
- * Fallback strategy: stale cache only — no mock data.
- * If the exchange is unreachable and no stale data exists, the error
- * propagates so the client receives a proper 503, not fabricated numbers.
+ * Dedup: concurrent requests for the same key share one Dhan call.
+ * Rate-limit guard: min 3 s between live calls per symbol+expiry.
  */
 
-import { fetchOptionChain, transformChain, UNDERLYING } from "./marketApi";
+import { UNDERLYING } from "./marketApi";
+import {
+  fetchOptionChain as dhanFetch,
+  transformChain   as dhanTransform,
+} from "./dhanApi";
 
-const cache     = new Map(); // cacheKey → { data, timestamp }
-const pending   = new Map(); // cacheKey → Promise  (dedup concurrent fetches)
-const lastFetch = new Map(); // cacheKey → timestamp of last API call
+const cache     = new Map(); // key → { data, timestamp }
+const pending   = new Map(); // key → Promise
+const lastFetch = new Map(); // key → timestamp
 
-// Minimum interval between live API calls per symbol+expiry key
 const MIN_FETCH_INTERVAL_MS = 3_000;
 
 function isMarketOpen() {
@@ -33,10 +33,8 @@ function isMarketOpen() {
 }
 
 /**
- * Returns cached chain data if fresh, otherwise fetches from the exchange.
- * Falls back to stale cache on errors. Throws if no data is available at all.
- *
- * @returns {{ data, fromCache: boolean, source: string, cacheAgeSeconds: number }}
+ * Returns { data, fromCache, source, cacheAgeSeconds }.
+ * Throws only when no data is available (caller should return 503).
  */
 export async function getChain(symbol, expiry) {
   if (!UNDERLYING[symbol]) throw new Error(`Unknown symbol: ${symbol}`);
@@ -45,53 +43,40 @@ export async function getChain(symbol, expiry) {
   const now = Date.now();
   const ttl = isMarketOpen() ? 15_000 : 5 * 60_000;
 
-  // 1. Fresh cache hit
+  // 1. Fresh cache
   const cached = cache.get(key);
   if (cached && now - cached.timestamp < ttl) {
-    return {
-      data:            cached.data,
-      fromCache:       true,
-      source:          "live-cached",
-      cacheAgeSeconds: Math.round((now - cached.timestamp) / 1000),
-    };
+    return { data: cached.data, fromCache: true, source: "live-cached",
+             cacheAgeSeconds: Math.round((now - cached.timestamp) / 1000) };
   }
 
-  // 2. Dedup: if a fetch is already in-flight for this key, piggyback on it
+  // 2. Dedup in-flight fetches
   if (pending.has(key)) return pending.get(key);
 
-  // 3. Rate-limit guard: serve stale cache rather than hammering the exchange
+  // 3. Rate-limit guard
   const last = lastFetch.get(key) ?? 0;
   if (now - last < MIN_FETCH_INTERVAL_MS && cached) {
-    return {
-      data:            cached.data,
-      fromCache:       true,
-      source:          "live-cached",
-      cacheAgeSeconds: Math.round((now - cached.timestamp) / 1000),
-    };
+    return { data: cached.data, fromCache: true, source: "live-cached",
+             cacheAgeSeconds: Math.round((now - cached.timestamp) / 1000) };
   }
 
-  // 4. Kick off a fresh fetch
+  // 4. Live fetch from Dhan
   const fetchPromise = (async () => {
     lastFetch.set(key, Date.now());
     try {
-      const raw  = await fetchOptionChain(symbol);
-      const data = transformChain(raw, expiry);
+      const raw  = await dhanFetch(symbol, expiry);
+      const data = dhanTransform(raw);
       cache.set(key, { data, timestamp: Date.now() });
-      return { data, fromCache: false, source: "live", cacheAgeSeconds: 0 };
+      return { data, fromCache: false, source: "dhan-live", cacheAgeSeconds: 0 };
     } catch (err) {
-      // Stale cache is real data — always prefer it over an error
+      // Stale cache beats an error — serve real (if slightly old) data
       const stale = cache.get(key);
       if (stale) {
-        console.warn(`[chainCache] ${symbol}/${expiry} fetch failed (${err.message}); serving stale cache`);
-        return {
-          data:            stale.data,
-          fromCache:       true,
-          source:          "stale",
-          cacheAgeSeconds: Math.round((Date.now() - stale.timestamp) / 1000),
-        };
+        console.warn(`[chain] Dhan failed (${err.message}); serving stale cache`);
+        return { data: stale.data, fromCache: true, source: "stale",
+                 cacheAgeSeconds: Math.round((Date.now() - stale.timestamp) / 1000) };
       }
-      // No stale data — propagate the error so the API returns 503
-      throw err;
+      throw err; // → 503
     } finally {
       pending.delete(key);
     }
