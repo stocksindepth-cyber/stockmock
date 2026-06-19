@@ -84,6 +84,9 @@ export default function sitemap() {
     "best-broker-options-trading-india", "lowest-brokerage-fno-india",
     "best-broker-nifty-weekly-options", "best-free-demat-account-india",
     "how-to-open-dhan-account", "switch-from-zerodha-to-dhan",
+    "dhan-vs-groww", "dhan-vs-fyers", "groww-vs-zerodha",
+    "best-broker-for-algo-trading-india", "best-trading-app-india",
+    "best-broker-for-beginners-india",
   ];
 
   const brokerHubPage = {
