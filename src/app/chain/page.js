@@ -23,8 +23,8 @@ function formatNum(n) {
 
 const SYMBOLS = [
   { symbol: "NIFTY", lotSize: 75 },
-  { symbol: "BANKNIFTY", lotSize: 15 },
-  { symbol: "FINNIFTY", lotSize: 25 },
+  { symbol: "BANKNIFTY", lotSize: 30 },
+  { symbol: "FINNIFTY", lotSize: 65 },
 ];
 
 import ProtectedRoute from "@/components/ProtectedRoute";
@@ -267,6 +267,14 @@ function ChainContent() {
                       secondsSince < 20 ? "bg-emerald-500/10 text-emerald-500" : "bg-amber-500/10 text-amber-400"
                     }`}>
                       Updated {secondsSince}s ago
+                    </span>
+                  )}
+                  {String(dataSource).includes("simulat") && (
+                    <span
+                      className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300"
+                      title="Premiums and Greeks are simulated with a Black-Scholes model anchored on the live index price — for practice and analysis, not a live broker feed."
+                    >
+                      Simulated pricing
                     </span>
                   )}
                 </span>

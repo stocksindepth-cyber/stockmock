@@ -12,7 +12,7 @@ export async function GET(request) {
     if (!expiries?.length) {
       return NextResponse.json({ error: "No expiry dates returned" }, { status: 503 });
     }
-    return NextResponse.json({ expiries, source: "live" });
+    return NextResponse.json({ expiries, source: "generated" });
   } catch (err) {
     console.error("[/api/expiries] Error:", err.message);
     return NextResponse.json({ error: err.message }, { status: 503 });
