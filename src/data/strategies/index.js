@@ -888,6 +888,624 @@ export const STRATEGIES = {
       },
     ],
   },
+
+  // ── Short Straddle on FINNIFTY (Neutral, undefined risk) ──────────────────
+  "short-straddle-finnifty": {
+    name: "Short Straddle on FINNIFTY",
+    index: "FINNIFTY",
+    category: "Neutral",
+    theme: "amber",
+    payoff: "tent",
+    badge: "Maximum Theta · Undefined Risk · Active Management",
+    tagline:
+      "Sell the ATM call and put on FINNIFTY to harvest the steepest time decay on the financial-services index — a measured cousin of the BANKNIFTY straddle.",
+    keywords:
+      "short straddle finnifty, finnifty straddle strategy, finnifty theta decay, finnifty expiry strategy, finnifty atm selling",
+    intro: [
+      "A Short Straddle on FINNIFTY sells the at-the-money call and put on the same strike and expiry, collecting both premiums up front. You win when FINNIFTY pins near that strike into expiry — the cleanest expression of 'the financial sector goes nowhere'.",
+      "FINNIFTY tends to move less violently than the pure-bank BANKNIFTY basket, which makes its straddle a touch more forgiving: the index pins near round strikes reasonably often, and the calmer tape means fewer of those gap days that punish naked sellers.",
+      "It remains an undefined-risk trade. The premiums are smaller than BANKNIFTY's, so a single trending session can still erase several quiet weeks. Position sizing, a hard stop, and active delta management are mandatory — this is a manage-it trade, not a fire-and-forget one.",
+    ],
+    stats: [
+      { label: "Typical Win Rate", value: "60–65%", note: "When FINNIFTY pins" },
+      { label: "Credit Collected", value: "₹180–260", note: "ATM call + put" },
+      { label: "Max Risk", value: "Undefined", note: "Hard stop required" },
+      { label: "Best Regime", value: "Flat / chop", note: "Low realised move" },
+      { label: "Theta", value: "Very high", note: "Peak decay near expiry" },
+      { label: "Margin / Lot", value: "₹90k–1.1L", note: "Naked selling margin" },
+    ],
+    setup: [
+      { label: "Underlying", value: "FINNIFTY monthly options (50-point strikes)" },
+      { label: "Strikes", value: "Sell the ATM call AND ATM put (same strike)" },
+      { label: "Entry Window", value: "Early in the cycle or expiry-week, elevated IV" },
+      { label: "Profit Target", value: "25–40% of the combined credit" },
+      { label: "Stop Loss", value: "Hard stop at ~1.5–2× the credit (mandatory)" },
+      { label: "Delta Hedge", value: "Adjust past ±0.25 net delta" },
+    ],
+    legs: [
+      { action: "SELL", type: "CE", strike: "ATM", note: "Short ATM call" },
+      { action: "SELL", type: "PE", strike: "ATM", note: "Short ATM put — same strike" },
+    ],
+    edges: [
+      {
+        title: "Maximum theta on a calmer index",
+        body: "The ATM straddle extracts the most premium of any neutral trade for a 'goes nowhere' view — and FINNIFTY's gentler tape means the dreaded trending day that breaks a straddle shows up less often than on BANKNIFTY.",
+      },
+      {
+        title: "50-point strikes pin cleanly",
+        body: "With 50-point spacing, FINNIFTY frequently settles right on or beside a round strike at expiry — exactly the pin a straddle seller wants for maximum payoff.",
+      },
+      {
+        title: "IV-over-realised edge",
+        body: "Like its index peers, FINNIFTY implied volatility usually overstates the move that actually arrives. The straddle monetises that gap — provided you survive the weeks it doesn't, which is what stops and sizing are for.",
+      },
+    ],
+    whenToUse: [
+      "You expect a quiet, range-bound FINNIFTY cycle with no major banking results in the window.",
+      "IV is elevated and you expect a volatility crush into expiry.",
+      "You can actively monitor and hedge delta intraday.",
+    ],
+    risks: [
+      "Undefined risk on both sides — a trending financials session can produce outsized losses.",
+      "Thinner liquidity than NIFTY/BANKNIFTY; use limit orders and mind the spread on adjustments.",
+      "Gamma risk spikes in the final two sessions — convert to an Iron Butterfly if you want capped risk.",
+    ],
+    faq: [
+      {
+        q: "Is a Short Straddle better on FINNIFTY or BANKNIFTY?",
+        a: "BANKNIFTY offers fatter premiums but bigger tail risk and more gap days; FINNIFTY is calmer with smaller credits. If you want the richest decay and can manage the risk, BANKNIFTY pays more — if you prefer a steadier tape, FINNIFTY's straddle is more forgiving.",
+      },
+      {
+        q: "When should I exit a FINNIFTY Short Straddle?",
+        a: "Most systematic sellers book at 25–40% of the credit rather than holding to expiry, and respect a hard stop near 1.5–2× the credit. Avoid carrying a naked straddle unhedged into the final session because of gamma risk.",
+      },
+      {
+        q: "How liquid is the FINNIFTY straddle?",
+        a: "The at-the-money strikes on the monthly expiry carry the bulk of FINNIFTY's liquidity, which is what a straddle uses. Always trade with limit orders, especially when adjusting, since spreads widen away from the money.",
+      },
+    ],
+  },
+
+  // ── Iron Butterfly on FINNIFTY (Neutral, defined risk) ────────────────────
+  "iron-butterfly-finnifty": {
+    name: "Iron Butterfly on FINNIFTY",
+    index: "FINNIFTY",
+    category: "Neutral",
+    theme: "purple",
+    payoff: "tent",
+    badge: "Pinpoint Neutral · Defined Risk · High Credit",
+    tagline:
+      "Sell the ATM straddle on FINNIFTY and buy protective wings — a capped-risk bet that the financial-services index pins near your strike.",
+    keywords:
+      "iron butterfly finnifty, finnifty iron fly, defined risk straddle finnifty, finnifty pinning strategy, finnifty neutral options",
+    intro: [
+      "The Iron Butterfly takes a FINNIFTY Short Straddle and bolts on protective wings. You sell the ATM call and put (the body) and buy a further OTM call and put (the wings), turning an undefined-risk straddle into a high-credit, defined-risk bet that FINNIFTY finishes near your strike.",
+      "Because FINNIFTY pins near round strikes fairly often and uses 50-point spacing, the butterfly's sharp peak payoff lines up neatly with where the index tends to settle — and the wings keep your maximum loss budgeted in advance.",
+      "You collect close to a straddle's credit while capping the downside and slashing margin. The trade-off is a narrow profit zone: FINNIFTY must stay near the body strike, or a decisive move toward a wing produces your fixed maximum loss.",
+    ],
+    stats: [
+      { label: "Typical Win Rate", value: "55–60%", note: "Needs a tight pin" },
+      { label: "Credit Collected", value: "₹130–190", note: "ATM body" },
+      { label: "Max Risk / Lot", value: "Capped", note: "Wing width minus credit" },
+      { label: "Best Regime", value: "Pin / high IV", note: "Low realised move" },
+      { label: "Theta", value: "Very high", note: "ATM body decays fast" },
+      { label: "Margin / Lot", value: "₹28k–40k", note: "Far below naked straddle" },
+    ],
+    setup: [
+      { label: "Underlying", value: "FINNIFTY monthly options (50-point strikes)" },
+      { label: "Body", value: "Sell ATM call AND ATM put (same strike)" },
+      { label: "Wings", value: "Buy a call and put 100–200 points OTM" },
+      { label: "Entry Window", value: "High IV or expiry-week pinning setups" },
+      { label: "Profit Target", value: "25–40% of the net credit" },
+      { label: "Adjustment", value: "Re-center if FINNIFTY drifts off the body" },
+    ],
+    legs: [
+      { action: "SELL", type: "PE", strike: "ATM", note: "Short ATM put — body" },
+      { action: "SELL", type: "CE", strike: "ATM", note: "Short ATM call — body" },
+      { action: "BUY", type: "PE", strike: "100–200 pts OTM", note: "Put wing — caps downside" },
+      { action: "BUY", type: "CE", strike: "100–200 pts OTM", note: "Call wing — caps upside" },
+    ],
+    edges: [
+      {
+        title: "Straddle credit, capped risk",
+        body: "The ATM body collects nearly as much as a naked straddle, but the wings convert open-ended risk into a fixed maximum loss and cut margin sharply — ideal on a calmer index where the pin is plausible.",
+      },
+      {
+        title: "Fine strike control",
+        body: "FINNIFTY's 50-point grid lets you place the body and wings precisely around the expected settlement, tuning the credit-to-risk ratio more finely than a 100-point index allows.",
+      },
+      {
+        title: "Controlled gamma",
+        body: "The long wings tame the gamma blow-up that makes a naked straddle dangerous near expiry — you keep the high theta of an ATM body without the open-ended tail.",
+      },
+    ],
+    whenToUse: [
+      "You expect FINNIFTY to settle very close to a specific strike (a classic pin).",
+      "IV is high and you want maximum credit but refuse open-ended risk.",
+      "You want a defined-risk alternative to a FINNIFTY Short Straddle.",
+    ],
+    risks: [
+      "Narrow profit zone — a decisive move toward a wing means the fixed maximum loss.",
+      "Lower win rate than a condor because the body sits at the money.",
+      "Re-centering after a drift costs credit; don't chase a runaway move.",
+    ],
+    faq: [
+      {
+        q: "Iron Butterfly vs Iron Condor on FINNIFTY?",
+        a: "The butterfly sells at-the-money options for a higher credit but a narrow profit zone (needs a pin); the condor sells OTM options for a lower credit but a wider profit zone and higher win rate. Choose the butterfly when you expect FINNIFTY to pin, the condor when you expect a range.",
+      },
+      {
+        q: "How wide should the wings be on a FINNIFTY Iron Butterfly?",
+        a: "Wings 100–200 points from the body are typical given FINNIFTY's 50-point strikes. Wider wings raise both the credit and the maximum loss; backtest a couple of widths to match your risk tolerance.",
+      },
+      {
+        q: "Is the FINNIFTY Iron Butterfly good for expiry day?",
+        a: "Yes — like NIFTY, FINNIFTY often gravitates to a high-open-interest round strike near expiry, which is where the butterfly's peak payoff sits, and the defined risk keeps expiry-day gamma under control.",
+      },
+    ],
+  },
+
+  // ── Long Straddle on NIFTY (Volatility) ───────────────────────────────────
+  "long-straddle-nifty": {
+    name: "Long Straddle on NIFTY",
+    index: "NIFTY",
+    category: "Volatility",
+    theme: "teal",
+    payoff: "valley",
+    badge: "Long Volatility · Defined Risk · Event Plays",
+    tagline:
+      "Buy the ATM call and put on NIFTY to profit from a big move in either direction — the textbook way to be long volatility into an event.",
+    keywords:
+      "long straddle nifty, nifty event strategy, long volatility nifty, nifty budget strategy, buy straddle nifty",
+    intro: [
+      "When you're confident NIFTY is about to move sharply but unsure of the direction — a budget, an RBI decision, a Fed meeting, election results — the Long Straddle is the clean expression of that view. You buy the ATM call and the ATM put together and profit from a large move either way.",
+      "Your maximum loss is limited to the combined premium paid, while the upside on a big swing is open-ended. NIFTY's deep liquidity means you can buy and exit a straddle with minimal slippage, which matters when you're racing the post-event volatility crush.",
+      "The enemy is time and falling IV. If NIFTY sits still, both legs decay; and IV often collapses right after the catalyst, hurting even a modestly correct call. Treat the long straddle as a short-duration event tool with a time stop, not a position to hold and hope.",
+    ],
+    stats: [
+      { label: "Profit Driver", value: "Big move", note: "Either direction" },
+      { label: "Premium Paid", value: "₹250–360", note: "ATM call + put, weekly" },
+      { label: "Max Risk", value: "Premium Paid", note: "Defined, limited" },
+      { label: "Best Regime", value: "Pre-event / low IV", note: "Before a vol spike" },
+      { label: "Theta", value: "Negative", note: "Decay works against you" },
+      { label: "Hold Time", value: "Hours–2 days", note: "Around the catalyst" },
+    ],
+    setup: [
+      { label: "Underlying", value: "NIFTY weekly/monthly options (50-point strikes)" },
+      { label: "Strikes", value: "Buy the ATM call AND ATM put (same strike)" },
+      { label: "Entry Window", value: "Before a known catalyst, while IV is still low" },
+      { label: "Profit Target", value: "Exit into the volatility spike / on the move" },
+      { label: "Stop Loss", value: "Time stop — exit if the catalyst passes flat" },
+      { label: "Key Risk", value: "IV crush after the event — act fast" },
+    ],
+    legs: [
+      { action: "BUY", type: "CE", strike: "ATM", note: "Long ATM call" },
+      { action: "BUY", type: "PE", strike: "ATM", note: "Long ATM put — same strike" },
+    ],
+    edges: [
+      {
+        title: "Direction-agnostic event exposure",
+        body: "You only need to be right that NIFTY moves big, not which way. Around binary catalysts — budgets, policy, results-heavy days — that's often a far easier call than guessing the direction.",
+      },
+      {
+        title: "Defined risk, asymmetric payoff",
+        body: "Downside is capped at the premium paid; a large move can multiply it. The payoff is a valley — lose a little if it's quiet, win a lot if NIFTY erupts.",
+      },
+      {
+        title: "Buy the move before it's priced",
+        body: "Enter while IV is still subdued, before the market fully prices the event. You pay less and benefit from IV expansion as the catalyst nears — then exit into the spike rather than holding through the crush.",
+      },
+    ],
+    whenToUse: [
+      "A known NIFTY catalyst is imminent (budget, RBI/Fed, major data) and you expect a large move.",
+      "Implied volatility is still relatively low, so you buy the move before it's fully priced.",
+      "You can act quickly to capture the move before the post-event IV crush.",
+    ],
+    risks: [
+      "Theta and IV crush are brutal — a quiet event decays both legs fast.",
+      "You can be right that 'it'll move' and still lose if the move is too small to cover both premiums.",
+      "Use a time stop; don't let a dead straddle bleed toward zero.",
+    ],
+    faq: [
+      {
+        q: "When is a Long Straddle on NIFTY worth it?",
+        a: "Ahead of high-impact, binary events — the Union Budget, RBI or Fed decisions, big data prints — where a large move is likely but the direction is genuinely uncertain. It profits if NIFTY moves enough in either direction to exceed the combined premium.",
+      },
+      {
+        q: "Why do long straddles often lose even when NIFTY moves?",
+        a: "Because of implied-volatility crush. IV gets bid up before an event and collapses right after; if the actual move is smaller than the move that was priced in, both legs lose value despite NIFTY moving. Entering while IV is low and exiting into the spike is key.",
+      },
+      {
+        q: "Long Straddle vs Long Strangle on NIFTY?",
+        a: "The straddle buys ATM options — more expensive but profits on a smaller move. The strangle buys cheaper OTM options but needs a bigger move. Use the straddle when you expect a large move and want it to pay sooner.",
+      },
+    ],
+  },
+
+  // ── Long Strangle on NIFTY (Volatility) ───────────────────────────────────
+  "long-strangle-nifty": {
+    name: "Long Strangle on NIFTY",
+    index: "NIFTY",
+    category: "Volatility",
+    theme: "teal",
+    payoff: "valley",
+    badge: "Long Volatility · Lower Cost · Big-Move Bet",
+    tagline:
+      "Buy an OTM call and an OTM put on NIFTY for a cheaper, big-move bet — long volatility when you expect an outsized swing.",
+    keywords:
+      "long strangle nifty, nifty long strangle, cheap volatility play nifty, nifty otm straddle, buy strangle nifty",
+    intro: [
+      "The Long Strangle is the budget version of the Long Straddle. Instead of buying at-the-money options, you buy an out-of-the-money call and an out-of-the-money put. The lower premium means a cheaper entry — but NIFTY has to move further before the position pays.",
+      "It's a long-volatility, defined-risk trade: maximum loss is the combined premium, while a big move in either direction can multiply it. The OTM strikes make it ideal when you expect an outsized swing, not just a modest one.",
+      "As with any long-premium trade, time decay and IV crush are the enemies. The strangle's cheaper cost cushions the bleed somewhat, but it still wants the move to arrive quickly. Treat it as a short-duration, big-event or breakout tool with a time stop.",
+    ],
+    stats: [
+      { label: "Profit Driver", value: "Large move", note: "Either direction" },
+      { label: "Premium Paid", value: "₹120–200", note: "OTM call + put, weekly" },
+      { label: "Max Risk", value: "Premium Paid", note: "Defined, limited" },
+      { label: "Best Regime", value: "Pre-breakout / low IV", note: "Big move expected" },
+      { label: "Theta", value: "Negative", note: "Decay works against you" },
+      { label: "Hold Time", value: "Hours–2 days", note: "Around the move" },
+    ],
+    setup: [
+      { label: "Underlying", value: "NIFTY weekly/monthly options (50-point strikes)" },
+      { label: "Strikes", value: "Buy a ~0.20–0.30 delta OTM call and put" },
+      { label: "Entry Window", value: "Coiled range / pre-event, while IV is low" },
+      { label: "Profit Target", value: "Exit into the move / volatility spike" },
+      { label: "Stop Loss", value: "Time stop if the breakout doesn't come" },
+      { label: "Key Risk", value: "Needs a larger move than a straddle to pay" },
+    ],
+    legs: [
+      { action: "BUY", type: "PE", strike: "~0.20–0.30 delta OTM", note: "Long OTM put" },
+      { action: "BUY", type: "CE", strike: "~0.20–0.30 delta OTM", note: "Long OTM call" },
+    ],
+    edges: [
+      {
+        title: "Cheaper long-volatility exposure",
+        body: "Buying OTM rather than ATM lowers the premium meaningfully, so a strangle costs less to put on than a straddle — useful when you expect a large move and want to risk less capital per bet.",
+      },
+      {
+        title: "Defined risk, leveraged to big swings",
+        body: "Your downside is capped at the premium, while an outsized NIFTY move can return several times the cost. The further-OTM strikes mean the payoff really opens up on the kind of breakout that a straddle would already be deep in profit on.",
+      },
+      {
+        title: "Great for coiled ranges",
+        body: "When NIFTY tightens into a narrow range before a breakout, a cheap strangle is a clean way to position for the eventual expansion without betting on the direction.",
+      },
+    ],
+    whenToUse: [
+      "You expect an unusually large NIFTY move (breakout or big event) and want a lower-cost long-vol bet.",
+      "IV is still low, so you buy the move before it's priced in.",
+      "NIFTY is coiled in a tight range and a volatility expansion looks imminent.",
+    ],
+    risks: [
+      "Needs a bigger move than a straddle — a moderate move can still leave it a loser.",
+      "Theta and IV crush erode the premium if the breakout is slow to arrive.",
+      "Use a time stop; OTM options can decay to near-zero fast if NIFTY stalls.",
+    ],
+    faq: [
+      {
+        q: "Long Strangle vs Long Straddle on NIFTY — which should I buy?",
+        a: "The strangle is cheaper (OTM strikes) but needs a bigger move to profit; the straddle costs more (ATM strikes) but pays on a smaller move. Use the strangle when you expect an outsized swing and want lower cost, the straddle when you want the move to pay sooner.",
+      },
+      {
+        q: "Which deltas should I buy for a NIFTY Long Strangle?",
+        a: "Buying around 0.20–0.30 delta on each side balances cost against the move needed. Closer-to-money strikes cost more but pay on a smaller move; further OTM is cheaper but needs a larger breakout.",
+      },
+      {
+        q: "How do I avoid IV crush on a long strangle?",
+        a: "Enter while implied volatility is still low — before the market prices the event — and exit into the volatility spike rather than holding through it. A time stop prevents a stalled breakout from bleeding the premium to zero.",
+      },
+    ],
+  },
+
+  // ── Bull Put Spread on BANKNIFTY (Bullish credit) ─────────────────────────
+  "bull-put-spread-banknifty": {
+    name: "Bull Put Spread on BANKNIFTY",
+    index: "BANKNIFTY",
+    category: "Bullish",
+    theme: "emerald",
+    payoff: "ramp-up",
+    badge: "Bullish Credit · Defined Risk · Theta Positive",
+    tagline:
+      "Get paid to be bullish on BANKNIFTY — sell a put spread below support and keep the fat credit while the index holds up.",
+    keywords:
+      "bull put spread banknifty, banknifty credit spread, bullish credit spread banknifty, banknifty put selling defined risk, sell put spread banknifty",
+    intro: [
+      "The Bull Put Spread is the credit way to be bullish on BANKNIFTY. You sell an OTM put and buy a further OTM put for protection, collecting a net credit. As long as BANKNIFTY stays above your short put, both options expire worthless and you keep the premium.",
+      "BANKNIFTY's higher implied volatility makes its put spreads especially attractive — you collect a fatter credit for the same probability of profit than you would on NIFTY. Theta works for you daily, and you profit even if the index just holds flat or drifts up.",
+      "Risk is defined by the spread width minus the credit, fixed on entry. Anchored to a real BANKNIFTY support level, it's a capital-efficient, defined-risk way to say 'the banks hold here' without paying upfront for a directional bet.",
+    ],
+    stats: [
+      { label: "Typical Win Rate", value: "65–72%", note: "Profits flat, up, or mildly down" },
+      { label: "Credit Collected", value: "30–40%", note: "Of spread width" },
+      { label: "Max Risk / Lot", value: "Capped", note: "Width minus credit" },
+      { label: "Best Regime", value: "Bullish / range", note: "Above support" },
+      { label: "Theta", value: "Positive", note: "Decay favours you" },
+      { label: "Margin / Lot", value: "₹25k–40k", note: "Defined-risk margin" },
+    ],
+    setup: [
+      { label: "Underlying", value: "BANKNIFTY weekly/monthly options (100-pt strikes)" },
+      { label: "Sell Leg", value: "OTM put below key support (~0.25–0.30 delta)" },
+      { label: "Buy Leg", value: "200–400 points below the short put" },
+      { label: "Entry Window", value: "Support reclaim, elevated IV, mild bullishness" },
+      { label: "Profit Target", value: "50% of the credit received" },
+      { label: "Stop Loss", value: "Exit if support breaks / short put goes ITM" },
+    ],
+    legs: [
+      { action: "SELL", type: "PE", strike: "OTM below support", note: "Short put — collects credit" },
+      { action: "BUY", type: "PE", strike: "further OTM", note: "Long put — caps downside" },
+    ],
+    edges: [
+      {
+        title: "Fatter credit than NIFTY",
+        body: "BANKNIFTY's elevated IV means its OTM puts are worth more, so the same-probability put spread collects a bigger credit than on NIFTY — more income for the defined risk you take.",
+      },
+      {
+        title: "Three ways to win",
+        body: "You profit whether BANKNIFTY rises, stays flat, or even dips slightly — as long as it holds above the short put. That's a far wider winning zone than a debit trade, which needs an actual up-move.",
+      },
+      {
+        title: "Sell into post-dip fear",
+        body: "After a pullback, BANKNIFTY IV spikes and puts inflate. Selling the spread just below a tested support level lets you collect that richer premium with the market's own structure backing the trade.",
+      },
+    ],
+    whenToUse: [
+      "You're mildly bullish or neutral-to-bullish and expect a BANKNIFTY support to hold.",
+      "IV is elevated (often after a dip), fattening the credit.",
+      "You want a defined-risk, theta-positive way to be long without paying upfront.",
+    ],
+    risks: [
+      "A break below support pushes the short put ITM toward max loss — honor the stop.",
+      "Reward is capped at the credit; a strong rally doesn't pay more.",
+      "Avoid holding through bank results or RBI policy that could gap BANKNIFTY below the short strike.",
+    ],
+    faq: [
+      {
+        q: "Why is a Bull Put Spread attractive on BANKNIFTY?",
+        a: "BANKNIFTY's higher implied volatility inflates put premiums, so the credit you collect for a given probability of profit is larger than on NIFTY. With protective wings the risk is still capped, making it an efficient bullish income trade.",
+      },
+      {
+        q: "How wide should a BANKNIFTY Bull Put Spread be?",
+        a: "Often 200–400 points between the short and long put, with the short strike just below a meaningful support. Wider spreads collect more credit but risk more capital; narrower spreads are cheaper with a smaller maximum loss.",
+      },
+      {
+        q: "What's the max loss on a Bull Put Spread?",
+        a: "It's the spread width minus the net credit, fixed on entry no matter how far BANKNIFTY falls. That defined, known risk is the main reason traders prefer credit spreads over naked put selling.",
+      },
+    ],
+  },
+
+  // ── Bear Call Spread on BANKNIFTY (Bearish credit) ────────────────────────
+  "bear-call-spread-banknifty": {
+    name: "Bear Call Spread on BANKNIFTY",
+    index: "BANKNIFTY",
+    category: "Bearish",
+    theme: "rose",
+    payoff: "ramp-down",
+    badge: "Bearish Credit · Defined Risk · Theta Positive",
+    tagline:
+      "Get paid to fade BANKNIFTY — sell a call spread above resistance and keep the rich credit while the index stays capped.",
+    keywords:
+      "bear call spread banknifty, banknifty bearish credit spread, sell call spread banknifty, defined risk bearish banknifty, banknifty resistance strategy",
+    intro: [
+      "The Bear Call Spread is how you fade BANKNIFTY with defined risk. You sell an OTM call and buy a further OTM call for protection, collecting a net credit. As long as BANKNIFTY stays below your short call, you keep the premium.",
+      "BANKNIFTY's high IV makes the credit especially juicy, and as a credit trade theta works for you — you win even if the index just stalls or drifts down below resistance. No crash required, just a ceiling that holds.",
+      "Shorting BANKNIFTY futures has open-ended risk if you're wrong; the Bear Call Spread caps the damage at the spread width minus credit. It's the disciplined way to fade an overextended rally or express 'the banks are tired here'.",
+    ],
+    stats: [
+      { label: "Typical Win Rate", value: "65–72%", note: "Profits flat, down, or mildly up" },
+      { label: "Credit Collected", value: "30–40%", note: "Of spread width" },
+      { label: "Max Risk / Lot", value: "Capped", note: "Width minus credit" },
+      { label: "Best Regime", value: "Bearish / range", note: "Below resistance" },
+      { label: "Theta", value: "Positive", note: "Decay favours you" },
+      { label: "Margin / Lot", value: "₹25k–40k", note: "Defined-risk margin" },
+    ],
+    setup: [
+      { label: "Underlying", value: "BANKNIFTY weekly/monthly options (100-pt strikes)" },
+      { label: "Sell Leg", value: "OTM call above resistance (~0.25–0.30 delta)" },
+      { label: "Buy Leg", value: "200–400 points above the short call" },
+      { label: "Entry Window", value: "Resistance rejection, overbought, elevated IV" },
+      { label: "Profit Target", value: "50% of the credit received" },
+      { label: "Stop Loss", value: "Exit if resistance breaks / short call goes ITM" },
+    ],
+    legs: [
+      { action: "SELL", type: "CE", strike: "OTM above resistance", note: "Short call — collects credit" },
+      { action: "BUY", type: "CE", strike: "further OTM", note: "Long call — caps upside risk" },
+    ],
+    edges: [
+      {
+        title: "Richest bearish credit on the NSE",
+        body: "BANKNIFTY's elevated IV inflates call premiums, so a bear call spread collects a bigger credit than the same structure on NIFTY — more income for the defined risk.",
+      },
+      {
+        title: "Win without a crash",
+        body: "You profit if BANKNIFTY falls, stays flat, or even ticks up slightly, as long as it holds below the short call. You don't have to call a top precisely — just identify a ceiling.",
+      },
+      {
+        title: "Capped-risk way to be bearish",
+        body: "Shorting BANKNIFTY futures can blow up on a squeeze. The spread caps the loss at width minus credit, so a sharp rally can't run away with the account.",
+      },
+    ],
+    whenToUse: [
+      "You're mildly bearish or neutral and expect a BANKNIFTY resistance to cap the upside.",
+      "BANKNIFTY looks overbought / has rejected resistance, with elevated IV.",
+      "You want defined-risk downside exposure without shorting futures.",
+    ],
+    risks: [
+      "A breakout above resistance pushes the short call ITM toward max loss — respect the stop.",
+      "Reward is capped at the credit regardless of how far BANKNIFTY falls.",
+      "Squeezes and result-day gap-ups are the main threat; avoid holding through bullish catalysts.",
+    ],
+    faq: [
+      {
+        q: "How does a Bear Call Spread make money on BANKNIFTY?",
+        a: "You sell an OTM BANKNIFTY call and buy a further OTM call for protection, collecting a net credit. You keep it as long as BANKNIFTY expires below the short call — so you profit if it falls, stays flat, or rises only slightly, with theta helping you throughout.",
+      },
+      {
+        q: "Why trade it on BANKNIFTY instead of NIFTY?",
+        a: "BANKNIFTY's higher implied volatility means a richer credit for the same probability of profit. The trade-off is bigger gap risk on bank results and RBI policy, so size carefully and avoid holding through those events.",
+      },
+      {
+        q: "Where should the short call go?",
+        a: "Just above a meaningful resistance level, commonly around 0.25–0.30 delta, with protection 200–400 points higher. Anchoring to real resistance raises the odds BANKNIFTY stays below your short strike.",
+      },
+    ],
+  },
+
+  // ── Bull Call Spread on FINNIFTY (Bullish, debit) ─────────────────────────
+  "bull-call-spread-finnifty": {
+    name: "Bull Call Spread on FINNIFTY",
+    index: "FINNIFTY",
+    category: "Bullish",
+    theme: "indigo",
+    payoff: "ramp-up",
+    badge: "Directional Bullish · Defined Risk · Low Cost",
+    tagline:
+      "Play a bullish FINNIFTY view cheaply — buy a call and sell a higher call to finance it, with risk capped at the net debit.",
+    keywords:
+      "bull call spread finnifty, finnifty bullish strategy, finnifty debit spread, defined risk bullish finnifty, finnifty call spread",
+    intro: [
+      "When you're bullish on FINNIFTY but don't want to overpay for a naked call or bleed theta waiting, the Bull Call Spread is the efficient choice. You buy a call near the money and sell a higher call against it, financing part of the cost.",
+      "The sold call caps your upside but slashes your cost and pulls your breakeven closer to spot. On FINNIFTY, where the financial-services heavyweights tend to grind rather than gap, that lower breakeven makes a directional bet meaningfully more achievable.",
+      "Your maximum loss is the net debit, fixed on entry. It's the disciplined way to play a FINNIFTY breakout, an oversold bounce in financials, or a pre-results drift higher — defined risk, no margin calls.",
+    ],
+    stats: [
+      { label: "Typical Win Rate", value: "52–56%", note: "Directional trades win less often" },
+      { label: "Avg Trade ROI", value: "12–18%", note: "On net debit deployed" },
+      { label: "Max Risk", value: "Net Debit", note: "Capped on entry" },
+      { label: "Best Regime", value: "Breakout / bounce", note: "Moderately bullish" },
+      { label: "Theta Drag", value: "Reduced", note: "Short call offsets decay" },
+      { label: "Capital / Lot", value: "₹4k–9k", note: "Net debit per lot" },
+    ],
+    setup: [
+      { label: "Underlying", value: "FINNIFTY monthly options (50-point strikes)" },
+      { label: "Buy Leg", value: "ATM or slightly ITM call" },
+      { label: "Sell Leg", value: "150–250 points OTM call" },
+      { label: "Entry Window", value: "At support reclaim or pre-bullish-event" },
+      { label: "Profit Target", value: "70–80% of the spread width" },
+      { label: "Stop Loss", value: "Exit on support break / thesis invalidation" },
+    ],
+    legs: [
+      { action: "BUY", type: "CE", strike: "ATM / slightly ITM", note: "Long call — the engine" },
+      { action: "SELL", type: "CE", strike: "150–250 pts OTM", note: "Short call — finances the trade" },
+    ],
+    edges: [
+      {
+        title: "Theta drag, neutralised",
+        body: "A naked FINNIFTY call bleeds if the move stalls. In a spread, the short call decays in your favour at nearly the rate the long call decays against you, so a few flat days barely dent the position.",
+      },
+      {
+        title: "Lower breakeven on a grinding index",
+        body: "FINNIFTY tends to trend in grinds rather than gaps. The credit from the short call lowers your breakeven, so you need a smaller, more realistic move to turn profitable than a naked call would require.",
+      },
+      {
+        title: "Defined risk, fine strike control",
+        body: "FINNIFTY's 50-point grid lets you place the short strike right at a realistic target, dialing in the reward — while the worst case stays fixed at the net debit.",
+      },
+    ],
+    whenToUse: [
+      "You're moderately bullish on FINNIFTY — expecting a move toward a target, not a moonshot.",
+      "IV is high and you want to avoid overpaying for a naked call.",
+      "You want a capped-risk, capital-efficient way to play a breakout or bounce in financials.",
+    ],
+    risks: [
+      "Capped upside — a big rally past the short strike leaves gains on the table.",
+      "Still a directional bet: a drop below support takes the position toward max loss.",
+      "Thinner FINNIFTY liquidity — use limit orders and check spreads before entering each leg.",
+    ],
+    faq: [
+      {
+        q: "Why a Bull Call Spread instead of a naked FINNIFTY call?",
+        a: "A naked call is costlier and bleeds theta if the move is slow. The spread sells a higher call to finance the purchase, cutting cost, lowering the breakeven, and reducing time decay — at the cost of a capped upside.",
+      },
+      {
+        q: "How wide should a FINNIFTY Bull Call Spread be?",
+        a: "Set the short strike near your realistic target, often 150–250 points above the long strike given FINNIFTY's 50-point grid. Wider spreads cost and pay more; narrower ones are cheaper with smaller maximum profit.",
+      },
+      {
+        q: "Is FINNIFTY liquid enough for a debit spread?",
+        a: "Around the at-the-money strikes on the monthly expiry, yes. Liquidity thins in deep OTM strikes, so keep the spread within a sensible range and use limit orders on both legs.",
+      },
+    ],
+  },
+
+  // ── Calendar Spread on BANKNIFTY (Volatility / time decay) ────────────────
+  "calendar-spread-banknifty": {
+    name: "Calendar Spread on BANKNIFTY",
+    index: "BANKNIFTY",
+    category: "Volatility",
+    theme: "teal",
+    payoff: "tent",
+    badge: "Time-Decay Edge · Long Vega · Defined Risk",
+    tagline:
+      "Sell a near-term BANKNIFTY option and buy a longer-dated one at the same strike — profit from faster front-month decay and a volatility pop.",
+    keywords:
+      "calendar spread banknifty, banknifty time spread, banknifty horizontal spread, long vega banknifty, banknifty theta strategy",
+    intro: [
+      "A Calendar Spread (or time spread) sells a near-term BANKNIFTY option and buys a longer-dated option at the same strike. You profit from the fact that the near-term option decays faster than the one you own — and from any expansion in implied volatility, since the long leg is more vega-sensitive.",
+      "It's a nuanced, defined-risk structure best placed at the money or just OTM. The position likes BANKNIFTY pinning near the strike into the near-term expiry, plus a stable-to-rising IV environment that lifts the value of your longer-dated long leg.",
+      "Maximum loss is the net debit paid. The calendar is a favourite for low-IV regimes where you expect a volatility pop, or as a calmer way to express a 'BANKNIFTY stays near here for now' view without the open-ended risk of naked selling.",
+    ],
+    stats: [
+      { label: "Typical Win Rate", value: "60–66%", note: "When BANKNIFTY pins near strike" },
+      { label: "Net Debit", value: "₹150–280", note: "Long leg minus short leg" },
+      { label: "Max Risk", value: "Net Debit", note: "Defined, limited" },
+      { label: "Best Regime", value: "Low / rising IV", note: "Stable-to-up vega" },
+      { label: "Vega", value: "Positive", note: "Long leg gains on IV pops" },
+      { label: "Hold Time", value: "Into near-expiry", note: "Front-month decay" },
+    ],
+    setup: [
+      { label: "Underlying", value: "BANKNIFTY options, two expiries, same strike" },
+      { label: "Sell Leg", value: "Near-term ATM (or slightly OTM) option" },
+      { label: "Buy Leg", value: "Next-expiry option at the SAME strike" },
+      { label: "Entry Window", value: "Low IV, BANKNIFTY consolidating near strike" },
+      { label: "Profit Target", value: "Exit near front-month expiry / on IV pop" },
+      { label: "Key Risk", value: "A big directional move away from the strike" },
+    ],
+    legs: [
+      { action: "SELL", type: "CE", strike: "near-term ATM", note: "Short front-month — fast decay" },
+      { action: "BUY", type: "CE", strike: "next-expiry, same strike", note: "Long back-month — holds value" },
+    ],
+    edges: [
+      {
+        title: "Front-month decays fastest",
+        body: "Theta accelerates as expiry nears, so the near-term option you sold loses value faster than the longer-dated one you own. As long as BANKNIFTY stays near the strike, that decay differential is your profit.",
+      },
+      {
+        title: "Long vega for the IV pop",
+        body: "The back-month leg is more sensitive to implied volatility. In a low-IV regime, a volatility expansion lifts your long leg more than your short leg — a second engine of profit beyond pure time decay.",
+      },
+      {
+        title: "Defined risk on a violent index",
+        body: "Naked selling on BANKNIFTY carries open-ended risk. The calendar's maximum loss is simply the net debit, making it a far calmer way to express a 'stays near here, vol may rise' view.",
+      },
+    ],
+    whenToUse: [
+      "BANKNIFTY is consolidating near a strike and you expect it to stay there into the near-term expiry.",
+      "Implied volatility is low and you expect a volatility expansion.",
+      "You want a defined-risk, long-vega alternative to naked premium selling.",
+    ],
+    risks: [
+      "A large directional move away from the strike is the main enemy — the spread loses value on both sides.",
+      "Falling IV hurts the long leg; calendars dislike a volatility collapse.",
+      "Requires more nuanced management than a vertical spread — model the payoff before entering.",
+    ],
+    faq: [
+      {
+        q: "How does a BANKNIFTY Calendar Spread make money?",
+        a: "Two ways: the near-term option you sold decays faster than the longer-dated option you bought (a positive time-decay differential), and the longer-dated leg gains value if implied volatility expands. It works best when BANKNIFTY pins near the strike into the near-term expiry.",
+      },
+      {
+        q: "When is the best time to put on a calendar spread?",
+        a: "In low-IV regimes when you expect volatility to rise and BANKNIFTY to stay near a strike for now. You want the front-month theta to work and the back-month vega to benefit from a volatility pop.",
+      },
+      {
+        q: "What's the biggest risk of a calendar spread?",
+        a: "A large directional move away from the strike, which erodes the spread on either side, and a collapse in implied volatility, which hurts the long back-month leg. Maximum loss is capped at the net debit you paid.",
+      },
+    ],
+  },
 };
 
 // Helper for routes/sitemap/hub.
