@@ -1,5 +1,13 @@
 import Link from "next/link";
 import { ArrowRight, BarChart2, TrendingUp, Shield, Zap, Target, BookOpen, ChevronRight, Activity, Percent, Calendar, RefreshCcw, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { STRATEGIES as STRATEGY_DATA, STRATEGY_SLUGS } from "@/data/strategies";
+
+const CATEGORY_STYLE = {
+  Neutral: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10",
+  Bullish: "text-indigo-400 border-indigo-500/30 bg-indigo-500/10",
+  Bearish: "text-rose-400 border-rose-500/30 bg-rose-500/10",
+  Volatility: "text-teal-400 border-teal-500/30 bg-teal-500/10",
+};
 
 export const metadata = {
   title: "Best NSE Options Strategies 2025 | NIFTY & BANKNIFTY Backtested Results | OptionsGyani",
@@ -385,6 +393,42 @@ export default function StrategiesPage() {
                 </div>
               </Link>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* More Strategies — data-driven matrix (index × strategy) */}
+      <section className="px-4 pb-24 relative z-10">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-12 text-center">
+            <h2 className="text-3xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">The Full Strategy Matrix</h2>
+            <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+              Every major options structure, mapped across NIFTY, BANKNIFTY & FINNIFTY — with setup, payoff, and backtest links.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {STRATEGY_SLUGS.map((slug) => {
+              const s = STRATEGY_DATA[slug];
+              return (
+                <Link
+                  key={slug}
+                  href={`/strategies/${slug}`}
+                  className="group relative rounded-2xl border border-slate-800 bg-slate-900/50 p-6 hover:border-slate-600 hover:-translate-y-1 transition-all flex flex-col"
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full border ${CATEGORY_STYLE[s.category] || CATEGORY_STYLE.Neutral}`}>
+                      {s.category}
+                    </span>
+                    <span className="text-[11px] font-bold text-slate-500">{s.index}</span>
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-100 group-hover:text-white mb-2 transition-colors">{s.name}</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed line-clamp-3 flex-1">{s.tagline}</p>
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-slate-300 group-hover:text-white transition-colors">
+                    View strategy <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </span>
+                </Link>
+              );
+            })}
           </div>
         </div>
       </section>

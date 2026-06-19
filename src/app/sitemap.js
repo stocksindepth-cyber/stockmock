@@ -1,3 +1,5 @@
+import { STRATEGY_SLUGS } from "@/data/strategies";
+
 export default function sitemap() {
   const baseUrl = "https://optionsgyani.com";
 
@@ -57,7 +59,10 @@ export default function sitemap() {
     "backtesting-guide",
   ];
 
-  const strategyPages = strategySlugs.map((slug) => ({
+  // Data-driven strategy pages (src/data/strategies) rendered via [slug] route.
+  const allStrategySlugs = [...strategySlugs, ...STRATEGY_SLUGS];
+
+  const strategyPages = allStrategySlugs.map((slug) => ({
     url: `${baseUrl}/strategies/${slug}`,
     lastModified: new Date(),
     changeFrequency: "monthly",
