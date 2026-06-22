@@ -8,6 +8,7 @@ export const metadata = {
   keywords: "bear put spread nifty, bear put spread india, defined risk bearish option strategy, nifty options selling, debit spread nifty",
   alternates: { canonical: "https://optionsgyani.com/strategies/bear-put-spread-nifty" },
   openGraph: {
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Bear Put Spread NIFTY — Strategy & Backtest | OptionsGyani",
     description: "Verified historical win rate 51.8%, avg 5.1% ROI per trade. Safely short NIFTY without huge margins.",
     url: "https://optionsgyani.com/strategies/bear-put-spread-nifty",

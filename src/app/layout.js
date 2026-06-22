@@ -38,14 +38,9 @@ export const metadata = {
     description: "Backtest Iron Condor, Short Straddle, and 10+ strategies on 8+ years of real NIFTY & BANKNIFTY data. Live option chain, IVP/IVR, OI analysis. Free for Indian traders.",
     url: "https://optionsgyani.com",
     siteName: "OptionsGyani",
-    images: [
-      {
-        url: "/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "OptionsGyani — NSE Options Analytics Platform",
-      },
-    ],
+    // og:image is provided site-wide by the file convention
+    // src/app/opengraph-image.png (inherited by every route, incl. child
+    // segments that set their own openGraph title/description).
     locale: "en_IN",
     type: "website",
   },
@@ -53,7 +48,7 @@ export const metadata = {
     card: "summary_large_image",
     title: "OptionsGyani — Free NSE Options Backtesting & Analytics",
     description: "Iron Condor, Short Straddle, Bull Spread — backtested on 8 years of real NSE data. Live IV, Greeks, IVP/IVR. Free for Indian options traders.",
-    images: ["/og-image.png"],
+    // twitter:image provided by src/app/twitter-image.png (file convention).
     creator: "@OptionsGyani",
   },
   alternates: {

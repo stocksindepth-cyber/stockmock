@@ -8,6 +8,7 @@ export const metadata = {
   keywords: "calendar spread nifty, horizontal spread options, nifty multi expiry options, volatility expansion strategy, long calendar spread",
   alternates: { canonical: "https://optionsgyani.com/strategies/calendar-spread-nifty" },
   openGraph: {
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Calendar Spread NIFTY — Playbook & Data | OptionsGyani",
     description: "Verified historical win rate 64.3%. Cash in on differing time decay curves.",
     url: "https://optionsgyani.com/strategies/calendar-spread-nifty",

@@ -15,6 +15,7 @@ export const metadata = {
   keywords: "best nifty options strategy, banknifty weekly expiry strategy, iron condor nifty backtest, short straddle nifty historical performance, options strategy NSE, non directional options strategy india",
   alternates: { canonical: "https://optionsgyani.com/strategies" },
   openGraph: {
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Best NSE Options Strategies — Backtested with Real Data | OptionsGyani",
     description: "Iron Condor, Short Straddle, Short Strangle — all backtested on 8+ years of real NSE data. Free for Indian traders.",
     url: "https://optionsgyani.com/strategies",

@@ -8,6 +8,7 @@ export const metadata = {
   keywords: "nifty weekly expiry strategy, nifty thursday expiry options, weekly options india guide, best day to sell nifty options, nifty expiry day strategy, 0dte nifty options",
   alternates: { canonical: "https://optionsgyani.com/strategies/nifty-weekly-expiry-guide" },
   openGraph: {
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "NIFTY Weekly Expiry Playbook 2025 (Backtest Verified) | OptionsGyani",
     description: "Daily quantitative roadmap for NIFTY weekly options, built on 8 years of tick data.",
     url: "https://optionsgyani.com/strategies/nifty-weekly-expiry-guide",

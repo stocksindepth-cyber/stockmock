@@ -7,6 +7,7 @@ export const metadata = {
   description: "In-depth broker reviews, comparisons and guides for Indian F&O traders. Compare Dhan, Zerodha, Upstox, Angel One on brokerage, platform, and options analytics.",
   alternates: { canonical: "https://optionsgyani.com/brokers" },
   openGraph: {
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Broker Guides for Indian F&O Traders 2025",
     description: "Honest broker reviews and comparisons for NIFTY and BANKNIFTY options traders in India.",
     url: "https://optionsgyani.com/brokers",

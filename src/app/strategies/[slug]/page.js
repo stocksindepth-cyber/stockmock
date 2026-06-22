@@ -29,7 +29,8 @@ export async function generateMetadata({ params }) {
     description,
     keywords: s.keywords,
     alternates: { canonical: url },
-    openGraph: { title, description, url, type: "article" },
+    openGraph: {
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }], title, description, url, type: "article" },
   };
 }
 

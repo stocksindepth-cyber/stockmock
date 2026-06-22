@@ -8,6 +8,7 @@ export const metadata = {
   keywords: "iron butterfly banknifty, banknifty option selling strictly defined risk, expiry day option strategy, sell straddle banknifty safe, delta neutral strategy india",
   alternates: { canonical: "https://optionsgyani.com/strategies/iron-butterfly-banknifty" },
   openGraph: {
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Iron Butterfly BANKNIFTY Strategy & Backtest Data | OptionsGyani",
     description: "Verified historical win rate 58.2%, avg 5.5% monthly ROI. Sleep peacefully holding overnight straddles by capping risk.",
     url: "https://optionsgyani.com/strategies/iron-butterfly-banknifty",

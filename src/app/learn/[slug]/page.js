@@ -17,6 +17,7 @@ export async function generateMetadata({ params }) {
     description: guide.meta,
     alternates: { canonical: `https://optionsgyani.com/learn/${slug}` },
     openGraph: {
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
       title: `${guide.title} | OptionsGyani`,
       description: guide.meta,
       url: `https://optionsgyani.com/learn/${slug}`,

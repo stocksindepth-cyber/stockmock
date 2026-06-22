@@ -8,6 +8,7 @@ export const metadata = {
   keywords: "short strangle finnifty, finnifty expiry strategy, sell strangle finnifty tuesday, option premium harvesting india, delta neutral strategy finnifty",
   alternates: { canonical: "https://optionsgyani.com/strategies/short-strangle-finnifty" },
   openGraph: {
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Short Strangle FINNIFTY — Tuesday Expiry Backtest | OptionsGyani",
     description: "Verified historical win rate 72.5%, avg 3.2% monthly ROI. Sell wings and collect Theta.",
     url: "https://optionsgyani.com/strategies/short-strangle-finnifty",

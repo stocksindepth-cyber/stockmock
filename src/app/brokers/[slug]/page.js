@@ -24,6 +24,7 @@ export async function generateMetadata({ params }) {
     keywords: article.keywords?.join(", "),
     alternates: { canonical: `https://optionsgyani.com/brokers/${slug}` },
     openGraph: {
+      images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
       title: article.metaTitle,
       description: article.metaDescription,
       url: `https://optionsgyani.com/brokers/${slug}`,
