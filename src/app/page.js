@@ -97,9 +97,9 @@ export default function Home() {
       <div className="absolute top-[30%] right-[10%] w-[30%] h-[30%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
 
       {/* ── Hero ── */}
-      <main className="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 flex flex-col lg:flex-row items-center justify-between max-w-7xl mx-auto z-10 gap-12">
+      <main className="relative pt-24 pb-16 md:pt-36 md:pb-28 px-6 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto z-10 gap-10 md:gap-12">
 
-        <div className="w-full lg:w-1/2 flex flex-col items-center lg:items-start text-center lg:text-left">
+        <div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-emerald-500/30 mb-8">
             <Activity className="w-4 h-4 text-emerald-400" />
             <span className="text-sm font-medium text-emerald-200">The Advanced Options Analytics Tool for NSE</span>
@@ -138,7 +138,7 @@ export default function Home() {
         </div>
 
         {/* Hero image */}
-        <div className="w-full lg:w-1/2 relative flex justify-center lg:justify-end">
+        <div className="w-full md:w-1/2 relative flex justify-center md:justify-end">
           <div className="relative w-full max-w-[500px] aspect-square rounded-3xl overflow-hidden glass-card border border-white/10 shadow-[0_0_80px_rgba(139,92,246,0.2)]">
             <Image
               src="/hero-dashboard.webp"

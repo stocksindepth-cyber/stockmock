@@ -269,7 +269,14 @@ function ChainContent() {
                       Updated {secondsSince}s ago
                     </span>
                   )}
-                  {String(dataSource).includes("simulat") && (
+                  {String(dataSource).includes("dhan") ? (
+                    <span
+                      className="text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300"
+                      title="Live exchange data — real LTP, OI, IV, and Greeks from NSE via Dhan."
+                    >
+                      ● Live exchange data
+                    </span>
+                  ) : String(dataSource).includes("simulat") && (
                     <span
                       className="text-xs px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300"
                       title="Premiums and Greeks are simulated with a Black-Scholes model anchored on the live index price — for practice and analysis, not a live broker feed."

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useMemo, useCallback } from "react";
-import { Plus, RotateCcw, Sparkles, Target, Zap, BookMarked, Check, Save } from "lucide-react";
+import { Plus, RotateCcw, Sparkles, Target, Zap, BookMarked, Check, Save, Lock } from "lucide-react";
 import PayoffChart from "@/components/PayoffChart";
 import StrategyLegRow from "@/components/StrategyLegRow";
 import GreeksPanel from "@/components/GreeksPanel";
 import TradeMetricsBar from "@/components/TradeMetricsBar";
 import ProtectedRoute from "@/components/ProtectedRoute";
+import UpgradeBanner from "@/components/UpgradeBanner";
 import { generatePayoffData, netPremium, calculatePOP } from "@/lib/options/payoff";
 import { getAllTemplates, generateStrategyLegs } from "@/lib/options/strategies";
 import { useAuth } from "@/context/AuthContext";
@@ -66,14 +67,15 @@ export default function BuilderPage() {
 // ─── Main content ─────────────────────────────────────────────────────────────
 
 function BuilderContent() {
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile } = useAuth();
   const [underlying, setUnderlying] = useState("NIFTY");
   const [spotPrice,  setSpotPrice]  = useState(22500);
   const [legs, setLegs] = useState([{
     type: "CE", action: "BUY", strike: 22500, premium: 150, lots: 1, lotSize: 75,
   }]);
-  const [saveMsg,    setSaveMsg]    = useState(null); // null | "saving" | "saved" | "error"
-  const [stratName,  setStratName]  = useState("");
+  const [saveMsg,      setSaveMsg]      = useState(null); // null | "saving" | "saved" | "error"
+  const [stratName,    setStratName]    = useState("");
+  const [upgradeOpen,  setUpgradeOpen]  = useState(false);
 
   const templates      = getAllTemplates();
   const underlyingMeta = useMemo(
@@ -107,6 +109,8 @@ function BuilderContent() {
 
   const handleSaveStrategy = useCallback(async () => {
     if (!currentUser || !legs.length) return;
+    const isFree = !userProfile?.plan || userProfile.plan === "free";
+    if (isFree) { setUpgradeOpen(true); return; }
     setSaveMsg("saving");
     try {
       const name = stratName.trim() ||
@@ -135,6 +139,11 @@ function BuilderContent() {
 
   return (
     <div className="min-h-screen bg-[#080C16]">
+      <UpgradeBanner
+        isOpen={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        message="Save strategies to your portfolio is a Pro feature. Upgrade to save unlimited strategies, run full backtests, and access 8+ years of NSE data."
+      />
       <main className="pt-20 pb-16 px-6 lg:px-10 max-w-[1440px] mx-auto">
 
         {/* ── Header ── */}
@@ -281,7 +290,9 @@ function BuilderContent() {
                         ? "bg-emerald-600/80 text-white border border-emerald-500/40"
                         : saveMsg === "error"
                           ? "bg-rose-600/80 text-white border border-rose-500/40"
-                          : "bg-violet-600 hover:bg-violet-500 text-white shadow-md shadow-violet-900/30 active:scale-[0.98]"
+                          : (!userProfile?.plan || userProfile.plan === "free")
+                            ? "bg-amber-600/80 hover:bg-amber-500/80 text-white border border-amber-500/40 active:scale-[0.98]"
+                            : "bg-violet-600 hover:bg-violet-500 text-white shadow-md shadow-violet-900/30 active:scale-[0.98]"
                     }`}
                   >
                     {saveMsg === "saving" ? (
@@ -290,6 +301,8 @@ function BuilderContent() {
                       <><Check className="w-3.5 h-3.5" /> Saved to Portfolio!</>
                     ) : saveMsg === "error" ? (
                       <>Failed – try again</>
+                    ) : (!userProfile?.plan || userProfile.plan === "free") ? (
+                      <><Lock className="w-3.5 h-3.5" /> Save to Portfolio — Pro</>
                     ) : (
                       <><BookMarked className="w-3.5 h-3.5" /> Save to Portfolio</>
                     )}

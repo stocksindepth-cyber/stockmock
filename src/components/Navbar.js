@@ -93,6 +93,7 @@ export default function Navbar() {
   }
 
   return (
+    <>
     <nav className="fixed top-0 left-0 right-0 z-50 bg-[#080C16]/90 backdrop-blur-xl border-b border-white/5">
       <div className="w-full mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -285,7 +286,7 @@ export default function Navbar() {
               </div>
             ) : (
               <div className="flex items-center gap-2 sm:gap-3">
-                <Link href="/login" className="px-3 md:px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors">
+                <Link href="/login" className="hidden sm:flex px-3 md:px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition-colors">
                   Log In
                 </Link>
                 <Link href="/signup" className="px-3 md:px-4 py-2 text-sm font-semibold bg-white text-slate-900 rounded-lg hover:bg-slate-200 transition-colors">
@@ -294,121 +295,168 @@ export default function Navbar() {
               </div>
             )}
 
-            {/* Hamburger — mobile / tablet only */}
+            {/* Hamburger — animated bars → X */}
             <button
               onClick={() => setMobileOpen((o) => !o)}
-              className="lg:hidden p-2 text-slate-400 hover:text-white ml-1 rounded-lg hover:bg-white/5 transition-colors"
+              className="lg:hidden relative w-9 h-9 flex flex-col items-center justify-center gap-[5px] ml-1 rounded-lg hover:bg-white/8 transition-colors group"
               aria-label="Toggle navigation"
+              aria-expanded={mobileOpen}
             >
-              {mobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              <span className={`block h-[1.5px] bg-slate-300 rounded-full transition-all duration-300 origin-center ${mobileOpen ? "w-5 rotate-45 translate-y-[6.5px]" : "w-5"}`} />
+              <span className={`block h-[1.5px] bg-slate-300 rounded-full transition-all duration-200 ${mobileOpen ? "w-0 opacity-0" : "w-3.5"}`} />
+              <span className={`block h-[1.5px] bg-slate-300 rounded-full transition-all duration-300 origin-center ${mobileOpen ? "w-5 -rotate-45 -translate-y-[6.5px]" : "w-5"}`} />
             </button>
           </div>
         </div>
       </div>
 
-      {/* ── Mobile / tablet drawer ── */}
-      {mobileOpen && (
-        <div className="lg:hidden border-t border-white/5 bg-[#0B0F19]/99 backdrop-blur-xl px-4 py-3 space-y-0.5 max-h-[85vh] overflow-y-auto">
+    </nav>
+
+      {/* ── Mobile drawer: backdrop + side panel — outside nav to avoid backdrop-filter stacking context ── */}
+      {/* Backdrop */}
+      <div
+        className={`lg:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
+        onClick={() => setMobileOpen(false)}
+        aria-hidden="true"
+      />
+
+      {/* Side panel slides from right */}
+      <div
+        className={`lg:hidden fixed top-0 right-0 h-screen w-[300px] z-50 bg-[#0B0F1A] border-l border-white/8 shadow-2xl flex flex-col transition-transform duration-300 ease-out ${mobileOpen ? "translate-x-0" : "translate-x-full"}`}
+      >
+        {/* Panel header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-white/6 shrink-0">
+          <Link href={currentUser ? "/dashboard" : "/"} onClick={() => setMobileOpen(false)} className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-md overflow-hidden border border-white/10">
+              <Image src="/logo.png" alt="OptionsGyani" width={28} height={28} className="object-cover" />
+            </div>
+            <span className="text-sm font-bold text-white tracking-tight">OptionsGyani</span>
+          </Link>
+          <button
+            onClick={() => setMobileOpen(false)}
+            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-white/8 transition-colors"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Scrollable content */}
+        <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
           {currentUser ? (
             <>
-              {/* Account summary strip */}
-              <div className="flex items-center gap-3 px-3 py-3 mb-2 bg-white/5 rounded-xl border border-white/8">
-                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30 overflow-hidden shrink-0">
+              {/* Profile card */}
+              <div className="flex items-center gap-3 p-3 mb-1 rounded-xl bg-gradient-to-r from-blue-500/10 to-indigo-500/5 border border-blue-500/15">
+                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center border border-blue-500/30 overflow-hidden shrink-0 relative">
                   {currentUser.photoURL ? (
                     <img src={currentUser.photoURL} alt="Avatar" className="w-full h-full object-cover" />
                   ) : (
-                    <span className="text-blue-400 font-bold">{currentUser.email?.charAt(0).toUpperCase()}</span>
+                    <span className="text-blue-400 font-bold text-sm">{currentUser.email?.charAt(0).toUpperCase()}</span>
+                  )}
+                  {userProfile?.plan && userProfile.plan !== "free" && (
+                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-amber-500 rounded-full border-2 border-[#0B0F1A]" />
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-white truncate">
+                  <p className="text-sm font-semibold text-white truncate leading-tight">
                     {currentUser.displayName || currentUser.email?.split("@")[0]}
                   </p>
-                  <p className="text-xs text-slate-400 truncate">{currentUser.email}</p>
+                  <p className="text-[11px] text-slate-500 truncate mt-0.5">{currentUser.email}</p>
                 </div>
-                <span className={`text-[10px] font-bold px-2 py-1 rounded-full uppercase shrink-0 ${
-                  userProfile?.plan !== "free" ? "bg-amber-500/20 text-amber-400" : "bg-slate-700/50 text-slate-400"
+                <span className={`text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-wider shrink-0 ${
+                  userProfile?.plan !== "free" ? "bg-amber-500/20 text-amber-400 border border-amber-500/20" : "bg-slate-700/60 text-slate-400"
                 }`}>
                   {userProfile?.plan || "Free"}
                 </span>
               </div>
 
               {/* Account links */}
-              <Link href="/dashboard" onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive("/dashboard") ? "bg-blue-500/20 text-blue-300" : "text-slate-300 hover:text-white hover:bg-white/5"}`}>
-                <LayoutDashboard className="w-4 h-4" /> Dashboard
-              </Link>
-              <Link href="/profile" onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive("/profile") ? "bg-blue-500/20 text-blue-300" : "text-slate-300 hover:text-white hover:bg-white/5"}`}>
-                <User className="w-4 h-4" /> My Profile
-              </Link>
-              <Link href="/pricing" onClick={() => setMobileOpen(false)} className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive("/pricing") ? "bg-blue-500/20 text-blue-300" : "text-slate-300 hover:text-white hover:bg-white/5"}`}>
-                <CreditCard className="w-4 h-4" /> Billing &amp; Plans
-              </Link>
+              <div className="space-y-0.5">
+                {[
+                  { href: "/dashboard", label: "Dashboard",      Icon: LayoutDashboard },
+                  { href: "/profile",   label: "My Profile",     Icon: User            },
+                  { href: "/pricing",   label: "Billing & Plans", Icon: CreditCard      },
+                ].map(({ href, label, Icon }) => (
+                  <Link key={href} href={href} onClick={() => setMobileOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${isActive(href) ? "bg-blue-500/15 text-blue-300" : "text-slate-300 hover:text-white hover:bg-white/6"}`}>
+                    <Icon className="w-4 h-4 shrink-0 opacity-70" /> {label}
+                  </Link>
+                ))}
+              </div>
 
-              <div className="h-px bg-white/5 mx-2 my-2" />
-              <p className="px-4 pt-1 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-widest">Tools</p>
+              {/* Tools section */}
+              <div className="pt-3">
+                <p className="px-3 pb-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Tools</p>
+                <div className="grid grid-cols-2 gap-1">
+                  {TOOL_LINKS.map(({ href, label, icon: Icon }) => (
+                    <Link key={href} href={href}
+                      onClick={() => { setMobileOpen(false); trackToolNavigate(label.toLowerCase().replace(/\s+/g, "_"), "navbar_mobile"); }}
+                      className={`flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium transition-all ${
+                        isActive(href) ? "bg-blue-500/20 text-blue-300 border border-blue-500/20" : "text-slate-400 hover:text-white hover:bg-white/6 border border-transparent"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5 shrink-0" /> {label}
+                    </Link>
+                  ))}
+                </div>
+              </div>
 
-              {TOOL_LINKS.map(({ href, label, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => { setMobileOpen(false); trackToolNavigate(label.toLowerCase().replace(/\s+/g, "_"), "navbar_mobile"); }}
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                    isActive(href) ? "bg-blue-500/20 text-blue-300" : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" /> {label}
-                </Link>
-              ))}
-
-              <div className="h-px bg-white/5 mx-2 my-2" />
-              <p className="px-4 pt-1 pb-2 text-xs font-semibold text-slate-500 uppercase tracking-widest">More</p>
-
-              {MORE_LINKS.map(({ href, label, icon: Icon }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                    isActive(href) ? "bg-blue-500/20 text-blue-300" : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" /> {label}
-                </Link>
-              ))}
-
-              <div className="h-px bg-white/5 mx-2 my-2" />
-              <button
-                onClick={handleSignOut}
-                className="flex items-center gap-3 w-full px-4 py-2.5 rounded-lg text-sm font-medium text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition-all"
-              >
-                <LogOut className="w-4 h-4" /> Sign Out
-              </button>
+              {/* Explore section */}
+              <div className="pt-3">
+                <p className="px-3 pb-1.5 text-[10px] font-semibold text-slate-500 uppercase tracking-widest">Explore</p>
+                <div className="space-y-0.5">
+                  {MORE_LINKS.map(({ href, label, icon: Icon, desc }) => (
+                    <Link key={href} href={href} onClick={() => setMobileOpen(false)}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-all group ${
+                        isActive(href) ? "bg-blue-500/15 text-blue-300" : "text-slate-400 hover:text-white hover:bg-white/6"
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity" />
+                      <div>
+                        <div className="text-xs font-medium leading-tight">{label}</div>
+                        <div className="text-[10px] text-slate-600 group-hover:text-slate-500 transition-colors leading-tight mt-0.5">{desc}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
             </>
           ) : (
             <>
-              {MARKETING_LINKS.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  onClick={() => setMobileOpen(false)}
-                  className={`flex items-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all ${
-                    isActive(href) ? "text-white bg-white/10" : "text-slate-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  {label}
+              <div className="space-y-0.5 pt-1">
+                {MARKETING_LINKS.map(({ href, label }) => (
+                  <Link key={href} href={href} onClick={() => setMobileOpen(false)}
+                    className={`flex items-center px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                      isActive(href) ? "text-white bg-white/10" : "text-slate-400 hover:text-white hover:bg-white/6"
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                ))}
+              </div>
+              <div className="pt-4 space-y-2">
+                <Link href="/login" onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm font-semibold text-slate-300 border border-white/10 hover:border-white/20 hover:text-white hover:bg-white/5 transition-all">
+                  Log In
                 </Link>
-              ))}
-              <div className="h-px bg-white/5 mx-2 my-2" />
-              <Link href="/login" onClick={() => setMobileOpen(false)} className="flex items-center px-4 py-2.5 rounded-lg text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 transition-all">
-                Log In
-              </Link>
-              <Link href="/signup" onClick={() => setMobileOpen(false)} className="flex items-center justify-center mx-2 py-2.5 rounded-lg text-sm font-semibold bg-white text-slate-900 hover:bg-slate-100 transition-all">
-                Sign Up Free
-              </Link>
+                <Link href="/signup" onClick={() => setMobileOpen(false)}
+                  className="flex items-center justify-center w-full py-2.5 rounded-xl text-sm font-bold bg-blue-600 text-white hover:bg-blue-500 transition-all shadow-lg shadow-blue-500/20">
+                  Sign Up Free →
+                </Link>
+              </div>
             </>
           )}
         </div>
-      )}
-    </nav>
+
+        {/* Bottom sign-out (logged in only) */}
+        {currentUser && (
+          <div className="shrink-0 px-3 py-3 border-t border-white/6">
+            <button onClick={handleSignOut}
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-slate-500 hover:text-rose-400 hover:bg-rose-500/8 transition-all">
+              <LogOut className="w-4 h-4 shrink-0" /> Sign Out
+            </button>
+          </div>
+        )}
+      </div>
+    </>
   );
 }

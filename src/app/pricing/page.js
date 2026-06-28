@@ -453,7 +453,7 @@ export default function PricingPage() {
         </div>
 
         {/* ── Social proof strip ── */}
-        <div className="grid grid-cols-3 gap-4 mb-16 max-w-2xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16 max-w-2xl mx-auto">
           {[
             { icon: <Users className="w-4 h-4" />, label: "Free to start", sub: "No card needed" },
             { icon: <Database className="w-4 h-4" />, label: "8+ years data", sub: "Real NSE Bhavcopy" },

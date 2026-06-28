@@ -64,7 +64,7 @@ export async function checkAndIncrementSimulationLimit(userId) {
       planAtExecution: data.plan 
     });
 
-    return { allowed: true };
+    return { allowed: true, count: currentRunCount + 1, limit };
   } catch (error) {
     if (error.code !== 'permission-denied') {
       console.warn("Firestore limit check failed:", error);

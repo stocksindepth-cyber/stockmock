@@ -90,7 +90,7 @@ export default function Footer() {
 
       {/* Main footer grid */}
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4 sm:gap-6 lg:gap-8">
           {/* Brand */}
           <div className="col-span-2 md:col-span-1">
             <Link href="/" className="flex items-center gap-2 mb-4">

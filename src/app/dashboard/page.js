@@ -330,6 +330,29 @@ function DashboardContent() {
           </div>
         </div>
 
+        {/* ── Pro upgrade strip (free users only) ── */}
+        {!isPro && (
+          <div className="mb-6 rounded-2xl border border-blue-500/20 bg-gradient-to-r from-blue-500/10 via-indigo-500/8 to-violet-500/10 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center shrink-0">
+                <Zap className="w-5 h-5 text-blue-400" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-white mb-0.5">You're on the Free plan</p>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Upgrade to Pro for <span className="text-slate-200">unlimited backtests</span>, <span className="text-slate-200">8+ years of NSE data</span>, and <span className="text-slate-200">saved strategy portfolios</span>.
+                </p>
+              </div>
+            </div>
+            <Link
+              href="/pricing"
+              className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-lg shadow-blue-900/30 whitespace-nowrap"
+            >
+              <Zap className="w-4 h-4" /> Upgrade to Pro
+            </Link>
+          </div>
+        )}
+
         {/* ── Plan & Usage ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-8">
           {/* Backtests used today */}

@@ -221,10 +221,10 @@ function MonthGroup({ group, underlying, expandedTrade, setExpandedTrade }) {
       {/* Trades within month */}
       {open && (
         <div className="divide-y divide-white/3 pl-4">
-          <div className="grid grid-cols-5 md:grid-cols-6 gap-3 px-4 py-1.5 text-[10px] text-slate-700 uppercase tracking-widest font-semibold">
+          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 px-4 py-1.5 text-[10px] text-slate-700 uppercase tracking-widest font-semibold">
             <span>#</span><span>Entry Date</span>
-            <span className="hidden md:block">Expiry</span>
-            <span className="hidden lg:block">Entry Spot</span>
+            <span className="hidden sm:block">Expiry</span>
+            <span className="hidden md:block">Entry Spot</span>
             <span>P&L</span><span>Cumulative</span>
           </div>
           {group.trades.map((trade) => (
@@ -295,11 +295,11 @@ function TradeRow({ trade, expanded, onToggle, underlying }) {
       className="border border-white/5 rounded-lg overflow-hidden cursor-pointer"
       onClick={onToggle}
     >
-      <div className={`grid grid-cols-5 md:grid-cols-6 gap-3 items-center px-4 py-2.5 text-sm ${trade.pnl >= 0 ? "bg-emerald-500/5" : "bg-rose-500/5"}`}>
+      <div className={`grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 items-center px-4 py-2.5 text-sm ${trade.pnl >= 0 ? "bg-emerald-500/5" : "bg-rose-500/5"}`}>
         <span className="text-slate-500 font-mono text-xs">{trade.cycle}</span>
         <span className="text-slate-300 text-xs">{trade.entryDate}</span>
-        <span className="text-slate-400 text-xs hidden md:block">{trade.expiryDate}</span>
-        <span className="text-slate-400 text-xs hidden lg:block">{trade.entrySpot?.toLocaleString()}</span>
+        <span className="text-slate-400 text-xs hidden sm:block">{trade.expiryDate}</span>
+        <span className="text-slate-400 text-xs hidden md:block">{trade.entrySpot?.toLocaleString()}</span>
         <span className={`font-mono font-semibold text-xs ${trade.pnl >= 0 ? "text-emerald-400" : "text-rose-400"}`}>
           {trade.pnl >= 0 ? "+" : ""}₹{trade.pnl?.toLocaleString()}
         </span>
@@ -438,6 +438,7 @@ function BacktestContent() {
   const [streamError, setStreamError] = useState(null);
   const [mounted,     setMounted]     = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
+  const [showNudge,   setShowNudge]   = useState(false);
   const [expandedTrade, setExpandedTrade] = useState(null);
   const [showTradeLog,  setShowTradeLog]  = useState(false);
   const [tradeLogView,  setTradeLogView]  = useState("list"); // "list" | "month"
@@ -450,7 +451,7 @@ function BacktestContent() {
   const abortRefB = useRef(null);
 
   const abortRef = useRef(null);
-  const { currentUser } = useAuth();
+  const { currentUser, userProfile } = useAuth();
 
   useEffect(() => setMounted(true), []);
 
@@ -539,6 +540,8 @@ function BacktestContent() {
 
     const limitCheck = await checkAndIncrementSimulationLimit(currentUser?.uid);
     if (!limitCheck.allowed) { setUpgradeOpen(true); return; }
+    const isFree = !userProfile?.plan || userProfile.plan === "free";
+    if (isFree && limitCheck.count >= 3) setShowNudge(true);
 
     // Reset all streaming state
     setTrades([]);
@@ -687,6 +690,25 @@ function BacktestContent() {
             No simulations, no synthetic curves.
           </p>
         </div>
+
+        {/* Soft upgrade nudge — shown after 3rd free backtest */}
+        {showNudge && (
+          <div className="mb-6 flex items-center justify-between gap-4 px-5 py-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25">
+            <div className="flex items-center gap-3 min-w-0">
+              <span className="text-amber-400 text-lg shrink-0">⚡</span>
+              <p className="text-sm text-amber-200 font-medium leading-snug">
+                You have {Math.max(0, (userProfile?.simulationsLimit || 5) - (userProfile?.simulationsRunToday || 0))} free backtests left today.{" "}
+                <span className="text-slate-400">Pro unlocks unlimited runs + 8 years of NSE data.</span>
+              </p>
+            </div>
+            <div className="flex items-center gap-2 shrink-0">
+              <a href="/pricing" className="text-xs font-bold text-amber-400 hover:text-amber-300 border border-amber-500/40 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
+                Go Pro →
+              </a>
+              <button onClick={() => setShowNudge(false)} className="text-slate-600 hover:text-slate-400 transition-colors text-xs px-1">✕</button>
+            </div>
+          </div>
+        )}
 
         {/* Controls */}
         <div className="glass-card rounded-2xl p-6 mb-8">
@@ -1252,11 +1274,11 @@ function BacktestContent() {
                     {/* ── All Trades (flat list) ── */}
                     {tradeLogView === "list" && (
                       <div className="divide-y divide-white/3 max-h-[600px] overflow-y-auto">
-                        <div className="grid grid-cols-5 md:grid-cols-6 gap-3 px-4 py-2 text-[10px] text-slate-600 uppercase tracking-widest font-semibold sticky top-0 bg-slate-950/95">
+                        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 px-4 py-2 text-[10px] text-slate-600 uppercase tracking-widest font-semibold sticky top-0 bg-slate-950/95">
                           <span>#</span>
                           <span>Entry Date</span>
-                          <span className="hidden md:block">Expiry</span>
-                          <span className="hidden lg:block">Entry Spot</span>
+                          <span className="hidden sm:block">Expiry</span>
+                          <span className="hidden md:block">Entry Spot</span>
                           <span>P&L</span>
                           <span>Cumulative</span>
                         </div>

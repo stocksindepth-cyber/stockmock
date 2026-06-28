@@ -436,7 +436,7 @@ function SimulatorContent() {
 
   return (
     <div className="min-h-screen bg-[#080C16] pb-28">
-      <main className="pt-20 pb-4 px-6 lg:px-10 max-w-[1440px] mx-auto">
+      <main className="pt-20 pb-4 px-3 sm:px-6 lg:px-10 max-w-[1440px] mx-auto">
 
         {/* ── Header ── */}
         <div className="mb-5 mt-2">

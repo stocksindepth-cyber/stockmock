@@ -108,7 +108,7 @@ export default function LearnPage() {
             
             <div className="relative z-10 flex flex-col lg:flex-row gap-8">
               {/* Module Header Block */}
-              <div className={`lg:w-1/3 flex-shrink-0 p-8 rounded-3xl bg-gradient-to-br ${mod.color} border border-white/5 backdrop-blur-sm self-start shadow-2xl`}>
+              <div className={`w-full lg:w-1/3 flex-shrink-0 p-6 sm:p-8 rounded-3xl bg-gradient-to-br ${mod.color} border border-white/5 backdrop-blur-sm self-start shadow-2xl`}>
                 <div className="mb-6">{mod.icon}</div>
                 <h2 className="text-2xl font-bold text-white mb-3">{mod.title}</h2>
                 <p className="text-slate-400 text-sm leading-relaxed">{mod.description}</p>

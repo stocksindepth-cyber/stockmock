@@ -1,8 +1,6 @@
 import { NextResponse } from "next/server";
 import { getChain } from "@/lib/data/chainCache";
 
-export const runtime = "edge";
-
 export async function GET(request) {
   const { searchParams } = new URL(request.url);
   const symbol = searchParams.get("symbol") || "NIFTY";
