@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, X, Zap, Target, Loader2, Shield, ExternalLink, Star, TrendingUp, Database, BarChart2, Users } from "lucide-react";
+import { Check, X, Zap, Target, Loader2, Shield, ExternalLink, Star, TrendingUp, Database, BarChart2, Users, Tag, CheckCircle2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { upgradeUserPlan } from "@/lib/firebase/userService";
@@ -155,6 +155,37 @@ export default function PricingPage() {
   const [processingId, setProcessingId] = useState(null);
   const [openFaq, setOpenFaq] = useState(null);
   const [modal, setModal] = useState(null);
+  const [couponInput, setCouponInput] = useState("");
+  const [couponState, setCouponState] = useState("idle"); // idle | checking | valid | invalid
+  const [couponData, setCouponData] = useState(null); // { discountPct, expiresAt, message }
+
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    setCouponState("checking");
+    try {
+      const res = await fetch("/api/coupon/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: couponInput.trim() }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setCouponState("valid");
+        setCouponData(data);
+      } else {
+        setCouponState("invalid");
+        setCouponData({ message: data.message });
+      }
+    } catch {
+      setCouponState("invalid");
+      setCouponData({ message: "Could not validate coupon. Try again." });
+    }
+  };
+
+  const discountedPrice = (base) =>
+    couponState === "valid" && couponData?.discountPct
+      ? Math.round(base * (1 - couponData.discountPct / 100))
+      : base;
 
   const handleSubscribe = async (plan) => {
     const billing = annual ? "annual" : "monthly";
@@ -170,7 +201,7 @@ export default function PricingPage() {
     }
 
     setProcessingId(plan.id);
-    const price = annual ? plan.annualPrice : plan.monthlyPrice;
+    const basePrice = annual ? plan.annualPrice : plan.monthlyPrice;
     const durationDays = annual ? 365 : plan.durationDays;
 
     try {
@@ -178,12 +209,14 @@ export default function PricingPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: price,
-          planId: plan.id,
+          amount: basePrice,
+          planId: plan.dbPlan,
           planName: plan.name,
           userId: currentUser.uid,
+          couponCode: couponState === "valid" ? couponInput.trim().toUpperCase() : undefined,
         }),
       });
+      const price = discountedPrice(basePrice);
       const order = await orderRes.json();
 
       if (order.mock) {
@@ -334,10 +367,52 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* ── Coupon input ── */}
+        <div className="flex justify-center mb-8">
+          <div className="w-full max-w-sm">
+            {couponState === "valid" ? (
+              <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span className="text-sm font-bold text-emerald-400">{couponInput.toUpperCase()}</span>
+                  <span className="text-xs text-emerald-500">{couponData.discountPct}% off applied</span>
+                </div>
+                <button onClick={() => { setCouponState("idle"); setCouponData(null); setCouponInput(""); }}
+                  className="text-xs text-slate-500 hover:text-slate-300 transition-colors">Remove</button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
+                  <input
+                    type="text"
+                    value={couponInput}
+                    onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponState("idle"); }}
+                    onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
+                    placeholder="Coupon code"
+                    className="w-full pl-8 pr-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
+                  />
+                </div>
+                <button
+                  onClick={handleApplyCoupon}
+                  disabled={couponState === "checking" || !couponInput.trim()}
+                  className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-semibold transition-colors shrink-0"
+                >
+                  {couponState === "checking" ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
+                </button>
+              </div>
+            )}
+            {couponState === "invalid" && (
+              <p className="text-xs text-rose-400 mt-1.5 pl-1">{couponData?.message}</p>
+            )}
+          </div>
+        </div>
+
         {/* ── Pricing cards ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           {PLANS.map((plan) => {
-            const displayPrice = annual ? plan.annualPrice : plan.monthlyPrice;
+            const basePrice = annual ? plan.annualPrice : plan.monthlyPrice;
+            const displayPrice = discountedPrice(basePrice);
             const isProcessing = processingId === plan.id;
 
             return (
@@ -370,9 +445,17 @@ export default function PricingPage() {
                       <>
                         <span className="text-5xl font-extrabold text-white">₹{displayPrice}</span>
                         <span className="text-slate-500 mb-2 text-sm">/mo</span>
+                        {couponState === "valid" && basePrice !== displayPrice && (
+                          <span className="text-slate-500 line-through text-lg mb-2 ml-1">₹{basePrice}</span>
+                        )}
                       </>
                     )}
                   </div>
+                  {couponState === "valid" && basePrice !== displayPrice && (
+                    <p className="text-xs text-emerald-400 font-semibold mb-0.5">
+                      You save ₹{basePrice - displayPrice}/mo with OG30
+                    </p>
+                  )}
                   {annual && displayPrice > 0 && (
                     <p className="text-xs text-slate-500">Billed annually · ₹{displayPrice * 12}/year</p>
                   )}

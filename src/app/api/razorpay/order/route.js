@@ -1,28 +1,44 @@
 import { NextResponse } from "next/server";
 
-// Razorpay Order Creation API
-// Requires env vars: RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET
-// Get your keys from https://dashboard.razorpay.com/app/keys
+// ── Server-side coupon registry (single source of truth — never trust client price) ──
+const COUPONS = {
+  OG30: { discountPct: 30, expiresAt: "2026-07-07T23:59:59+05:30", active: true, plans: ["pro", "elite"] },
+};
+
+function applyCoupon(code, planId, originalAmount) {
+  if (!code) return { finalAmount: originalAmount, discountPct: 0, discountAmount: 0 };
+  const coupon = COUPONS[code.trim().toUpperCase()];
+  if (!coupon || !coupon.active) return { finalAmount: originalAmount, discountPct: 0, discountAmount: 0 };
+  if (new Date() > new Date(coupon.expiresAt)) return { finalAmount: originalAmount, discountPct: 0, discountAmount: 0 };
+  if (coupon.plans && !coupon.plans.includes(planId)) return { finalAmount: originalAmount, discountPct: 0, discountAmount: 0 };
+  const discountAmount = Math.round(originalAmount * coupon.discountPct / 100);
+  return { finalAmount: originalAmount - discountAmount, discountPct: coupon.discountPct, discountAmount };
+}
+
 export async function POST(request) {
   try {
-    const { amount, planId, planName, userId } = await request.json();
+    const { amount, planId, planName, userId, couponCode } = await request.json();
 
     if (!amount || !planId || !userId) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    // Apply coupon discount server-side — client-supplied amount is ignored
+    const { finalAmount, discountPct, discountAmount } = applyCoupon(couponCode, planId, amount);
+
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
     if (!keyId || !keySecret) {
-      // Fallback to mock mode for development without Razorpay keys
       console.warn("[Razorpay] Keys not set — returning mock order for development");
       return NextResponse.json({
         mock: true,
         orderId: `mock_order_${Date.now()}`,
-        amount: amount * 100,
+        amount: finalAmount * 100,
         currency: "INR",
         keyId: "mock_key",
+        discountPct,
+        finalAmount,
       });
     }
 
@@ -30,20 +46,12 @@ export async function POST(request) {
 
     const response = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Basic ${credentials}`,
-      },
+      headers: { "Content-Type": "application/json", Authorization: `Basic ${credentials}` },
       body: JSON.stringify({
-        amount: amount * 100, // Razorpay expects paise
+        amount: finalAmount * 100,
         currency: "INR",
-        // Razorpay receipt max = 40 chars: "rcpt_" + 10 uid chars + "_" + base36 timestamp = ~26 chars
         receipt: `rcpt_${userId.substring(0, 10)}_${Date.now().toString(36)}`,
-        notes: {
-          userId,
-          planId,
-          planName,
-        },
+        notes: { userId, planId, planName, couponCode: couponCode || "", discountPct: String(discountPct) },
       }),
     });
 
@@ -59,6 +67,9 @@ export async function POST(request) {
       amount: order.amount,
       currency: order.currency,
       keyId,
+      discountPct,
+      finalAmount,
+      discountAmount,
     });
   } catch (error) {
     console.error("[Razorpay] Unexpected error:", error);
