@@ -15,5 +15,5 @@ export function getResendClient() {
   return _resend;
 }
 
-export const FROM_ADDRESS = 'OptionsGyani <support@optionsgyani.com>';
+export const FROM_ADDRESS = 'OptionsGyani <noreply@grahai.com>';
 export const ADMIN_EMAIL  = 'support@optionsgyani.com';
