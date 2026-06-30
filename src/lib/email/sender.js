@@ -17,6 +17,8 @@ const SUBJECTS = {
   invoice:           'Your OptionsGyani Invoice — Payment Confirmed ✓',
   nudge:             (props) => `You missed something on OptionsGyani, ${props.name || 'trader'}`,
   alert:             (props) => `🔔 ${props.symbol || 'NIFTY'} ${(props.metric || 'IVP').toUpperCase()} Alert — ${props.condition === 'above' ? 'crossed above' : 'dropped below'} ${props.threshold}`,
+  day3:              (props) => `${props.name || 'Hey'}, your free backtests are waiting — takes 60 seconds`,
+  day14:             (props) => `${props.name || 'Trader'}, 14 days on free — here's what Pro unlocks for you`,
   // marketUpdate uses the subject prop passed in directly
 };
 
@@ -29,6 +31,8 @@ const TEMPLATE_LOADERS = {
   marketUpdate:      () => import('./templates/MarketUpdateEmail.jsx'),
   nudge:             () => import('./templates/NudgeEmail.jsx'),
   alert:             () => import('./templates/AlertEmail.jsx'),
+  day3:              () => import('./templates/Day3Email.jsx'),
+  day14:             () => import('./templates/Day14Email.jsx'),
 };
 
 /**
