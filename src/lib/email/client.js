@@ -15,9 +15,5 @@ export function getResendClient() {
   return _resend;
 }
 
-// Use verified test sender until optionsgyani.com domain is verified in Resend.
-// After domain verification, change back to: 'OptionsGyani <support@optionsgyani.com>'
-export const FROM_ADDRESS = process.env.RESEND_DOMAIN_VERIFIED === 'true'
-  ? 'OptionsGyani <support@optionsgyani.com>'
-  : 'OptionsGyani <onboarding@resend.dev>';
-export const ADMIN_EMAIL = 'support@optionsgyani.com';
+export const FROM_ADDRESS = 'OptionsGyani <support@optionsgyani.com>';
+export const ADMIN_EMAIL  = 'support@optionsgyani.com';
