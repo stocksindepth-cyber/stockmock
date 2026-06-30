@@ -20,7 +20,7 @@ import {
 } from "@/lib/firebase/config";
 import {
   doc, getDoc, setDoc, updateDoc, collection, addDoc, deleteDoc,
-  query, orderBy, serverTimestamp, writeBatch, getDocs,
+  query, orderBy, serverTimestamp, writeBatch, getDocs, onSnapshot,
 } from "firebase/firestore";
 import { getAllTemplates, generateStrategyLegs } from "@/lib/options/strategies";
 import { generatePayoffData, calculatePOP } from "@/lib/options/payoff";
@@ -266,6 +266,7 @@ function PaperTradeContent() {
   const [expandedPos,   setExpandedPos]   = useState(null);   // posId with chart expanded
   const [expandedHist,  setExpandedHist]  = useState(null);   // history row expanded
   const [liveSpotMap,   setLiveSpotMap]   = useState({});     // posId → current spot price
+  const [oiWallMap,     setOiWallMap]     = useState({});     // `${symbol}_${expiry}` → { maxCallOIStrike, maxPutOIStrike, maxCallOI, maxPutOI }
   const [modal,         setModal]         = useState(null);   // AppModal state
   // notes
   const [noteMap,       setNoteMap]       = useState({});     // tradeId → draft note text
@@ -415,7 +416,7 @@ function PaperTradeContent() {
     return () => { cancelled = true; };
   }, [selIndex, selExpiry]);
 
-  // ── Live MTM polling (every 60 s) for open positions ─────────────────────
+  // ── Manual MTM refresh (calls API which reads from Firestore snapshot) ────
   const refreshMTM = useCallback(async (positions) => {
     if (!positions.length) { setMtmMap({}); return; }
     setMtmLoading(true);
@@ -438,7 +439,7 @@ function PaperTradeContent() {
               if (data.spot) newSpots[pos.id] = data.spot;
             }
           }
-        } catch { /* keep previous MTM for this group */ }
+        } catch { /* keep previous MTM */ }
       })
     );
     setMtmMap((prev) => ({ ...prev, ...newMtm }));
@@ -447,13 +448,64 @@ function PaperTradeContent() {
     setMtmLoading(false);
   }, []);
 
-  // Trigger MTM on open positions change + interval
+  // ── Firestore onSnapshot listeners for live MTM (no polling) ─────────────
+  // Subscribes to marketSnapshot/{SYMBOL}_{EXPIRY} for each open position group.
+  // The cron /api/cron/poll-chains writes to these docs every 3 min during market hours.
+  // When a doc updates, all positions in that group get their MTM recomputed instantly.
   useEffect(() => {
-    if (!openPositions.length) { setMtmMap({}); return; }
+    if (!openPositions.length) { setMtmMap({}); setOiWallMap({}); return; }
+
+    // Group by symbol+expiry so we subscribe once per unique doc
+    const grouped = {};
+    for (const pos of openPositions) {
+      const key = `${pos.indexKey}_${pos.expiry}`;
+      if (!grouped[key]) grouped[key] = { positions: [] };
+      grouped[key].positions.push(pos);
+    }
+
+    const unsubs = Object.entries(grouped).map(([docId, { positions: grpPos }]) => {
+      const snapRef = doc(db, "marketSnapshot", docId);
+      return onSnapshot(snapRef, (snap) => {
+        if (!snap.exists()) return;
+        const data = snap.data();
+        if (!data?.chain) return;
+
+        setMtmMap((prev) => {
+          const updated = { ...prev };
+          for (const pos of grpPos) {
+            updated[pos.id] = calcMTM(pos, data);
+          }
+          return updated;
+        });
+
+        if (data.spot) {
+          setLiveSpotMap((prev) => {
+            const updated = { ...prev };
+            for (const pos of grpPos) updated[pos.id] = data.spot;
+            return updated;
+          });
+        }
+
+        setOiWallMap((prev) => ({
+          ...prev,
+          [docId]: {
+            maxCallOIStrike: data.maxCallOIStrike,
+            maxPutOIStrike:  data.maxPutOIStrike,
+            maxCallOI:       data.maxCallOI,
+            maxPutOI:        data.maxPutOI,
+          },
+        }));
+
+        setMtmUpdated(new Date());
+      });
+    });
+
+    // Initial fetch via API in case no snapshot exists yet (pre-market or first load)
     refreshMTM(openPositions);
-    const id = setInterval(() => refreshMTM(openPositions), 60_000);
-    return () => clearInterval(id);
-  }, [openPositions, refreshMTM]);
+
+    return () => unsubs.forEach((u) => u());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [openPositions.map((p) => p.id).join(",")]);
 
   // ── Open a new position ───────────────────────────────────────────────────
   async function handleOpenPosition() {
@@ -1062,7 +1114,7 @@ function PaperTradeContent() {
                 {mtmUpdated && (
                   <p className="text-xs text-slate-600 text-right">
                     MTM updated at {mtmUpdated.toLocaleTimeString("en-IN", { timeZone: "Asia/Kolkata", hour: "2-digit", minute: "2-digit", second: "2-digit" })} IST
-                    {" · "}auto-refresh every 60s
+                    {" · "}live via Dhan · updates every ~3 min
                   </p>
                 )}
 
