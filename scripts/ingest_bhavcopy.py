@@ -53,9 +53,11 @@ DATASET_ID = "optionsgyani"
 # Pre-July 5 2024:
 URL_OLD = "https://nsearchives.nseindia.com/content/historical/DERIVATIVES/{year}/{mon}/fo{dd}{MON}{yyyy}bhav.csv.zip"
 URL_OLD_ALT = "https://archives.nseindia.com/content/historical/DERIVATIVES/{year}/{mon}/fo{dd}{MON}{yyyy}bhav.csv.zip"
-# Post-July 8 2024 (UDiFF format):
-URL_NEW = "https://nsearchives.nseindia.com/content/fo/BhavCopy_NSE_FO_0_0_0_{ddmmyyyy}_F_0000.csv.zip"
-URL_NEW_ALT = "https://archives.nseindia.com/content/fo/BhavCopy_NSE_FO_0_0_0_{ddmmyyyy}_F_0000.csv.zip"
+# Post-July 8 2024 (UDiFF format — DDMMYYYY):
+URL_NEW_DDMMYYYY = "https://nsearchives.nseindia.com/content/fo/BhavCopy_NSE_FO_0_0_0_{ddmmyyyy}_F_0000.csv.zip"
+# Post-2026 NSE switched to YYYYMMDD date ordering in filename:
+URL_NEW_YYYYMMDD = "https://nsearchives.nseindia.com/content/fo/BhavCopy_NSE_FO_0_0_0_{yyyymmdd}_F_0000.csv.zip"
+URL_NEW_YYYYMMDD_ALT = "https://archives.nseindia.com/content/fo/BhavCopy_NSE_FO_0_0_0_{yyyymmdd}_F_0000.csv.zip"
 
 # NSE Headers — rotate user agents to avoid fingerprinting on CI/cloud IPs
 NSE_USER_AGENTS = [
@@ -212,12 +214,14 @@ def build_bhavcopy_urls(d: date) -> list[str]:
                "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
     mon_abbr = months3[d.month - 1]
     ddmmyyyy = d.strftime("%d%m%Y")
+    yyyymmdd = d.strftime("%Y%m%d")
     if d >= CUTOVER_DATE:
         return [
-            URL_NEW.format(ddmmyyyy=ddmmyyyy),
-            URL_NEW_ALT.format(ddmmyyyy=ddmmyyyy),
-            # Older archive mirror sometimes lags one format behind
-            URL_OLD.format(year=d.year, mon=mon_abbr, dd=d.strftime("%d"), MON=mon_abbr, yyyy=d.year),
+            # Try YYYYMMDD first (NSE switched to this format in 2026)
+            URL_NEW_YYYYMMDD.format(yyyymmdd=yyyymmdd),
+            URL_NEW_YYYYMMDD_ALT.format(yyyymmdd=yyyymmdd),
+            # Fall back to DDMMYYYY (valid for Jul 2024 – end 2025)
+            URL_NEW_DDMMYYYY.format(ddmmyyyy=ddmmyyyy),
         ]
     else:
         kwargs = dict(year=d.year, mon=mon_abbr, dd=d.strftime("%d"), MON=mon_abbr, yyyy=d.year)
