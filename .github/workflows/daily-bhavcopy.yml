@@ -49,8 +49,18 @@ jobs:
           echo '${{ secrets.BIGQUERY_CREDENTIALS_JSON }}' | python3 -c "import sys,json; json.load(sys.stdin); print('✓ Credentials JSON is valid')"
 
       - name: Write BigQuery credentials file
+        env:
+          BIGQUERY_CREDENTIALS_JSON: ${{ secrets.BIGQUERY_CREDENTIALS_JSON }}
         run: |
-          echo '${{ secrets.BIGQUERY_CREDENTIALS_JSON }}' > /tmp/bq-sa.json
+          # Use Python to parse+re-serialize so private_key \n escapes are real newlines
+          python3 - <<'EOF'
+          import os, json
+          raw = os.environ["BIGQUERY_CREDENTIALS_JSON"]
+          info = json.loads(raw)
+          with open("/tmp/bq-sa.json", "w") as f:
+              json.dump(info, f, indent=2)
+          print("✓ Credentials file written to /tmp/bq-sa.json")
+          EOF
           echo "GOOGLE_APPLICATION_CREDENTIALS=/tmp/bq-sa.json" >> $GITHUB_ENV
 
       - name: Run incremental ingestion (daily schedule)
