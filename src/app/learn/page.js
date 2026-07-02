@@ -70,6 +70,23 @@ const MODULES = [
       { slug: "stop-losses-options", title: "Why Stop Losses are Tricky with Options", time: "12 min", diff: "Intermediate", icon: <ShieldCheck/> },
       { slug: "backtesting-guide", title: "How to Backtest Options Systems", time: "15 min", diff: "Advanced", icon: <Zap/> },
     ]
+  },
+  {
+    moduleId: 6,
+    title: "Module 6: Market Intelligence",
+    description: "Read the market like a professional. Master the option chain, Open Interest, Put-Call Ratio, Max Pain, and expiry-day mechanics to trade NSE with institutional-grade insight.",
+    icon: <BarChart2 className="w-8 h-8 text-cyan-400" />,
+    color: "from-cyan-500/20 to-cyan-600/5",
+    lessons: [
+      { slug: "how-to-read-option-chain", title: "How to Read an Option Chain — NSE Guide", time: "18 min", diff: "Intermediate", icon: <BookOpen/> },
+      { slug: "open-interest-explained", title: "Open Interest — What It Is and How to Trade It", time: "16 min", diff: "Intermediate", icon: <BarChart2/> },
+      { slug: "what-is-iv-percentile", title: "IV Percentile — When to Sell and Buy Options", time: "14 min", diff: "Intermediate", icon: <Zap/> },
+      { slug: "pcr-ratio-explained", title: "Put-Call Ratio — Reading Market Sentiment", time: "14 min", diff: "Intermediate", icon: <Scale/> },
+      { slug: "when-to-sell-options-india", title: "When to Sell Options — The IVP + Theta Framework", time: "16 min", diff: "Advanced", icon: <TrendingUp/> },
+      { slug: "max-pain-options", title: "Max Pain Theory — NSE's Secret Price Magnet", time: "14 min", diff: "Advanced", icon: <Target/> },
+      { slug: "banknifty-options-guide", title: "BANKNIFTY Options — Beginner to Advanced Guide", time: "20 min", diff: "Advanced", icon: <Layers/> },
+      { slug: "nifty-expiry-day-strategy", title: "NIFTY Expiry Day — How to Trade Thursday Options", time: "18 min", diff: "Advanced", icon: <Brain/> },
+    ]
   }
 ];
 

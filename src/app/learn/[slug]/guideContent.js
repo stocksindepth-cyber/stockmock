@@ -18,6 +18,7 @@ import { stopLossesOptionsContent } from "./content/stop-losses-options";
 import { backtestingGuideContent } from "./content/backtesting-guide";
 import { MODULES_STRATEGIES_RISK } from "./guideModules2";
 import { MODULES_BASICS_GREEKS } from "./guideModules1";
+import { MODULES_ADVANCED } from "./guideModules3";
 
 // We extract out the ones we have completely overwritten with Varsity-level 2500+ word content.
 // For the others, we fall back to the thick content from the previous iterations until they also get their Varsity-level rewrites.
@@ -49,5 +50,8 @@ export const GUIDE_CONTENT = {
   
   // --- THICK CONTENT BACKUPS ---
   ...remainingGreeks,
-  ...remainingStategies
+  ...remainingStategies,
+
+  // --- MODULE 6: MARKET INTELLIGENCE ---
+  ...MODULES_ADVANCED
 };

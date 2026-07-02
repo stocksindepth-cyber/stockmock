@@ -1506,6 +1506,697 @@ export const STRATEGIES = {
       },
     ],
   },
+
+  // ── Bear Put Spread (Bearish, defined risk) ──────────────────────────────
+  "bear-put-spread-banknifty": {
+    name: "Bear Put Spread on BANKNIFTY",
+    index: "BANKNIFTY",
+    category: "Bearish",
+    theme: "rose",
+    payoff: "ramp-down",
+    badge: "Bearish · Defined Risk · Debit Strategy",
+    tagline:
+      "Buy an ATM put and sell a lower OTM put on BANKNIFTY — pay a small debit, cap your downside exposure, and profit cleanly when the index falls.",
+    keywords:
+      "bear put spread banknifty, banknifty bear spread, put debit spread banknifty, bearish options banknifty, defined risk bearish banknifty",
+    intro: [
+      "The Bear Put Spread is the cleanest directional bearish structure you can build on BANKNIFTY. You buy a put near the current market price (absorbing the intrinsic value) and simultaneously sell a lower-strike put further out of the money, partially financing your buy. The result is a net debit — your maximum possible loss — against a capped but concrete maximum profit when BANKNIFTY falls to your short put.",
+      "Unlike a naked long put, the short leg offsets a meaningful slice of your premium outlay. On a high-beta index like BANKNIFTY — where implied volatility is routinely elevated — that premium offset matters: buying an unhedged put on BANKNIFTY is expensive, while a bear put spread keeps your cost-to-win ratio sane even after factoring in the direction bet.",
+      "Backtests on NSE monthly and weekly BANKNIFTY data show win rates of 48–52% for directional plays — honest odds for a purely bearish thesis. The edge comes not from frequency but from payoff asymmetry: when the index falls sharply, your profit approaches the full spread width minus the debit, while your loss on wrong trades is bounded by what you paid upfront.",
+    ],
+    stats: [
+      { label: "Win Rate", value: "48–52%", note: "Directional; depends on entry timing" },
+      { label: "Typical Debit", value: "₹100–160", note: "Per share (100-point spread, BANKNIFTY)" },
+      { label: "Max Profit", value: "Spread − Debit", note: "e.g. ₹340 on a ₹500 spread − ₹160 debit" },
+      { label: "Max Loss", value: "Net Debit Only", note: "Bounded on entry — no margin call" },
+      { label: "Best IV Regime", value: "Low IVP", note: "Buy premium cheap, below IVP 40%" },
+      { label: "Margin Required", value: "Net Debit", note: "No additional SPAN margin needed" },
+    ],
+    setup: [
+      { label: "Underlying", value: "BANKNIFTY monthly or weekly options (100-point strikes)" },
+      { label: "Long Put Strike", value: "ATM or 1 strike ITM (closer to current price)" },
+      { label: "Short Put Strike", value: "100–300 points below long put (OTM)" },
+      { label: "Entry Condition", value: "Bearish trend confirmed; IVP below 40% for cheap premium" },
+      { label: "Profit Target", value: "Exit at 60–70% of max profit or when short put delta < 0.10" },
+      { label: "Stop Loss", value: "Exit if debit doubles (i.e., spread loses 100% of cost)" },
+    ],
+    legs: [
+      { action: "BUY", type: "PE", strike: "ATM or 1 ITM", note: "Long put — the core bearish leg" },
+      { action: "SELL", type: "PE", strike: "100–300 pts below ATM", note: "Short put — premium offset, caps profit" },
+    ],
+    edges: [
+      {
+        title: "Defined risk lets you size correctly",
+        body: "Because your maximum loss is precisely the net debit paid, position sizing is straightforward. You can enter a bear put spread with a fixed-rupee risk budget, unlike a naked put which has margin calls and delta surprises. This makes it the preferred bearish vehicle for disciplined traders who manage drawdown strictly.",
+      },
+      {
+        title: "Lower cost than a naked put on BANKNIFTY",
+        body: "BANKNIFTY implied volatility runs high — a single ATM put at 10 DTE can cost ₹250–350 per share. The short put leg offsets ₹100–160 of that, cutting your cost basis substantially. You give up gains below the short strike, but for a typical 5–7% directional move that zone rarely matters.",
+      },
+      {
+        title: "Profits from both delta and IV compression of the short leg",
+        body: "As BANKNIFTY falls toward your short put, the spread's intrinsic value increases while the short OTM put's time value erodes — a double benefit. If IV spikes on the bearish move (which often happens as markets fall), your long put gains more vega value than the short, adding an extra tailwind.",
+      },
+    ],
+    whenToUse: [
+      "BANKNIFTY has broken a key support level on high volume and macro sentiment is negative (weak global cues, RBI hawkishness, banking sector stress).",
+      "India VIX is below 15 — puts are cheap enough that buying makes sense rather than selling premium.",
+      "You want a directional bearish bet with a predefined maximum loss before you enter — no open-ended risk.",
+    ],
+    risks: [
+      "If BANKNIFTY reverses and rallies, you lose the entire net debit — accept this loss quickly rather than hoping for a turnaround.",
+      "Time decay works against the long put; a slow sideways drift erodes value even if direction is eventually right.",
+      "The short put caps your profit: if BANKNIFTY crashes far below your short strike, you leave significant gains on the table versus holding a naked put.",
+    ],
+    faq: [
+      {
+        q: "What is the ideal strike gap for a BANKNIFTY Bear Put Spread?",
+        a: "Most traders use a 100–200 point spread for weekly expiries and 200–300 points for monthly. Wider spreads have a better absolute profit potential but cost more upfront. Match the spread width to the expected magnitude of the BANKNIFTY move — a 200-point target move warrants a 200-point spread.",
+      },
+      {
+        q: "When should I exit a Bear Put Spread before expiry?",
+        a: "Exit when you've captured 60–70% of the maximum profit — the remaining upside diminishes sharply as the short put goes deeper ITM. Also exit if the trade goes against you and the debit has doubled, locking in a managed loss before time decay compounds the damage.",
+      },
+      {
+        q: "Can I convert a Bear Put Spread into an Iron Condor?",
+        a: "Yes — if you later turn neutral, you can add a short call spread above the market to convert the bear put spread into an Iron Condor, collecting additional credit to offset some of the original debit. This is a common adjustment when a bearish thesis softens but you still see a range-bound environment ahead.",
+      },
+    ],
+  },
+
+  "bear-put-spread-finnifty": {
+    name: "Bear Put Spread on FINNIFTY",
+    index: "FINNIFTY",
+    category: "Bearish",
+    theme: "rose",
+    payoff: "ramp-down",
+    badge: "Bearish · Defined Risk · Debit Strategy",
+    tagline:
+      "Structure a limited-risk bearish trade on FINNIFTY by buying an ATM put and selling a lower OTM put — profit when financials fall, with your loss capped at entry.",
+    keywords:
+      "bear put spread finnifty, finnifty bear spread, put debit spread finnifty, bearish options finnifty, defined risk bearish finnifty",
+    intro: [
+      "FINNIFTY — the NSE's financial-services index — sits between NIFTY and BANKNIFTY in volatility character. Its constituents include private banks, NBFCs, and insurance companies, meaning it reacts sharply to RBI decisions, credit events, and quarterly bank results while remaining slightly less volatile than BANKNIFTY itself. A Bear Put Spread on FINNIFTY lets you take a clean bearish view on the financials sector with a known, capped cost.",
+      "The structure works identically to a standard bear put spread: buy a put near the current FINNIFTY level and sell a lower-strike put to partially fund the purchase. The 50-point strike increments on FINNIFTY give precise strike selection — you can tailor the spread to match your specific price target without overshooting. Net debits typically run ₹60–120 per share, lower than BANKNIFTY due to the index's smaller price level and tighter volatility range.",
+      "Probability-wise, a directional bearish trade on any index carries a win rate around 48–52% over a large sample — the advantage is asymmetry. When FINNIFTY falls, the spread earns multiples of the debit. When it doesn't, the loss is bounded. Used selectively around key financial-sector catalysts, the bear put spread is a precise, disciplined tool for a sector-specific bearish thesis.",
+    ],
+    stats: [
+      { label: "Win Rate", value: "48–52%", note: "Directional; timing dependent" },
+      { label: "Typical Debit", value: "₹60–120", note: "Per share (50-point spread, FINNIFTY)" },
+      { label: "Max Profit", value: "Spread − Debit", note: "e.g. ₹130 on a ₹250 spread − ₹120 debit" },
+      { label: "Max Loss", value: "Net Debit Only", note: "Predefined — no margin call risk" },
+      { label: "Best IV Regime", value: "Low IVP", note: "Enter below IVP 35–40% for cheap premium" },
+      { label: "Margin Required", value: "Net Debit", note: "No SPAN margin — pure debit trade" },
+    ],
+    setup: [
+      { label: "Underlying", value: "FINNIFTY monthly options (50-point strike increments)" },
+      { label: "Long Put Strike", value: "ATM or 50 points ITM" },
+      { label: "Short Put Strike", value: "100–250 points below the long put" },
+      { label: "Entry Condition", value: "Bearish financial sector outlook; IVP below 40%" },
+      { label: "Profit Target", value: "60% of max profit, or short put delta < 0.10" },
+      { label: "Stop Loss", value: "Exit if position value falls 80% from purchase price" },
+    ],
+    legs: [
+      { action: "BUY", type: "PE", strike: "ATM or 1 ITM (50 pts)", note: "Long put — bearish core leg" },
+      { action: "SELL", type: "PE", strike: "100–250 pts below ATM", note: "Short put — offsets premium cost" },
+    ],
+    edges: [
+      {
+        title: "Precision in a sector-driven index",
+        body: "FINNIFTY moves on identifiable catalysts — RBI meetings, NBFC asset-quality data, and major private bank earnings. This makes a directional put spread more targetable than on a diversified index: you can time entry around a known catalyst and size your spread width to match the expected downside.",
+      },
+      {
+        title: "Lower debit than BANKNIFTY equivalent",
+        body: "FINNIFTY's smaller absolute level and tighter volatility mean ATM put premiums are lower than BANKNIFTY. A comparable percentage-move spread costs ₹60–120 versus ₹100–160 on BANKNIFTY, letting you participate in a bearish financials thesis with less capital at risk per lot.",
+      },
+      {
+        title: "Clean hedging vehicle for bank stock portfolios",
+        body: "Investors holding portfolios heavy in banking and NBFC stocks can use a FINNIFTY bear put spread as a low-cost portfolio hedge without touching individual stock options. The index correlation is high enough to offset a meaningful portion of portfolio drawdown during financial-sector selloffs.",
+      },
+    ],
+    whenToUse: [
+      "FINNIFTY has broken below a key support zone and bank sector breadth is deteriorating — multiple large-cap banks are underperforming the broader market.",
+      "An RBI policy meeting, quarterly banking results season, or a significant NBFC credit event is approaching that you expect to weigh on financial stocks.",
+      "India VIX is subdued (below 15), making put buying cost-effective relative to potential returns.",
+    ],
+    risks: [
+      "A rebound in financial stocks on positive RBI commentary or better-than-expected bank results erases the debit — accept the bounded loss quickly.",
+      "Theta decay works against the long put leg as time passes without a bearish move; avoid holding into the last 3 days if the trade hasn't worked.",
+      "The short put caps profit: FINNIFTY crashing far below the short strike caps your gains — acceptable for most directional traders but worth modeling before entry.",
+    ],
+    faq: [
+      {
+        q: "How does a FINNIFTY Bear Put Spread differ from a BANKNIFTY Bear Put Spread?",
+        a: "The mechanics are identical, but FINNIFTY's 50-point strike increments allow finer strike selection compared to BANKNIFTY's 100-point steps. FINNIFTY also has lower absolute premium levels and slightly lower volatility, making bear put spreads cheaper in rupee terms — useful when you want a smaller capital outlay per lot.",
+      },
+      {
+        q: "What is a realistic profit target for this spread?",
+        a: "Target 60–70% of the maximum possible profit. On a ₹250 spread costing ₹100 debit, the maximum profit is ₹150 — aim to exit at ₹90–105 gain. Trying to squeeze the last 30% means sitting through final-week gamma risk when the trade can reverse quickly.",
+      },
+      {
+        q: "Should I use weekly or monthly FINNIFTY options?",
+        a: "FINNIFTY currently has monthly expiries only (no weekly series as of 2025), so monthly options are your default. Align your trade to the upcoming monthly expiry and allow 7–15 days for the bearish thesis to play out. Avoid entering within 5 days of expiry where theta decay accelerates sharply against the long leg.",
+      },
+    ],
+  },
+
+  // ── Long Strangle (Volatility, event-driven) ─────────────────────────────
+  "long-strangle-banknifty": {
+    name: "Long Strangle on BANKNIFTY",
+    index: "BANKNIFTY",
+    category: "Volatility",
+    theme: "fuchsia",
+    payoff: "valley",
+    badge: "Volatility · Long Premium · Event Strategy",
+    tagline:
+      "Buy an OTM call and an OTM put on BANKNIFTY simultaneously — profit from any sharp move in either direction, making this the go-to structure for events and high-uncertainty periods.",
+    keywords:
+      "long strangle banknifty, banknifty event strategy, buy volatility banknifty, banknifty strangle before rbi, banknifty pre-budget options strategy",
+    intro: [
+      "A Long Strangle positions you to profit when BANKNIFTY makes a large move — in either direction. You buy an OTM call above the current price and an OTM put below it, paying a combined debit upfront. If BANKNIFTY subsequently surges or crashes by more than the total premium paid, one leg moves into the money and you profit. If the index just drifts sideways, both legs decay and you lose the debit.",
+      "BANKNIFTY is uniquely suited for the long strangle. It moves 1.5–2% on ordinary days and 3–5% on event days — RBI policy announcements, Union Budgets, surprise global cues, and bank earnings. The strategy is most potent when entered with India VIX low (IVP below 25%), meaning you're buying cheap options just before a catalyst that historically spikes implied volatility and propels the index sharply.",
+      "The combined premium outlay on BANKNIFTY typically runs ₹200–350 per share for OTM strikes 1–2% away from spot. To break even, the index needs to move at least as far as the sum of the two premiums. Directional traders who've been burned by wrong-way bets increasingly use the strangle to profit from volatility without choosing a direction — letting the event decide the market's path.",
+    ],
+    stats: [
+      { label: "Break-even Move", value: "> 2× Debit", note: "Index must move more than total premium paid" },
+      { label: "Combined Premium", value: "₹200–350", note: "Per share; OTM strikes ~1.5% from spot" },
+      { label: "Best IVP Entry", value: "Below 25%", note: "Buy cheap before volatility spike" },
+      { label: "Ideal Catalyst", value: "RBI / Budget", note: "Known dates for vol expansion events" },
+      { label: "Max Loss", value: "Net Debit", note: "Both legs expire worthless if BANKNIFTY pins" },
+      { label: "Margin Required", value: "Net Debit", note: "No SPAN margin — long-only structure" },
+    ],
+    setup: [
+      { label: "Underlying", value: "BANKNIFTY weekly or monthly options (100-point strikes)" },
+      { label: "Long Call Strike", value: "1.5–2% above current BANKNIFTY (OTM CE)" },
+      { label: "Long Put Strike", value: "1.5–2% below current BANKNIFTY (OTM PE)" },
+      { label: "Entry Timing", value: "2–5 days before a known catalyst; IVP below 25–30%" },
+      { label: "Profit Target", value: "100% of debit paid (double your money), then trail" },
+      { label: "Stop Loss", value: "Exit if combined value drops 40–50% on the first day" },
+    ],
+    legs: [
+      { action: "BUY", type: "CE", strike: "~1.5–2% OTM above spot", note: "Long call — profits on upside move" },
+      { action: "BUY", type: "PE", strike: "~1.5–2% OTM below spot", note: "Long put — profits on downside move" },
+    ],
+    edges: [
+      {
+        title: "Direction-agnostic profit from large moves",
+        body: "Every directional trade carries the cost of being wrong about which way the index moves. The long strangle eliminates that burden: you simply need BANKNIFTY to move enough. On RBI policy days, BANKNIFTY has historically moved an average of 300–500 points within the session — enough to make even slightly expensive strangles profitable.",
+      },
+      {
+        title: "Vega boost on the event day",
+        body: "When you buy options before a catalyst, you benefit from two potential gains: the delta move if the index travels in one direction, plus vega expansion if implied volatility spikes into the event. Even if BANKNIFTY moves modestly, a sharp IV spike can temporarily lift the strangle's value before the move fully plays out.",
+      },
+      {
+        title: "Defined and manageable risk",
+        body: "Unlike selling strangles where losses are theoretically unlimited, a long strangle limits your total loss to the combined debit paid. This makes position sizing straightforward and removes the risk of catastrophic loss — you can participate in event volatility without existential risk to your account.",
+      },
+    ],
+    whenToUse: [
+      "A scheduled high-impact event — RBI monetary policy, Union Budget, US Fed decision, or major bank quarterly results — falls within your option's expiry and you expect a large BANKNIFTY move but are uncertain of direction.",
+      "India VIX is below 14 and IVP is below 25%, meaning options are historically cheap relative to realized volatility — an attractive entry for long premium strategies.",
+      "BANKNIFTY has been consolidating in a tight range for multiple sessions and coiling energy — a breakout is likely but the direction is unclear.",
+    ],
+    risks: [
+      "The 'volatility crush' trap: if IV spikes into an event and then collapses sharply after (even with a move), the post-event IV collapse can erode gains from the directional move — avoid holding through expiry if you entered far before the catalyst.",
+      "Time decay is a constant headwind: every day that passes without a sufficient move reduces both legs' value. The strangle is a time-sensitive trade — don't enter too early.",
+      "If BANKNIFTY pins near the current level through expiry, both legs expire worthless and you lose 100% of the premium paid.",
+    ],
+    faq: [
+      {
+        q: "How far OTM should I place the strikes on a BANKNIFTY Long Strangle?",
+        a: "A common approach is 1.5–2% away from spot on each side — roughly 650–900 points on BANKNIFTY at current levels. Closer strikes cost more but need less movement; farther strikes are cheaper but require a bigger event-day move. Start with the 1.5% guideline and adjust based on the magnitude of the expected catalyst.",
+      },
+      {
+        q: "What is the 'volatility crush' and how do I avoid it?",
+        a: "Volatility crush is the rapid drop in implied volatility that occurs immediately after a scheduled event (RBI policy, Budget), even if the market makes a large move. To mitigate it, consider exiting the profitable leg just as the move peaks on event day rather than holding into the post-event session when IV deflates sharply.",
+      },
+      {
+        q: "Is a Long Strangle better than a Long Straddle on BANKNIFTY?",
+        a: "A long straddle uses ATM strikes on both sides — more expensive but profits from smaller moves. A strangle uses OTM strikes — cheaper but needs a larger move to profit. On BANKNIFTY, where event-day moves are large, a strangle is often preferable because the lower cost improves the risk/reward ratio even if the break-even distance is wider.",
+      },
+    ],
+  },
+
+  "long-strangle-finnifty": {
+    name: "Long Strangle on FINNIFTY",
+    index: "FINNIFTY",
+    category: "Volatility",
+    theme: "fuchsia",
+    payoff: "valley",
+    badge: "Volatility · Long Premium · Event Strategy",
+    tagline:
+      "Buy OTM calls and puts on FINNIFTY simultaneously before a financial-sector catalyst — position for a large move in either direction with a precisely defined debit as your only risk.",
+    keywords:
+      "long strangle finnifty, finnifty event strategy, buy volatility finnifty, finnifty rbi options strategy, finnifty long premium",
+    intro: [
+      "The Long Strangle on FINNIFTY follows the same logic as its BANKNIFTY counterpart but targets the financial-services index, where sector-specific catalysts create sharp moves with unpredictable direction. FINNIFTY contains private banks, PSU banks, NBFCs, insurance companies, and housing finance firms — a mix that reacts explosively to RBI rate decisions, credit-cycle data, NPA disclosures, and international banking stress events.",
+      "You buy an OTM call above FINNIFTY and an OTM put below it for a combined net debit. The trade profits when FINNIFTY moves enough — up or down — to overcome the total premium paid. FINNIFTY's 50-point strike increments allow fine-tuned strike placement, and its lower absolute premium level versus BANKNIFTY means combined strangle costs are typically ₹120–220 per share for strikes placed 1.5–2% from spot.",
+      "The key edge of a FINNIFTY strangle is the concentration of catalysts. Because FINNIFTY is narrow and sector-specific, a single major event — an unexpected rate cut, a large NBFC default, or a government recapitalization announcement — can move it 4–6% in a session. That concentrated catalyst risk is exactly what a long strangle harvests.",
+    ],
+    stats: [
+      { label: "Break-even Move", value: "> 2× Debit", note: "Total premium must be exceeded by index move" },
+      { label: "Combined Premium", value: "₹120–220", note: "Per share; OTM strikes ~1.5% from spot" },
+      { label: "Best IVP Entry", value: "Below 30%", note: "Enter when options are relatively cheap" },
+      { label: "Ideal Catalyst", value: "RBI Policy / Bank Results", note: "Sector-specific high-impact events" },
+      { label: "Max Loss", value: "Net Debit", note: "Both legs expire worthless if FINNIFTY pins" },
+      { label: "Margin Required", value: "Net Debit", note: "Long-only structure — no SPAN margin" },
+    ],
+    setup: [
+      { label: "Underlying", value: "FINNIFTY monthly options (50-point strike increments)" },
+      { label: "Long Call Strike", value: "1.5–2% above current FINNIFTY (OTM CE)" },
+      { label: "Long Put Strike", value: "1.5–2% below current FINNIFTY (OTM PE)" },
+      { label: "Entry Timing", value: "3–5 days before a catalyst; IVP below 30%" },
+      { label: "Profit Target", value: "75–100% of debit paid; exit the profitable leg on event day" },
+      { label: "Stop Loss", value: "Exit if combined value falls 45% within the first 2 days" },
+    ],
+    legs: [
+      { action: "BUY", type: "CE", strike: "~1.5–2% OTM above spot", note: "Long call — profits on financials rally" },
+      { action: "BUY", type: "PE", strike: "~1.5–2% OTM below spot", note: "Long put — profits on financials selloff" },
+    ],
+    edges: [
+      {
+        title: "Sector catalysts are denser and sharper on FINNIFTY",
+        body: "While NIFTY moves on broad economic signals, FINNIFTY reacts to a narrower set of events — and those events tend to produce larger sector-specific moves. An unexpected RBI rate hold with hawkish commentary can drop FINNIFTY 3% while NIFTY moves only 1%. This concentrated reaction is what makes event strangles particularly effective on financial indices.",
+      },
+      {
+        title: "Lower cost than a BANKNIFTY strangle",
+        body: "FINNIFTY options are cheaper in absolute terms than BANKNIFTY options because the index level and lot-weighted premium are both lower. A comparable 1.5%-OTM strangle on FINNIFTY costs ₹120–220 versus ₹200–350 on BANKNIFTY — a meaningful difference when the underlying event may not produce a BANKNIFTY-magnitude move.",
+      },
+      {
+        title: "Full sector exposure with single-instrument efficiency",
+        body: "Buying a FINNIFTY strangle gives you volatility exposure across the entire financial sector simultaneously, without having to stagger individual stock option positions across multiple scrips. The single-instrument approach is cleaner to manage, less prone to stock-specific idiosyncratic risk, and simpler to track.",
+      },
+    ],
+    whenToUse: [
+      "An RBI monetary policy committee (MPC) meeting, quarterly results from a major private bank or NBFC, or a government banking-sector policy announcement is scheduled within the option's expiry window.",
+      "FINNIFTY's IVP is below 30% — premium is cheap enough that buying long strangles offers a favourable risk/reward relative to the historical event-day move size.",
+      "FINNIFTY has been range-bound for 5–8 sessions with low realized volatility, suggesting a coiled spring that may unwind sharply on the next sector catalyst.",
+    ],
+    risks: [
+      "IV crush post-event: even if FINNIFTY moves on event day, a rapid post-event collapse in implied volatility can reduce the strangle's value faster than the directional gain accrues — exit promptly on event day.",
+      "Theta decay is relentless: a strangle with 10 days to expiry loses significant value each day without a move, making this an unsuitable 'set and forget' trade.",
+      "Tight FINNIFTY liquidity: compared to NIFTY and BANKNIFTY, FINNIFTY options have wider bid-ask spreads — always use limit orders placed at the mid-price and allow extra slippage in your break-even calculation.",
+    ],
+    faq: [
+      {
+        q: "Why use FINNIFTY for a long strangle instead of BANKNIFTY?",
+        a: "If your view is specifically about financial-sector volatility — such as an RBI decision that will hit banks and NBFCs differently than the broader index — FINNIFTY gives you cleaner, more concentrated sector exposure at a lower absolute cost per lot. Use BANKNIFTY when you want higher absolute premiums and deeper liquidity.",
+      },
+      {
+        q: "How many days before the event should I enter the strangle?",
+        a: "2–5 days before the event is the sweet spot. Entering too early means paying more theta decay before the catalyst. Entering on the event day itself means paying a large IV premium that collapses immediately after the announcement. Three trading days before the event is a practical balance for most FINNIFTY catalysts.",
+      },
+      {
+        q: "What if only one leg is profitable on event day — should I hold the other?",
+        a: "Typically, close the whole structure on event day or the morning after. The profitable leg should be exited while IV is still elevated and the move is fresh. The losing OTM leg retains very little value and continuing to hold it exposes you to further theta decay for negligible potential recovery.",
+      },
+    ],
+  },
+
+  // ── Calendar Spread (Neutral, time decay) ────────────────────────────────
+  "calendar-spread-finnifty": {
+    name: "Calendar Spread on FINNIFTY",
+    index: "FINNIFTY",
+    category: "Neutral",
+    theme: "indigo",
+    payoff: "tent",
+    badge: "Neutral · Theta Positive · Time Spread",
+    tagline:
+      "Sell a near-month FINNIFTY ATM option and buy the same strike in the far month — harvest the faster theta decay of the front leg while the back leg holds its value.",
+    keywords:
+      "calendar spread finnifty, diagonal spread finnifty, time spread finnifty, horizontal spread finnifty, theta spread finnifty",
+    intro: [
+      "A Calendar Spread — also called a time spread or horizontal spread — exploits the fact that near-dated options lose time value faster than longer-dated options at the same strike. On FINNIFTY, you sell the front-month ATM call (or put) and simultaneously buy the same strike in the next month, paying a small net debit. As the front month decays rapidly into expiry, the spread's value increases — as long as FINNIFTY stays near your strike.",
+      "FINNIFTY's monthly-only expiry cycle (no weekly series as of 2025) makes the front-month vs. next-month calendar the standard implementation. The key driver of profitability is the theta differential: the short front-month option decays at an accelerating rate in its final 2–3 weeks, while the long back-month option retains most of its time value. This differential theta collection is the trade's primary income source.",
+      "FINNIFTY's intermediate volatility character — sitting between NIFTY and BANKNIFTY — gives the calendar spread a reliable risk/reward setup. The strategy works best when the index is range-bound and implied volatility is expected to stay steady or rise slightly, as the back-month long option benefits from any IV expansion while the front-month short is already time-decaying.",
+    ],
+    stats: [
+      { label: "Net Debit", value: "₹80–140", note: "Per share (front vs. back month at same ATM strike)" },
+      { label: "Max Profit Zone", value: "ATM ± 2%", note: "FINNIFTY must pin near the strike at front expiry" },
+      { label: "Max Loss", value: "Net Debit", note: "If FINNIFTY moves far from the strike" },
+      { label: "Best Regime", value: "Low IV, Range-bound", note: "Avoid around major banking catalysts" },
+      { label: "Theta Profile", value: "Positive (net)", note: "Front month decays faster than back month" },
+      { label: "Vega Profile", value: "Positive (net)", note: "IV expansion lifts the back-month long" },
+    ],
+    setup: [
+      { label: "Underlying", value: "FINNIFTY monthly options (50-point strike increments)" },
+      { label: "Short Leg", value: "Sell near-month ATM call (or put)" },
+      { label: "Long Leg", value: "Buy next-month ATM call (or put) — same strike" },
+      { label: "Entry Condition", value: "FINNIFTY range-bound; no major event in front-month window; IVP moderate" },
+      { label: "Profit Target", value: "Exit at 40–50% of max theoretical profit, or before front-month expiry week" },
+      { label: "Adjustment", value: "Roll strike to ATM if FINNIFTY drifts more than 2% from your strike" },
+    ],
+    legs: [
+      { action: "SELL", type: "CE", strike: "ATM (front month)", note: "Short near-month call — theta income" },
+      { action: "BUY", type: "CE", strike: "ATM (next month, same strike)", note: "Long back-month call — value anchor" },
+    ],
+    edges: [
+      {
+        title: "Theta differential is the core income engine",
+        body: "Options lose time value at a rate proportional to 1/√T — meaning near-dated options decay exponentially faster as expiry approaches. By being short the front month and long the back month at the same strike, you collect the difference in decay rates. On FINNIFTY, this differential is typically ₹80–140 per share over a 3–4 week holding period.",
+      },
+      {
+        title: "Double benefit when IV rises",
+        body: "If implied volatility expands after you enter, both legs increase in value — but the back-month long option gains more (it has higher vega). This makes the calendar spread a genuinely positive-vega trade: unlike a simple short straddle, you actually want IV to tick up. This is a rare edge in a predominantly theta-selling environment.",
+      },
+      {
+        title: "Lower margin than directional or naked positions",
+        body: "The net debit structure means your maximum loss is the premium paid — there is no naked option exposure. Margin requirements are minimal compared to short straddles or iron condors, making this an efficient use of capital when you have a neutral view on FINNIFTY for the month ahead.",
+      },
+    ],
+    whenToUse: [
+      "FINNIFTY is in a confirmed trading range and no major RBI events, banking-sector results, or budget announcements fall within the front-month expiry window.",
+      "The implied volatility term structure is in contango (front month IV is lower than back month), suggesting the market does not expect an imminent shock — front-month theta will work cleanly.",
+      "You want a market-neutral, positively-convex theta trade that benefits from sideways price action without the open-ended risk of an uncapped naked straddle.",
+    ],
+    risks: [
+      "A sharp FINNIFTY move away from the strike in either direction collapses the calendar's tent-shaped payoff quickly — the trade loses on both vanna and delta if the index trends away.",
+      "Front-month IV collapse (without price movement) can cause the short leg to decay less than modelled, slowing profit accrual — check the IV term structure before entry.",
+      "Liquidity risk: FINNIFTY back-month options have wider spreads than front month — factor in extra slippage when buying the far-month leg and when closing the entire spread.",
+    ],
+    faq: [
+      {
+        q: "Should I use calls or puts for a FINNIFTY Calendar Spread?",
+        a: "Either works mechanically, but many traders use calls when FINNIFTY is slightly below the strike (so the short call is slightly OTM and benefits from an extra theta pickup) and puts when the index is slightly above. A double calendar — one call spread plus one put spread at the same or nearby strikes — broadens the profitable zone but doubles the debit.",
+      },
+      {
+        q: "When should I close the front-month leg?",
+        a: "Exit the entire spread 3–5 days before the front-month expiry, before gamma risk spikes and the short leg becomes dangerously sensitive to small price moves. Alternatively, let the front-month leg expire and hold the back-month leg if FINNIFTY has moved to a new ATM — this converts the trade into a long single option.",
+      },
+      {
+        q: "How does FINNIFTY's monthly-only cycle affect the calendar spread?",
+        a: "The lack of weekly FINNIFTY options means you must use consecutive monthly expiries, creating a 25–35 day gap between legs. This is a wider time spread than a NIFTY or BANKNIFTY weekly calendar, which means more capital is at risk (higher debit) but also a more extended theta collection window. Plan for a 20–25 day maximum holding period.",
+      },
+    ],
+  },
+
+  // ── Bull Put Spread (Bullish/Neutral, credit) ────────────────────────────
+  "bull-put-spread-finnifty": {
+    name: "Bull Put Spread on FINNIFTY",
+    index: "FINNIFTY",
+    category: "Bullish",
+    theme: "amber",
+    payoff: "tent",
+    badge: "Bullish · Credit Received · Defined Risk",
+    tagline:
+      "Sell a put at a higher strike and buy a put at a lower strike on FINNIFTY — collect an upfront credit and keep it entirely if FINNIFTY stays above your short put at expiry.",
+    keywords:
+      "bull put spread finnifty, credit spread finnifty, cash secured put finnifty, finnifty put credit spread, neutral bullish finnifty strategy",
+    intro: [
+      "The Bull Put Spread is a credit strategy — you receive premium on day one and aim to keep it. You sell a put at a higher strike (closer to or at the current FINNIFTY level) and buy a put at a lower strike as protection, netting a credit. As long as FINNIFTY stays above your short put at expiry, both legs expire worthless and you retain 100% of the credit. Your protection leg limits your loss if the index falls sharply.",
+      "This is one of the most popular income strategies for FINNIFTY because it marries a bullish or neutral market view with a probabilistic edge. By placing the short put below the current market — in the 15–25 delta zone — you collect credit while giving FINNIFTY room to fall modestly without triggering a loss. The wing (long put below) caps your loss and reduces margin requirements versus selling a naked put.",
+      "The financial-services sector in India has historically displayed a mild bullish long-term trend punctuated by sharp event-driven corrections. The bull put spread suits this profile: collect regular credit income in trending-to-flat periods, and let the long put wing limit damage when a financial-sector shock delivers an outsized downswing. Over 2021–2024 NSE data, 15-delta FINNIFTY put spreads achieved a 65–70% expiry-worthless rate on monthly cycles.",
+    ],
+    stats: [
+      { label: "Win Rate", value: "65–70%", note: "15-delta short put, monthly FINNIFTY cycle" },
+      { label: "Credit Received", value: "₹60–110", note: "Per share (50-point spread width)" },
+      { label: "Max Loss", value: "Spread − Credit", note: "e.g. ₹190 loss on ₹250 spread − ₹60 credit" },
+      { label: "Best Regime", value: "Bullish / Sideways", note: "FINNIFTY trending up or flat" },
+      { label: "Theta", value: "Positive", note: "Credit decays toward zero as expiry nears" },
+      { label: "Margin / Lot", value: "₹15k–25k", note: "Lower than naked put selling" },
+    ],
+    setup: [
+      { label: "Underlying", value: "FINNIFTY monthly options (50-point strikes)" },
+      { label: "Short Put Strike", value: "15–20 delta OTM put (below current FINNIFTY)" },
+      { label: "Long Put Strike", value: "100–250 points below short put (wing)" },
+      { label: "Entry Condition", value: "Bullish or sideways view; no major financial catalyst in the window" },
+      { label: "Profit Target", value: "Close at 50% of credit received (reduce gamma risk)" },
+      { label: "Adjustment Trigger", value: "Short put delta crosses 0.35 — roll down or close" },
+    ],
+    legs: [
+      { action: "SELL", type: "PE", strike: "15–20 delta OTM (below spot)", note: "Short put — premium income" },
+      { action: "BUY", type: "PE", strike: "100–250 pts below short put", note: "Long put wing — caps max loss" },
+    ],
+    edges: [
+      {
+        title: "Time decay is your daily ally",
+        body: "As a net credit structure, every day that passes without FINNIFTY breaching your short put increases your profit. Theta works continuously — the short put's time value erodes while the further OTM long put loses value more slowly, widening the spread's P&L in your favour as expiry approaches.",
+      },
+      {
+        title: "High probability of profit with defined risk",
+        body: "Placing the short put at the 15-delta level means the market implies approximately an 85% chance of FINNIFTY staying above it at expiry. You can't control which 15% of cycles are losers, but the long wing ensures that even in a losing cycle, your maximum loss is bounded and pre-known — not a surprise margin call.",
+      },
+      {
+        title: "Works as a recurring income overlay on a bullish FINNIFTY view",
+        body: "Investors already long FINNIFTY ETFs or financials-heavy mutual funds can add a bull put spread to generate extra monthly income on top of portfolio appreciation. The spread's premium buffers against small FINNIFTY dips while the portfolio gains from rallies — a natural complement to a long-financials core position.",
+      },
+    ],
+    whenToUse: [
+      "FINNIFTY is in an uptrend or trading sideways above a well-defined support zone, with no major RBI or banking-sector catalysts due before expiry.",
+      "India VIX is moderate-to-elevated (15–20), making put premiums rich enough to collect a meaningful credit for a spread placed 3–5% below the current index level.",
+      "You want a recurring monthly income strategy on the financial sector without the unlimited risk of selling a naked put.",
+    ],
+    risks: [
+      "A sharp FINNIFTY selloff — triggered by an unexpected RBI decision or a bank crisis — can breach the short put quickly; always manage at the 0.35-delta trigger rather than waiting for assignment.",
+      "Collecting small credits means a single losing cycle can erase several months of gains if not managed — never skip the stop-loss discipline on a credit spread.",
+      "Assignment risk on the short put if FINNIFTY drops through it near expiry — close well before the final session to avoid any assignment complications on monthly expiry day.",
+    ],
+    faq: [
+      {
+        q: "What is the difference between a Bull Put Spread and a naked put on FINNIFTY?",
+        a: "A naked put has unlimited risk below the strike and requires significantly higher margin. A bull put spread adds a protective long put that caps the maximum loss at the spread width minus the credit received, while also reducing margin requirements by 50–70%. You give up some premium by buying the wing, but gain defined risk and capital efficiency.",
+      },
+      {
+        q: "At what credit level does this spread become attractive on FINNIFTY?",
+        a: "Aim for a credit-to-spread-width ratio of at least 25% — for example, collecting ₹65 on a ₹250-wide spread. Below 20%, the risk/reward deteriorates: you're risking ₹185 to make ₹65 and the math only works if your win rate stays well above 70%. When premium is thin, widen the spread or wait for higher IV.",
+      },
+      {
+        q: "How does the bull put spread behave when FINNIFTY approaches the short put?",
+        a: "As FINNIFTY falls toward the short put, the spread's value increases toward its maximum loss (spread width minus original credit). At the short-put delta of 0.35, the conventional adjustment is to close the spread, take a partial loss, and reassess. Waiting longer increases gamma risk and the probability of a maximum-loss outcome.",
+      },
+    ],
+  },
+
+  // ── Bear Call Spread (Bearish, credit) ───────────────────────────────────
+  "bear-call-spread-finnifty": {
+    name: "Bear Call Spread on FINNIFTY",
+    index: "FINNIFTY",
+    category: "Bearish",
+    theme: "rose",
+    payoff: "ramp-down",
+    badge: "Bearish · Credit Received · Defined Risk",
+    tagline:
+      "Sell a lower-strike call and buy a higher-strike call on FINNIFTY — pocket a credit upfront and keep it entirely when FINNIFTY stays below your short call at expiry.",
+    keywords:
+      "bear call spread finnifty, credit call spread finnifty, call credit spread finnifty, bearish credit strategy finnifty, finnifty short call spread",
+    intro: [
+      "The Bear Call Spread is the credit-side bearish structure: you sell a call at a strike closer to the current FINNIFTY level and buy a higher-strike call to cap your risk, receiving a net credit upfront. If FINNIFTY stays below your short call at expiry — or falls — you keep the entire credit as profit. The long call wing above ensures your loss is bounded if FINNIFTY unexpectedly surges.",
+      "This strategy pairs exceptionally well with FINNIFTY because financial stocks have well-defined resistance zones that often hold through multiple monthly cycles. Selling a call spread at or just above a resistance level is a recurring setup — you collect credit from time decay while the level holds, and the long wing protects you if the resistance breaks with force.",
+      "Unlike a debit-based bear put spread, the bear call spread generates immediate income. The trade-off is probability: you want FINNIFTY to stay below your short call, which is easier to achieve with an OTM placement but gives a lower credit. At-the-money or just-OTM placements collect more but require more precise market timing. Most professional traders use the 15–25 delta short call as the baseline.",
+    ],
+    stats: [
+      { label: "Win Rate", value: "65–70%", note: "15-delta short call, monthly FINNIFTY cycle" },
+      { label: "Credit Received", value: "₹60–110", note: "Per share (50-point spread width)" },
+      { label: "Max Loss", value: "Spread − Credit", note: "e.g. ₹190 on a ₹250 spread − ₹60 credit" },
+      { label: "Best Regime", value: "Bearish / Sideways", note: "FINNIFTY trending down or at resistance" },
+      { label: "Theta", value: "Positive", note: "Short call decays toward zero as expiry approaches" },
+      { label: "Margin / Lot", value: "₹15k–25k", note: "Lower than naked call selling" },
+    ],
+    setup: [
+      { label: "Underlying", value: "FINNIFTY monthly options (50-point strikes)" },
+      { label: "Short Call Strike", value: "15–25 delta OTM call (above current FINNIFTY)" },
+      { label: "Long Call Strike", value: "100–250 points above short call (wing)" },
+      { label: "Entry Condition", value: "FINNIFTY at or near resistance; bearish or neutral view; IV moderate-to-high" },
+      { label: "Profit Target", value: "Close at 50% of credit received to reduce risk" },
+      { label: "Adjustment Trigger", value: "Short call delta crosses 0.35 — roll up or close position" },
+    ],
+    legs: [
+      { action: "SELL", type: "CE", strike: "15–25 delta OTM (above spot)", note: "Short call — premium income" },
+      { action: "BUY", type: "CE", strike: "100–250 pts above short call", note: "Long call wing — caps max loss" },
+    ],
+    edges: [
+      {
+        title: "Collect credit at proven resistance levels",
+        body: "FINNIFTY's sector concentration means resistance zones form clearly and hold well. Selling a call spread just above a well-tested resistance — confirmed by multiple failed breakout attempts — stacks a structural edge on top of the probabilistic one. Time decay erodes the short call while the resistance holds.",
+      },
+      {
+        title: "Theta decay without directional commitment",
+        body: "You don't need FINNIFTY to fall dramatically — you just need it not to rally above your short strike. Sideways-to-bearish is sufficient for full profit. This makes the bear call spread a useful tool in range-bound markets where selling puts is uncomfortable but calls above resistance are attractively priced.",
+      },
+      {
+        title: "Predefined loss with no margin call risk",
+        body: "The long call wing above your short call converts what would be an unlimited-risk naked call into a bounded-loss structure. You know exactly how much you can lose before you enter, enabling precise position sizing and systematic risk management — critical for trading financial-sector options where gap risk from banking events is non-trivial.",
+      },
+    ],
+    whenToUse: [
+      "FINNIFTY is testing a resistance level and showing signs of reversal — multiple failed closes above the level with bearish candle patterns on the daily chart.",
+      "The India VIX is elevated (15–20+), making call premiums rich enough to collect a meaningful credit even with a wing reducing the net take.",
+      "You have a near-term bearish or neutral view on the financial sector (RBI has been hawkish, credit growth slowing) but want a bounded-risk expression rather than a naked directional trade.",
+    ],
+    risks: [
+      "A breakout rally above the short call — triggered by surprise positive news like an unexpected rate cut or strong banking results — can push the spread toward maximum loss quickly; manage at the 0.35-delta trigger.",
+      "Momentum markets where FINNIFTY trends strongly upward make call spreads at resistance dangerous — trend confirmation is more important than resistance levels in trending regimes.",
+      "Near-expiry gamma: in the final 3–5 days, a small FINNIFTY move can dramatically change the spread's value — close early to avoid expiry-week gamma risk on the short leg.",
+    ],
+    faq: [
+      {
+        q: "Is a Bear Call Spread better than a Bear Put Spread on FINNIFTY?",
+        a: "They express the same bearish view but differ in structure. A bear call spread is a credit strategy — you receive premium and time is your friend. A bear put spread is a debit strategy — you pay premium and need a move to profit. In range-bound or mildly bearish markets, the call spread's credit advantage is superior. In sharp-move scenarios, the put spread's unlimited downside capture potential (relative to debit) can be more profitable.",
+      },
+      {
+        q: "What credit-to-spread ratio should I target for a FINNIFTY Bear Call Spread?",
+        a: "Aim for at least 25% — e.g., collecting ₹65 on a ₹250-wide spread. Below 20%, the risk/reward requires a very high win rate to be profitable over a series of trades. When IV is high enough to collect 30–35% of the spread width, the trade becomes particularly attractive.",
+      },
+      {
+        q: "Can I use this spread inside an Iron Condor?",
+        a: "Yes — a Bear Call Spread is always one half of an Iron Condor. If you're already in a Bull Put Spread on FINNIFTY and want to add the bearish call side to create a full non-directional structure, you simply add the Bear Call Spread above the market. Just ensure your combined credit and margin requirements fit your account size and risk limits.",
+      },
+    ],
+  },
+
+  // ── Covered Call (Income on long position) ───────────────────────────────
+  "covered-call-nifty": {
+    name: "Covered Call on NIFTY",
+    index: "NIFTY",
+    category: "Bullish",
+    theme: "amber",
+    payoff: "tent",
+    badge: "Bullish · Income Strategy · Theta Positive",
+    tagline:
+      "Hold a long NIFTY position (ETF or futures) and sell an OTM call against it — generate monthly income on an existing holding while retaining upside up to the sold strike.",
+    keywords:
+      "covered call nifty, nifty etf covered call, sell call against nifty position, nifty income strategy, niftybees covered call, long nifty short call",
+    intro: [
+      "The Covered Call is the most widely used income-generation strategy for investors who already hold a long NIFTY position. You own NIFTY exposure — through Niftybees ETF units, a long NIFTY futures contract, or a basket of NIFTY constituents — and sell an out-of-the-money call option against that position. The call premium flows to you upfront as income. If NIFTY stays below the sold strike at expiry, the call expires worthless and you repeat the process next month.",
+      "In the Indian context, the cleanest implementation is Niftybees units (the NSE-listed NIFTY 50 ETF) paired with short NIFTY weekly or monthly CE options. The ETF provides the 'covered' equity leg; the short call generates income. The strategy is also executed by futures traders who are long NF futures and sell the same-expiry OTM CE — the futures provide physical delivery equivalence, making the call 'covered' in margin terms.",
+      "Historically, a covered call writer on NIFTY captures 60–80% of the index's upside in bull markets (capped at the sold strike) while generating 1–2% monthly income from premiums in sideways markets. The trade-off is that if NIFTY rallies sharply past the sold strike, your gains are capped at the strike price — you participate in the rally only up to the call's exercise point. The strategy suits investors with a mildly bullish to neutral outlook who prioritise income over unlimited upside.",
+    ],
+    stats: [
+      { label: "Monthly Income", value: "0.5–1.5%", note: "Of position value; OTM call premium at 15–25 delta" },
+      { label: "Upside Cap", value: "Short Strike", note: "Profits capped at the sold call's strike" },
+      { label: "Downside", value: "Unprotected", note: "Long NIFTY position losses offset by premium only" },
+      { label: "Best Regime", value: "Sideways–Mildly Bullish", note: "Full premium retained; position appreciates modestly" },
+      { label: "Theta", value: "Positive", note: "Short call decays in your favour daily" },
+      { label: "Break-even Improvement", value: "By premium received", note: "Effectively lowers your long NIFTY cost basis" },
+    ],
+    setup: [
+      { label: "Long Leg", value: "Niftybees ETF or long NIFTY futures (1 lot = 75 units)" },
+      { label: "Short Call Strike", value: "1–3% OTM from current NIFTY (15–25 delta zone)" },
+      { label: "Expiry", value: "Nearest weekly or monthly NIFTY option" },
+      { label: "Entry Condition", value: "Neutral-to-mildly bullish view; IV elevated enough to collect meaningful premium" },
+      { label: "Profit Target", value: "Sell call, collect premium, hold to expiry or 50% premium decay" },
+      { label: "Roll / Adjustment", value: "If NIFTY approaches short strike, roll the call up-and-out to next expiry" },
+    ],
+    legs: [
+      { action: "BUY", type: "CE", strike: "NIFTY ETF / Futures (existing long position)", note: "The 'covered' long leg — held in portfolio" },
+      { action: "SELL", type: "CE", strike: "1–3% OTM above current NIFTY", note: "Short call — generates monthly income premium" },
+    ],
+    edges: [
+      {
+        title: "Lowers your effective cost basis month after month",
+        body: "Every premium you collect from the short call reduces your effective entry price in the long NIFTY position. If you bought Niftybees at ₹250 and collect ₹2 per unit monthly for 12 months, your effective cost falls to ₹226 — a meaningful 9.6% cost reduction over a year, compounding alongside any NIFTY appreciation.",
+      },
+      {
+        title: "India's sideways market phases are long and regular",
+        body: "NIFTY has historically spent 40–50% of its time in flat-to-mildly-trending phases where directional traders lose money but premium sellers thrive. Covered call writers systematically harvest those sideways months through option income while remaining positioned for the next trending phase up to the sold call's strike.",
+      },
+      {
+        title: "No additional margin required",
+        body: "Because the short call is covered by the existing long ETF or futures position, NSE margin rules treat it as a covered position with significantly reduced margin requirements compared to a naked short call. For ETF-based covered calls, the call is collateralised by the ETF shares — no SPAN margin is levied on top.",
+      },
+    ],
+    whenToUse: [
+      "You already hold a long NIFTY position (Niftybees, index mutual fund, or NIFTY futures) and want to generate monthly income on it without reducing the position.",
+      "NIFTY has been in a sideways or slowly rising market for several weeks and you don't expect a sharp near-term rally — the sold call is unlikely to be exercised.",
+      "Implied volatility is elevated (IV rank above 40%) and call premiums are rich — selling expensive calls improves the income yield and provides a better cushion against small drawdowns.",
+    ],
+    risks: [
+      "Capped upside: if NIFTY rallies sharply, your gains on the long position stop at the short call's strike — you will regret selling the call on days of strong rallies.",
+      "Downside is NOT protected: the premium collected provides only a small buffer against NIFTY falling; a 5–8% correction still produces a significant loss on the long position that premium alone cannot offset.",
+      "Early assignment risk (primarily on futures leg): if the short call goes deep in the money near expiry, there is a theoretical assignment risk on American-style contracts — on NSE's European-exercise index options, assignment is only at expiry.",
+    ],
+    faq: [
+      {
+        q: "Can I implement a covered call using only Niftybees ETF without futures?",
+        a: "Yes — Niftybees (or any NIFTY 50 ETF) can serve as the covered equity leg. You hold the ETF units in your demat account and sell NIFTY CE options against an equivalent notional exposure. The ETF provides physical backing, reducing margin requirements. However, the ETF tracks the cash index while options are settled against the futures-derived closing price — verify the notional match carefully.",
+      },
+      {
+        q: "What happens if NIFTY rallies above my short call at expiry?",
+        a: "Your long position gains up to the strike level, and the short call is exercised at expiry — you deliver the gains (settled in cash on NSE index options). Your net profit is the strike gain plus the premium received, but you miss any rally above the strike. You can then re-establish the position by selling the next month's call at a new, higher strike.",
+      },
+      {
+        q: "How often should I write covered calls on NIFTY?",
+        a: "Monthly is the most common frequency — one call sold per expiry cycle, collecting premium while managing the long position. Some active traders write weekly calls on NIFTY for higher frequency income but with commensurately higher transaction costs and management overhead. Start monthly to understand the mechanics before moving to weekly cadence.",
+      },
+    ],
+  },
+
+  // ── Diagonal Spread (Neutral/Bullish, PMCC) ───────────────────────────────
+  "diagonal-spread-nifty": {
+    name: "Diagonal Spread on NIFTY",
+    index: "NIFTY",
+    category: "Neutral",
+    theme: "teal",
+    payoff: "tent",
+    badge: "Neutral · Bullish Lean · Poor Man's Covered Call",
+    tagline:
+      "Buy a longer-dated ITM NIFTY call and sell a shorter-dated OTM call against it — a capital-efficient alternative to the covered call, powered by time decay differential.",
+    keywords:
+      "diagonal spread nifty, pmcc nifty, poor mans covered call nifty, diagonal options strategy nse, nifty calendar with different strikes, nifty diagonal call spread",
+    intro: [
+      "The Diagonal Spread — often called a Poor Man's Covered Call (PMCC) — replicates the income-generating mechanics of a covered call at a fraction of the capital required to hold the underlying. Instead of owning NIFTY ETF units or a futures position, you buy a deep ITM or ATM call with a longer expiration (2–3 months out) to act as a proxy for the long position, then sell a shorter-dated OTM call against it each month to collect premium.",
+      "The long deep ITM call has a delta close to 1 — it moves almost one-for-one with NIFTY — while costing far less than the equivalent ETF position. You then sell a near-month OTM call against this long position, exactly as a covered call writer would, collecting monthly premium. The difference is time: the short call expires in weeks while the long call has months of life remaining, creating the theta differential that drives the trade's income engine.",
+      "On NIFTY, a diagonal spread is particularly capital-efficient because NIFTY's deep liquidity allows entry and exit at tight spreads even in longer-dated contracts. A long ITM call 2 months out might cost ₹400–600 per share (versus ₹1,800+ to buy equivalent NIFTY futures exposure), and selling a 1-month OTM call for ₹80–120 per share gives you a recurring income yield of 15–25% on the long call's cost each month. Over 3–4 months of short call rolls, you can recover most of your initial debit.",
+    ],
+    stats: [
+      { label: "Monthly Income", value: "15–25%", note: "Of long call cost; from short near-month OTM call" },
+      { label: "Long Call Cost", value: "₹400–600", note: "Per share; 2–3 month ITM call on NIFTY" },
+      { label: "Short Call Premium", value: "₹80–120", note: "Per share; 1-month OTM call at 20–30 delta" },
+      { label: "Capital Required", value: "~30% of ETF", note: "Versus buying equivalent NIFTY exposure via ETF" },
+      { label: "Best Regime", value: "Mildly Bullish / Sideways", note: "Long call appreciates; short call decays" },
+      { label: "Break-even", value: "Long call cost minus accumulated short call credits", note: "Recoverable over 3–4 monthly rolls" },
+    ],
+    setup: [
+      { label: "Long Leg", value: "Buy NIFTY CE: 2–3 months to expiry, ITM (delta 0.70–0.85)" },
+      { label: "Short Leg", value: "Sell NIFTY CE: 1 month to expiry, OTM (delta 0.20–0.30)" },
+      { label: "Strike Relationship", value: "Short call strike must be above long call strike (avoids inverted spread)" },
+      { label: "Entry Condition", value: "Mildly bullish to neutral on NIFTY; IV moderate (not spiking)" },
+      { label: "Roll Process", value: "When short call expires or reaches 50% profit, sell next month's OTM call" },
+      { label: "Exit", value: "Close entire spread if NIFTY breaches long call strike on the downside significantly" },
+    ],
+    legs: [
+      { action: "BUY", type: "CE", strike: "ITM (delta 0.70–0.85), 2–3 months expiry", note: "Long ITM call — synthetic long NIFTY position" },
+      { action: "SELL", type: "CE", strike: "OTM (delta 0.20–0.30), front month expiry", note: "Short OTM call — monthly income generator" },
+    ],
+    edges: [
+      {
+        title: "Leverage without futures margin risk",
+        body: "A long deep ITM NIFTY call at ₹500/share gives delta-1 exposure to NIFTY at a fraction of the cost of futures (which require ₹90,000–110,000 in SPAN margin per lot). You get nearly identical upside participation up to the short call strike but with a defined, pre-paid cost — no overnight margin calls, no mark-to-market risk on the long leg beyond the premium paid.",
+      },
+      {
+        title: "Monthly income through short call rolls",
+        body: "The short near-month OTM call is what generates recurring income. Each time it expires or decays to 50% of its value, you sell the next month's call at the then-current OTM level. Over time, accumulated short call credits reduce your net cost in the long ITM call, progressively improving the trade's risk/reward with each roll cycle.",
+      },
+      {
+        title: "Benefits from NIFTY's mean-reverting tendencies",
+        body: "NIFTY has a historical tendency to chop sideways in 2–4 month bands before the next trending phase. The diagonal spread is designed precisely for this environment: the long ITM call captures any eventual rally, while the monthly short call rolls extract income during the choppy sideways periods. It's a strategy that converts sideways time into cumulative premium collected.",
+      },
+    ],
+    whenToUse: [
+      "You are mildly bullish on NIFTY over the next 2–3 months but don't want to deploy full ETF or futures capital — the diagonal lets you participate with a defined debit and monthly income rolls.",
+      "NIFTY is in a sideways or slowly rising phase and you expect this to continue for 1–2 more months before a potential breakout — short call income accrues while you wait.",
+      "IV on near-term options is elevated relative to longer-dated options (steep forward skew), making the short near-month call attractively priced relative to the long back-month call you're buying.",
+    ],
+    risks: [
+      "If NIFTY falls sharply, the long ITM call loses value (though delta-hedged by the short call partially) — deep moves threaten the long leg's intrinsic value and can produce a significant loss despite the short call income collected.",
+      "Short call assignment risk: if NIFTY surges past the short call's strike, the short leg moves deeply ITM — close or roll it promptly as the short call's loss can exceed the short call premium received, eroding the long call's gains.",
+      "Time decay risk on the long leg: the 2–3 month ITM call has significant time value that decays — if NIFTY stays flat for the entire holding period and IV falls, the long call loses value faster than the accumulated short call credits compensate.",
+    ],
+    faq: [
+      {
+        q: "What makes a Diagonal Spread different from a Calendar Spread on NIFTY?",
+        a: "A calendar spread uses the same strike for both legs — different expiries, same strike. A diagonal spread uses different strikes AND different expiries — the long leg is typically ITM and farther out, while the short leg is OTM and near-term. The diagonal has a directional component (slightly bullish) because the long ITM call has intrinsic value, whereas a calendar is purely strike-neutral.",
+      },
+      {
+        q: "How do I choose the strike for the long ITM call?",
+        a: "Target a delta of 0.70–0.85 for the long call — deep enough in the money to have high delta (so it moves like NIFTY) but not so deep that you overpay for intrinsic value with no time benefit. At a 0.75 delta, a ₹100 NIFTY move translates into approximately ₹75 gain on the long call — near-equivalent exposure to the ETF for a fraction of the cost.",
+      },
+      {
+        q: "What is the maximum loss on a Diagonal Spread?",
+        a: "The maximum theoretical loss is the net debit paid for the entire spread — the cost of the long ITM call minus the credit from the first short call. In practice, you would exit well before a total-loss scenario by closing the long call when NIFTY moves significantly against you. Define a stop-loss at 50% of the net debit and honour it regardless of conviction.",
+      },
+    ],
+  },
 };
 
 // Helper for routes/sitemap/hub.
