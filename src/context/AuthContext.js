@@ -35,7 +35,7 @@ export function AuthProvider({ children }) {
               photoURL: user.photoURL || "",
               plan: "free",
               simulationsRunToday: 0,
-              simulationsLimit: 5,
+              simulationsLimit: 3,
               lastSimulationDate: new Date().toISOString().split('T')[0],
               createdAt: new Date().toISOString()
             };
@@ -61,7 +61,7 @@ export function AuthProvider({ children }) {
           setUserProfile({
             plan: "free",
             simulationsRunToday: 0,
-            simulationsLimit: 5,
+            simulationsLimit: 3,
             error: true
           });
         }

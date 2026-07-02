@@ -14,6 +14,7 @@ import PayoffChart from "@/components/PayoffChart";
 import GreeksPanel from "@/components/GreeksPanel";
 import AppModal from "@/components/AppModal";
 import TradeMetricsBar from "@/components/TradeMetricsBar";
+import UpgradeBanner from "@/components/UpgradeBanner";
 import { useAuth } from "@/context/AuthContext";
 import {
   db,
@@ -268,6 +269,7 @@ function PaperTradeContent() {
   const [liveSpotMap,   setLiveSpotMap]   = useState({});     // posId → current spot price
   const [oiWallMap,     setOiWallMap]     = useState({});     // `${symbol}_${expiry}` → { maxCallOIStrike, maxPutOIStrike, maxCallOI, maxPutOI }
   const [modal,         setModal]         = useState(null);   // AppModal state
+  const [upgradeOpen,   setUpgradeOpen]   = useState(false);  // free-tier paywall
   // notes
   const [noteMap,       setNoteMap]       = useState({});     // tradeId → draft note text
   const [savingNoteId,  setSavingNoteId]  = useState(null);
@@ -508,9 +510,18 @@ function PaperTradeContent() {
   }, [openPositions.map((p) => p.id).join(",")]);
 
   // ── Open a new position ───────────────────────────────────────────────────
+  const FREE_POSITION_LIMIT = 2;
+
   async function handleOpenPosition() {
     if (!currentUser || !previewLegs || submitting) return;
     if (!previewLegs.pricedLegs?.length) return;
+
+    // Free-tier: max 2 open positions at a time
+    const isFree = !userProfile?.plan || userProfile.plan === "free";
+    if (isFree && openPositions.length >= FREE_POSITION_LIMIT) {
+      setUpgradeOpen(true);
+      return;
+    }
 
     const { pricedLegs, netPremium: netPrem, spotPrice } = previewLegs;
     // Rough NSE margin: 15% of notional + net debit
@@ -1465,6 +1476,13 @@ function PaperTradeContent() {
 
         {/* ══════════════════ APP MODAL ══════════════════ */}
         <AppModal modal={modal} onClose={() => setModal(null)} />
+
+        {/* ══════════════════ FREE TIER PAYWALL ══════════════════ */}
+        <UpgradeBanner
+          isOpen={upgradeOpen}
+          onClose={() => setUpgradeOpen(false)}
+          message="Free accounts can hold up to 2 open positions at a time. Upgrade to Pro for unlimited paper trading and full P&L analytics."
+        />
 
         {/* ══════════════════ RESET CONFIRM MODAL ══════════════════ */}
         {resetConfirm && (

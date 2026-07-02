@@ -697,7 +697,7 @@ function BacktestContent() {
             <div className="flex items-center gap-3 min-w-0">
               <span className="text-amber-400 text-lg shrink-0">⚡</span>
               <p className="text-sm text-amber-200 font-medium leading-snug">
-                You have {Math.max(0, (userProfile?.simulationsLimit || 5) - (userProfile?.simulationsRunToday || 0))} free backtests left today.{" "}
+                You have {Math.max(0, (userProfile?.simulationsLimit || 3) - (userProfile?.simulationsRunToday || 0))} free backtests left today.{" "}
                 <span className="text-slate-400">Pro unlocks unlimited runs + 8 years of NSE data.</span>
               </p>
             </div>
@@ -1272,27 +1272,62 @@ function BacktestContent() {
                     </div>
 
                     {/* ── All Trades (flat list) ── */}
-                    {tradeLogView === "list" && (
-                      <div className="divide-y divide-white/3 max-h-[600px] overflow-y-auto">
-                        <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 px-4 py-2 text-[10px] text-slate-600 uppercase tracking-widest font-semibold sticky top-0 bg-slate-950/95">
-                          <span>#</span>
-                          <span>Entry Date</span>
-                          <span className="hidden sm:block">Expiry</span>
-                          <span className="hidden md:block">Entry Spot</span>
-                          <span>P&L</span>
-                          <span>Cumulative</span>
+                    {tradeLogView === "list" && (() => {
+                      const isFree = !userProfile?.plan || userProfile.plan === "free";
+                      const FREE_VISIBLE = 10;
+                      const visibleTrades = isFree ? trades.slice(0, FREE_VISIBLE) : trades;
+                      const lockedCount = trades.length - visibleTrades.length;
+                      return (
+                        <div className="divide-y divide-white/3 max-h-[600px] overflow-y-auto">
+                          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 px-4 py-2 text-[10px] text-slate-600 uppercase tracking-widest font-semibold sticky top-0 bg-slate-950/95">
+                            <span>#</span>
+                            <span>Entry Date</span>
+                            <span className="hidden sm:block">Expiry</span>
+                            <span className="hidden md:block">Entry Spot</span>
+                            <span>P&L</span>
+                            <span>Cumulative</span>
+                          </div>
+                          {visibleTrades.map((trade) => (
+                            <TradeRow
+                              key={trade.cycle}
+                              trade={trade}
+                              underlying={underlying}
+                              expanded={expandedTrade === trade.cycle}
+                              onToggle={() => setExpandedTrade(expandedTrade === trade.cycle ? null : trade.cycle)}
+                            />
+                          ))}
+                          {isFree && lockedCount > 0 && (
+                            <div className="relative">
+                              {/* Blurred ghost rows */}
+                              {[...Array(Math.min(lockedCount, 5))].map((_, i) => (
+                                <div key={i} className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-3 px-4 py-3 blur-sm select-none opacity-40 border-b border-white/5">
+                                  <span className="text-slate-400 text-xs font-mono">{FREE_VISIBLE + i + 1}</span>
+                                  <span className="h-3 w-20 bg-slate-700 rounded" />
+                                  <span className="h-3 w-16 bg-slate-700 rounded hidden sm:block" />
+                                  <span className="h-3 w-14 bg-slate-700 rounded hidden md:block" />
+                                  <span className="h-3 w-12 bg-slate-700 rounded" />
+                                  <span className="h-3 w-16 bg-slate-700 rounded" />
+                                </div>
+                              ))}
+                              {/* Lock overlay */}
+                              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent backdrop-blur-[2px]">
+                                <div className="bg-slate-900 border border-amber-500/30 rounded-2xl px-6 py-5 text-center shadow-[0_0_40px_rgba(245,158,11,0.15)] max-w-xs">
+                                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center mx-auto mb-3">
+                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                                  </div>
+                                  <p className="text-white font-semibold text-sm mb-1">{lockedCount} more trades locked</p>
+                                  <p className="text-slate-400 text-xs mb-4">Upgrade to Pro to see the full trade history across all {trades.length} cycles</p>
+                                  <a href="/pricing" className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:from-blue-500 hover:to-indigo-500 transition-all">
+                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                                    Unlock Full History
+                                  </a>
+                                </div>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        {trades.map((trade) => (
-                          <TradeRow
-                            key={trade.cycle}
-                            trade={trade}
-                            underlying={underlying}
-                            expanded={expandedTrade === trade.cycle}
-                            onToggle={() => setExpandedTrade(expandedTrade === trade.cycle ? null : trade.cycle)}
-                          />
-                        ))}
-                      </div>
-                    )}
+                      );
+                    })()}
 
                     {/* ── By Month (grouped) ── */}
                     {tradeLogView === "month" && (

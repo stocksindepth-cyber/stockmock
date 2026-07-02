@@ -38,7 +38,7 @@ export async function checkAndIncrementSimulationLimit(userId) {
     const today = new Date().toISOString().split("T")[0];
     
     let currentRunCount = data.simulationsRunToday || 0;
-    const limit = data.simulationsLimit || 5;
+    const limit = data.simulationsLimit || 3; // free tier: 3 backtests/day
 
     // Reset counter if it's a new day
     if (data.lastSimulationDate !== today) {
