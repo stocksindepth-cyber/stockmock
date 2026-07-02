@@ -38,7 +38,9 @@ export async function checkAndIncrementSimulationLimit(userId) {
     const today = new Date().toISOString().split("T")[0];
     
     let currentRunCount = data.simulationsRunToday || 0;
-    const limit = data.simulationsLimit || 3; // free tier: 3 backtests/day
+    // Free users are always capped at 3 — ignore any legacy higher value stored in Firestore
+    const FREE_LIMIT = 3;
+    const limit = data.plan === "free" ? FREE_LIMIT : (data.simulationsLimit || FREE_LIMIT);
 
     // Reset counter if it's a new day
     if (data.lastSimulationDate !== today) {
