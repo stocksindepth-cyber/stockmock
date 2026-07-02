@@ -345,32 +345,95 @@ def parse_old_format(df: pd.DataFrame, trade_date: date) -> pd.DataFrame:
 def parse_new_format(df: pd.DataFrame, trade_date: date) -> pd.DataFrame:
     """
     Parse post-July 2024 UDiFF format Bhavcopy.
-    Columns may vary; adapt as needed.
+    NSE changed column names again in 2026 — detect schema and route accordingly.
     """
-    # Normalise column names to uppercase
+    cols = list(df.columns)
+
+    # ── 2026+ schema: TckrSymb, XpryDt, StrkPric, OptnTp, ... ──────────────
+    if "TckrSymb" in cols:
+        return _parse_udiff_2026(df, trade_date)
+
+    # ── 2024-2025 schema: SYMBOL / EXPIRY / STRIKE_PR / OPTION_TYP ─────────
+    return _parse_udiff_2024(df, trade_date)
+
+
+def _parse_udiff_2026(df: pd.DataFrame, trade_date: date) -> pd.DataFrame:
+    """
+    Parse the 2026 UDiFF schema.
+    Relevant columns:
+      FinInstrmTp  IDO=index option, STO=stock option
+      TckrSymb     NIFTY / BANKNIFTY / FINNIFTY / ...
+      XpryDt       expiry date (YYYY-MM-DD)
+      StrkPric     strike price
+      OptnTp       CE / PE
+      OpnPric / HghPric / LwPric / ClsPric / LastPric / SttlmPric
+      TtlTradgVol  volume
+      OpnIntrst    OI
+      ChngInOpnIntrst  OI change
+      UndrlygPric  actual spot price — no need to derive!
+    """
+    # Keep index options (IDO) only — covers NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY
+    df = df[df["FinInstrmTp"] == "IDO"].copy()
+
+    df = df.rename(columns={
+        "TckrSymb":          "underlying",
+        "XpryDt":            "expiry_date",
+        "StrkPric":          "strike",
+        "OptnTp":            "option_type",
+        "OpnPric":           "open",
+        "HghPric":           "high",
+        "LwPric":            "low",
+        "ClsPric":           "close",
+        "LastPric":          "ltp",
+        "SttlmPric":         "settle_pr",
+        "TtlTradgVol":       "volume",
+        "OpnIntrst":         "oi",
+        "ChngInOpnIntrst":   "oi_change",
+        "UndrlygPric":       "spot_price",  # real spot — used to build spot_map
+    })
+
+    df["trade_date"] = trade_date.strftime("%Y-%m-%d")
+
+    # Normalise expiry date to YYYY-MM-DD string
+    df["expiry_date"] = pd.to_datetime(df["expiry_date"], errors="coerce").dt.strftime("%Y-%m-%d")
+
+    # Normalise option type
+    df["option_type"] = df["option_type"].str.strip().str.upper()
+    df = df[df["option_type"].isin(["CE", "PE"])]
+
+    # Filter to known underlyings
+    df = df[df["underlying"].isin(UNDERLYING_MAP.keys())].copy()
+    df["underlying"] = df["underlying"].map(UNDERLYING_MAP)
+
+    return df
+
+
+def _parse_udiff_2024(df: pd.DataFrame, trade_date: date) -> pd.DataFrame:
+    """
+    Parse the 2024-2025 UDiFF schema (column names differ from 2026).
+    """
+    # Normalise column names to uppercase for matching
     df.columns = [c.strip().upper() for c in df.columns]
 
-    # Keep index options
     instrument_col = next((c for c in df.columns if "INSTRUMENT" in c or "INSTTYPE" in c), None)
     if instrument_col:
         df = df[df[instrument_col].isin(["OPTIDX", "OPTSTK"])].copy()
 
-    # Try to find columns (UDiFF schema may differ slightly)
     col_map = {}
     for col in df.columns:
         u = col.upper()
-        if "SYMBOL" in u:            col_map[col] = "underlying"
-        elif "EXPIRY" in u:          col_map[col] = "expiry_date_raw"
-        elif "STRIKE" in u:          col_map[col] = "strike"
+        if "SYMBOL" in u:                                   col_map[col] = "underlying"
+        elif "EXPIRY" in u:                                 col_map[col] = "expiry_date_raw"
+        elif "STRIKE" in u:                                 col_map[col] = "strike"
         elif "OPTIONTYPE" in u or ("OPTION" in u and "TYPE" in u): col_map[col] = "option_type"
-        elif u == "OPEN":            col_map[col] = "open"
-        elif u == "HIGH":            col_map[col] = "high"
-        elif u == "LOW":             col_map[col] = "low"
-        elif u == "CLOSE":           col_map[col] = "close"
-        elif "SETTLE" in u:          col_map[col] = "settle_pr"
-        elif "CONTRACT" in u or "VOLUME" in u: col_map[col] = "volume"
-        elif "OPENINT" in u or "OI" in u and "CHG" not in u: col_map[col] = "oi"
-        elif "CHG" in u and "OI" in u: col_map[col] = "oi_change"
+        elif u == "OPEN":                                   col_map[col] = "open"
+        elif u == "HIGH":                                   col_map[col] = "high"
+        elif u == "LOW":                                    col_map[col] = "low"
+        elif u == "CLOSE":                                  col_map[col] = "close"
+        elif "SETTLE" in u:                                 col_map[col] = "settle_pr"
+        elif "CONTRACT" in u or "VOLUME" in u:              col_map[col] = "volume"
+        elif "OPENINT" in u or ("OI" in u and "CHG" not in u): col_map[col] = "oi"
+        elif "CHG" in u and "OI" in u:                     col_map[col] = "oi_change"
 
     df = df.rename(columns=col_map)
     df["trade_date"] = trade_date.strftime("%Y-%m-%d")
@@ -433,20 +496,27 @@ NSE_INDEX_NAMES = {
 
 def fetch_spot_from_bhavcopy(options_df: pd.DataFrame) -> dict:
     """
-    Derive approximate spot prices from ATM straddle in Bhavcopy.
-    Uses the strike with highest combined CE+PE OI as a proxy for spot.
-    This is a fallback — prefer real index data when available.
+    Derive spot prices. In the 2026 UDiFF format, NSE provides UndrlygPric directly
+    (mapped to 'spot_price'). For older formats, fall back to high-OI ATM strike proxy.
     """
     spot_map = {}
+
+    # 2026 format: use the actual underlying price NSE provides
+    if "spot_price" in options_df.columns:
+        for underlying in options_df["underlying"].unique():
+            sub = options_df[options_df["underlying"] == underlying]
+            val = pd.to_numeric(sub["spot_price"], errors="coerce").dropna()
+            if not val.empty:
+                spot_map[underlying] = float(val.median())
+        return spot_map
+
+    # Legacy: derive from high-OI ATM strike (approximate)
     for underlying in options_df["underlying"].unique():
         sub = options_df[options_df["underlying"] == underlying]
-        # Near-dated expiry only
         if sub.empty:
             continue
         near_exp = sub["expiry_date"].min()
         sub = sub[sub["expiry_date"] == near_exp]
-
-        # Pivot OI by strike
         oi_by_strike = sub.groupby("strike")["oi"].sum()
         if not oi_by_strike.empty:
             atm_strike = oi_by_strike.idxmax()
