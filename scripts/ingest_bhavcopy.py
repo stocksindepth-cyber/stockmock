@@ -113,14 +113,34 @@ log = logging.getLogger(__name__)
 # ─── BigQuery Client ──────────────────────────────────────────────────────────
 
 def get_bq_client():
-    creds_json = os.environ.get("BIGQUERY_CREDENTIALS_JSON")
+    # Prefer file-based ADC (set by the workflow's "Write BigQuery credentials" step).
+    # Using bigquery.Client() with GOOGLE_APPLICATION_CREDENTIALS pointing to the JSON
+    # file is the most reliable path — avoids newline-escaping issues that can corrupt
+    # private keys when passed through environment variables in CI.
+    creds_file = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", "")
+    if creds_file and os.path.exists(creds_file):
+        log.info(f"[BQ] Using file-based ADC from {creds_file}")
+        return bigquery.Client(project=PROJECT_ID)
+
+    # Fallback: parse raw JSON from env var (local dev without the file)
+    creds_json = os.environ.get("BIGQUERY_CREDENTIALS_JSON", "")
     if creds_json:
         from google.oauth2 import service_account
+        try:
+            info = json.loads(creds_json)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"BIGQUERY_CREDENTIALS_JSON is not valid JSON: {e}")
+        # GitHub Actions can turn actual newlines into \\n in env vars
+        if "private_key" in info:
+            info["private_key"] = info["private_key"].replace("\\n", "\n")
         creds = service_account.Credentials.from_service_account_info(
-            json.loads(creds_json),
-            scopes=["https://www.googleapis.com/auth/bigquery"],
+            info, scopes=["https://www.googleapis.com/auth/bigquery"],
         )
+        log.info("[BQ] Using credentials from BIGQUERY_CREDENTIALS_JSON env var")
         return bigquery.Client(project=PROJECT_ID, credentials=creds)
+
+    # ADC (gcloud auth application-default login for local dev)
+    log.info("[BQ] Using Application Default Credentials (local dev)")
     return bigquery.Client(project=PROJECT_ID)
 
 
