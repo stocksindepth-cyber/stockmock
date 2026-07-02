@@ -81,7 +81,7 @@ jobs:
 
       - name: Report BigQuery row count
         # Always show current DB state after ingestion; never fail the workflow here
-        if: always() && inputs.dry_run != 'true' && secrets.BIGQUERY_CREDENTIALS_JSON != ''
+        if: always() && inputs.dry_run != 'true'
         continue-on-error: true
         env:
           BIGQUERY_CREDENTIALS_JSON: ${{ secrets.BIGQUERY_CREDENTIALS_JSON }}
