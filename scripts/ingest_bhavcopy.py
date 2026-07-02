@@ -33,6 +33,7 @@ import json
 import logging
 import math
 import os
+import sys
 import time
 import zipfile
 from datetime import date, datetime, timedelta
@@ -48,19 +49,29 @@ from scipy.optimize import brentq
 PROJECT_ID = "optionsindepth"
 DATASET_ID = "optionsgyani"
 
-# NSE Bhavcopy URL patterns
+# NSE Bhavcopy URL patterns — try multiple CDN paths for resilience
 # Pre-July 5 2024:
 URL_OLD = "https://nsearchives.nseindia.com/content/historical/DERIVATIVES/{year}/{mon}/fo{dd}{MON}{yyyy}bhav.csv.zip"
-# Post-July 8 2024 (new UDiFF format):
+URL_OLD_ALT = "https://archives.nseindia.com/content/historical/DERIVATIVES/{year}/{mon}/fo{dd}{MON}{yyyy}bhav.csv.zip"
+# Post-July 8 2024 (UDiFF format):
 URL_NEW = "https://nsearchives.nseindia.com/content/fo/BhavCopy_NSE_FO_0_0_0_{ddmmyyyy}_F_0000.csv.zip"
+URL_NEW_ALT = "https://archives.nseindia.com/content/fo/BhavCopy_NSE_FO_0_0_0_{ddmmyyyy}_F_0000.csv.zip"
 
-# NSE Headers (required to avoid 403)
+# NSE Headers — rotate user agents to avoid fingerprinting on CI/cloud IPs
+NSE_USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:125.0) Gecko/20100101 Firefox/125.0",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
+]
 NSE_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
     "Accept-Encoding": "gzip, deflate, br",
-    "Referer": "https://www.nseindia.com",
+    "Referer": "https://www.nseindia.com/",
     "Connection": "keep-alive",
+    "Upgrade-Insecure-Requests": "1",
+    "Cache-Control": "max-age=0",
 }
 
 # Index symbols in Bhavcopy → our canonical names
@@ -191,45 +202,98 @@ def compute_iv_batch(df, spot_map):
 
 CUTOVER_DATE = date(2024, 7, 8)  # NSE switched to new UDiFF format
 
-def build_bhavcopy_url(d: date) -> str:
+# Sentinel to distinguish "no data today" (404) from "blocked" (403/network)
+class DownloadBlocked(Exception):
+    pass
+
+def build_bhavcopy_urls(d: date) -> list[str]:
+    """Return all URL candidates to try in order for a given date."""
+    months3 = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+               "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
+    mon_abbr = months3[d.month - 1]
+    ddmmyyyy = d.strftime("%d%m%Y")
     if d >= CUTOVER_DATE:
-        return URL_NEW.format(ddmmyyyy=d.strftime("%d%m%Y"))
+        return [
+            URL_NEW.format(ddmmyyyy=ddmmyyyy),
+            URL_NEW_ALT.format(ddmmyyyy=ddmmyyyy),
+            # Older archive mirror sometimes lags one format behind
+            URL_OLD.format(year=d.year, mon=mon_abbr, dd=d.strftime("%d"), MON=mon_abbr, yyyy=d.year),
+        ]
     else:
-        months3 = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN",
-                   "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"]
-        mon_abbr = months3[d.month - 1]
-        return URL_OLD.format(
-            year=d.year,
-            mon=mon_abbr,
-            dd=d.strftime("%d"),
-            MON=mon_abbr,
-            yyyy=d.year,
-        )
+        kwargs = dict(year=d.year, mon=mon_abbr, dd=d.strftime("%d"), MON=mon_abbr, yyyy=d.year)
+        return [
+            URL_OLD.format(**kwargs),
+            URL_OLD_ALT.format(**kwargs),
+        ]
+
+
+def _try_download(url: str, session: requests.Session, ua: str) -> bytes | None:
+    """
+    Try one URL. Returns raw bytes on success, None on 404, raises DownloadBlocked on 403/timeout.
+    """
+    hdrs = {**NSE_HEADERS, "User-Agent": ua}
+    try:
+        resp = session.get(url, headers=hdrs, timeout=45)
+        if resp.status_code == 404:
+            return None
+        if resp.status_code in (403, 429, 503):
+            raise DownloadBlocked(f"HTTP {resp.status_code} from {url}")
+        resp.raise_for_status()
+        return resp.content
+    except DownloadBlocked:
+        raise
+    except requests.exceptions.Timeout:
+        raise DownloadBlocked(f"Timeout on {url}")
+    except requests.exceptions.ConnectionError as e:
+        raise DownloadBlocked(f"Connection error on {url}: {e}")
+    except requests.exceptions.HTTPError as e:
+        code = e.response.status_code if e.response else 0
+        if code == 404:
+            return None
+        raise DownloadBlocked(f"HTTP {code} on {url}")
 
 
 def download_bhavcopy(d: date, session: requests.Session) -> pd.DataFrame | None:
-    url = build_bhavcopy_url(d)
-    try:
-        resp = session.get(url, headers=NSE_HEADERS, timeout=30)
-        if resp.status_code == 404:
-            return None  # Holiday / no trading
-        resp.raise_for_status()
+    """
+    Try all URL candidates and user agents. Returns DataFrame or None (holiday).
+    Raises DownloadBlocked if every attempt was blocked/failed (not a 404).
+    """
+    import random
+    urls = build_bhavcopy_urls(d)
+    uas  = list(NSE_USER_AGENTS)
+    random.shuffle(uas)
 
-        with zipfile.ZipFile(io.BytesIO(resp.content)) as z:
-            csv_name = z.namelist()[0]
-            with z.open(csv_name) as f:
-                df = pd.read_csv(f)
+    last_blocked_reason = None
+    found_404 = False
 
-        return df
+    for url in urls:
+        for ua in uas[:2]:  # Try 2 user agents per URL
+            try:
+                content = _try_download(url, session, ua)
+                if content is None:
+                    found_404 = True
+                    continue  # This URL is a 404 — try alternate URL
+                # Parse zip
+                with zipfile.ZipFile(io.BytesIO(content)) as z:
+                    csv_name = z.namelist()[0]
+                    with z.open(csv_name) as f:
+                        return pd.read_csv(f)
+            except DownloadBlocked as e:
+                last_blocked_reason = str(e)
+                log.debug(f"  Blocked: {e} — trying next option")
+                time.sleep(2)
+            except zipfile.BadZipFile as e:
+                log.warning(f"  Bad zip for {d} from {url}: {e}")
 
-    except requests.exceptions.HTTPError as e:
-        if e.response and e.response.status_code == 404:
-            return None
-        log.warning(f"HTTP error for {d}: {e}")
+    # All URLs returned 404 → genuine holiday
+    if found_404 and last_blocked_reason is None:
         return None
-    except Exception as e:
-        log.warning(f"Download failed for {d}: {e}")
-        return None
+
+    # Some were blocked — raise so caller can count failures
+    if last_blocked_reason:
+        raise DownloadBlocked(f"All {len(urls)} URLs blocked for {d}: {last_blocked_reason}")
+
+    return None
 
 
 def parse_old_format(df: pd.DataFrame, trade_date: date) -> pd.DataFrame:
@@ -523,11 +587,16 @@ def process_date(d: date, session: requests.Session, bq_client: bigquery.Client,
     log.info(f"Processing {date_str}...")
 
     # Download Bhavcopy
-    raw_df = download_bhavcopy(d, session)
+    try:
+        raw_df = download_bhavcopy(d, session)
+    except DownloadBlocked as e:
+        log.error(f"  BLOCKED for {date_str}: {e}")
+        return {"date": date_str, "status": "blocked", "error": str(e)}
+
     time.sleep(REQUEST_DELAY_S)  # Respect NSE rate limits
 
     if raw_df is None:
-        log.info(f"  No data for {date_str} (holiday or weekend)")
+        log.info(f"  No data for {date_str} (holiday or weekend — 404)")
         return {"date": date_str, "status": "skipped", "reason": "no_file"}
 
     # Parse
@@ -571,13 +640,22 @@ def run_ingestion(start: date, end: date, dry_run=False, incremental=False):
     log.info(f"  Dry run: {dry_run}")
     log.info("=" * 60)
 
+    import random
     session = requests.Session()
-    # Warm up the NSE session (required to set cookies)
-    try:
-        session.get("https://www.nseindia.com", headers=NSE_HEADERS, timeout=10)
-        time.sleep(1)
-    except Exception:
-        pass
+    # Warm up the NSE session (required to set cookies for Cloudflare)
+    # Try a few pages to pick up the necessary cookies
+    warmup_ua = random.choice(NSE_USER_AGENTS)
+    warmup_urls = [
+        "https://www.nseindia.com/",
+        "https://www.nseindia.com/market-data/live-equity-market",
+    ]
+    for wu in warmup_urls:
+        try:
+            session.get(wu, headers={**NSE_HEADERS, "User-Agent": warmup_ua}, timeout=15)
+            time.sleep(1.5)
+        except Exception as e:
+            log.debug(f"  Warmup for {wu} failed (non-fatal): {e}")
+    log.info(f"  Session warmed up — cookies: {list(session.cookies.keys())}")
 
     bq_client = None if dry_run else get_bq_client()
 
@@ -611,6 +689,11 @@ def run_ingestion(start: date, end: date, dry_run=False, incremental=False):
 
         if result["status"] == "success":
             processed += 1
+        elif result["status"] == "blocked":
+            failed += 1
+            log.error(f"  ⛔ Download blocked for {result['date']}: {result.get('error', '')}")
+            if not dry_run and bq_client:
+                log_ingestion(bq_client, current, "blocked", error_msg=result.get("error"))
         elif result["status"] == "failed":
             failed += 1
             if not dry_run and bq_client:
@@ -621,9 +704,12 @@ def run_ingestion(start: date, end: date, dry_run=False, incremental=False):
         current += timedelta(days=1)
 
     log.info("\n" + "=" * 60)
-    log.info(f"  ✅ Ingestion complete")
-    log.info(f"  Processed: {processed} | Skipped: {skipped} | Failed: {failed}")
+    log.info(f"  Processed: {processed} | Skipped: {skipped} | Failed/Blocked: {failed}")
     log.info("=" * 60)
+
+    if failed > 0 and processed == 0:
+        log.error("  ❌ No dates were successfully ingested — all attempts failed or blocked.")
+        sys.exit(1)
 
 
 # ─── Entry Point ──────────────────────────────────────────────────────────────

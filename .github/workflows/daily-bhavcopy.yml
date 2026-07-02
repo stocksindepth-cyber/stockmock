@@ -1,9 +1,9 @@
 name: Daily NSE Bhavcopy Ingestion
 
 on:
-  # 6:30 PM IST = 13:00 UTC — runs after NSE closes (3:30 PM IST) and data is published
+  # 7:00 PM IST = 13:30 UTC — well after NSE closes (3:30 PM IST) and publishes data
   schedule:
-    - cron: "0 13 * * 1-5"
+    - cron: "30 13 * * 1-5"
 
   # Manual trigger for backfills or re-runs
   workflow_dispatch:
@@ -39,6 +39,15 @@ jobs:
       - name: Install Python dependencies
         run: pip install -r scripts/requirements.txt
 
+      - name: Validate secrets
+        run: |
+          if [ -z "${{ secrets.BIGQUERY_CREDENTIALS_JSON }}" ]; then
+            echo "::error::BIGQUERY_CREDENTIALS_JSON secret is NOT set. Add it in repo Settings → Secrets → Actions."
+            exit 1
+          fi
+          # Quick JSON validity check
+          echo '${{ secrets.BIGQUERY_CREDENTIALS_JSON }}' | python3 -c "import sys,json; json.load(sys.stdin); print('✓ Credentials JSON is valid')"
+
       - name: Write BigQuery credentials file
         run: |
           echo '${{ secrets.BIGQUERY_CREDENTIALS_JSON }}' > /tmp/bq-sa.json
@@ -71,25 +80,66 @@ jobs:
           python scripts/ingest_bhavcopy.py $ARGS
 
       - name: Report BigQuery row count
-        if: success() && inputs.dry_run != 'true'
+        # Always show current DB state after ingestion; never fail the workflow here
+        if: always() && inputs.dry_run != 'true' && secrets.BIGQUERY_CREDENTIALS_JSON != ''
+        continue-on-error: true
         env:
           BIGQUERY_CREDENTIALS_JSON: ${{ secrets.BIGQUERY_CREDENTIALS_JSON }}
         run: |
           python3 - <<'EOF'
-          import os, json
+          import os, json, sys
           from google.cloud import bigquery
           from google.oauth2 import service_account
-          creds = service_account.Credentials.from_service_account_info(
-            json.loads(os.environ["BIGQUERY_CREDENTIALS_JSON"]))
-          client = bigquery.Client(project="optionsindepth", credentials=creds)
-          for row in client.query("""
-            SELECT COUNT(*) as rows, MIN(trade_date) as earliest, MAX(trade_date) as latest
-            FROM `optionsindepth.optionsgyani.options_eod`
-          """).result():
-            print(f"Total rows: {row.rows:,} | Range: {row.earliest} to {row.latest}")
+
+          creds_json = os.environ.get("BIGQUERY_CREDENTIALS_JSON", "")
+          if not creds_json:
+              print("No credentials — skipping row count report")
+              sys.exit(0)
+
+          try:
+              creds = service_account.Credentials.from_service_account_info(json.loads(creds_json))
+              client = bigquery.Client(project="optionsindepth", credentials=creds)
+
+              # Check if table exists before querying
+              tables = {t.table_id for t in client.list_tables("optionsindepth.optionsgyani")}
+              if "options_eod" not in tables:
+                  print("⚠️  options_eod table does not exist yet — no data has been ingested successfully")
+                  print("Run a manual workflow_dispatch with a date range to seed the table.")
+                  sys.exit(0)
+
+              for row in client.query("""
+                  SELECT
+                    COUNT(*) AS total_rows,
+                    MIN(trade_date) AS earliest,
+                    MAX(trade_date) AS latest,
+                    COUNT(DISTINCT trade_date) AS trading_days,
+                    COUNT(DISTINCT underlying) AS underlyings
+                  FROM `optionsindepth.optionsgyani.options_eod`
+              """).result():
+                  print(f"✅ Total rows  : {row.total_rows:,}")
+                  print(f"   Date range  : {row.earliest} → {row.latest}")
+                  print(f"   Trading days: {row.trading_days}")
+                  print(f"   Underlyings : {row.underlyings}")
+
+              # Also show last 5 ingested dates
+              print("\nLast 5 ingestion log entries:")
+              for row in client.query("""
+                  SELECT trade_date, status, rows_options, error_msg
+                  FROM `optionsindepth.optionsgyani.ingestion_log`
+                  ORDER BY trade_date DESC LIMIT 5
+              """).result():
+                  print(f"  {row.trade_date}  {row.status}  ({row.rows_options} rows)  {row.error_msg or ''}")
+
+          except Exception as e:
+              print(f"Report step error (non-fatal): {e}")
+              sys.exit(0)
           EOF
 
       - name: Notify on failure
         if: failure()
         run: |
-          echo "::error::NSE Bhavcopy ingestion FAILED. Check logs above."
+          echo "::error::NSE Bhavcopy ingestion FAILED. This is usually caused by:"
+          echo "::error::  1. NSE blocking GitHub Actions datacenter IPs (403) — check ingestion logs above"
+          echo "::error::  2. BIGQUERY_CREDENTIALS_JSON secret not set or invalid"
+          echo "::error::  3. BigQuery table schema mismatch"
+          echo "::error::If blocked: trigger workflow_dispatch with a --dry-run to confirm connectivity."
