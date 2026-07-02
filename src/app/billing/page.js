@@ -38,7 +38,7 @@ function Invoice({ txn, user }) {
   const billingPeriod = txn.durationDays === 365 ? "Annual" : "Monthly";
 
   return (
-    <div id="printable-invoice" className="bg-white text-slate-900 p-10 text-sm font-sans">
+    <div id="printable-invoice" className="bg-white text-slate-900 p-5 sm:p-10 text-sm font-sans">
       {/* Header */}
       <div className="flex justify-between items-start mb-8">
         <div>

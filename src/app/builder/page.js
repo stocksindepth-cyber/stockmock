@@ -144,7 +144,7 @@ function BuilderContent() {
         onClose={() => setUpgradeOpen(false)}
         message="Save strategies to your portfolio is a Pro feature. Upgrade to save unlimited strategies, run full backtests, and access 8+ years of NSE data."
       />
-      <main className="pt-20 pb-16 px-6 lg:px-10 max-w-[1440px] mx-auto">
+      <main className="pt-16 sm:pt-20 pb-12 sm:pb-16 px-4 sm:px-6 lg:px-10 max-w-[1440px] mx-auto">
 
         {/* ── Header ── */}
         <div className="mb-6 mt-2">

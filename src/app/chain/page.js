@@ -288,11 +288,11 @@ function ChainContent() {
               )}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <select
               value={symbol}
               onChange={(e) => setSymbol(e.target.value)}
-              className="bg-white/5 border border-white/10 text-white px-3 py-2 rounded-lg text-sm"
+              className="bg-white/5 border border-white/10 text-white px-3 py-2 rounded-lg text-sm flex-1 sm:flex-none"
             >
               {SYMBOLS.map((u) => (
                 <option key={u.symbol} value={u.symbol}>
@@ -303,7 +303,7 @@ function ChainContent() {
             <select
               value={expiry}
               onChange={(e) => setExpiry(e.target.value)}
-              className="bg-white/5 border border-white/10 text-white px-3 py-2 rounded-lg text-sm"
+              className="bg-white/5 border border-white/10 text-white px-3 py-2 rounded-lg text-sm flex-1 sm:flex-none"
             >
               {expiries.map((exp) => (
                 <option key={exp} value={exp}>{exp}</option>
@@ -316,9 +316,9 @@ function ChainContent() {
             >
               ↻
             </button>
-            {/* IVP / IVR */}
+            {/* IVP / IVR — hidden on small mobile, shown sm+ */}
             {ivStats && (
-              <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium ${
+              <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-medium ${
                 ivStats.ivp >= 75 ? "bg-red-500/10 border-red-500/20 text-red-300" :
                 ivStats.ivp <= 25 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-300" :
                                     "bg-slate-700/40 border-white/10 text-slate-300"
@@ -344,12 +344,12 @@ function ChainContent() {
                 title="Jump to ATM"
               >
                 ₹{(liveSpot ?? chainData.spot).toLocaleString("en-IN", { maximumFractionDigits: 2 })}
-                <span className="ml-1.5 text-[10px] text-sky-500 font-normal">↓ ATM</span>
+                <span className="ml-1 text-[10px] text-sky-500 font-normal hidden sm:inline">↓ ATM</span>
               </button>
             )}
             <button
               onClick={() => setShowGreeks(!showGreeks)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+              className={`hidden sm:block px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                 showGreeks
                   ? "bg-blue-500/20 text-blue-300 border border-blue-500/30"
                   : "glass text-slate-400 hover:text-white"

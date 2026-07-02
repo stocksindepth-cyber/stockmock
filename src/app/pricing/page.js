@@ -317,7 +317,7 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080C16] pt-24 pb-20 relative overflow-hidden">
+    <div className="min-h-screen bg-[#080C16] pt-16 pb-12 md:pt-24 md:pb-20 relative overflow-hidden">
       {/* Ambient glow */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-indigo-500/8 blur-[140px] rounded-full pointer-events-none" />
       <div className="absolute top-60 left-10 w-[400px] h-[400px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
@@ -329,7 +329,7 @@ export default function PricingPage() {
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-4">
             <Database className="w-3 h-3" /> 8+ Years Real NSE Data · No Synthetic Prices
           </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
             Start Free. Upgrade When<br className="hidden md:block" />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400"> You're Ready.</span>
           </h1>
@@ -340,9 +340,10 @@ export default function PricingPage() {
 
         {/* ── Competitor callout ── */}
         <div className="flex justify-center mb-8">
-          <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-400">
-            <TrendingUp className="w-4 h-4" />
-            <span>Sensibull: ₹2,499/mo · Quantsapp: ₹999/mo · <strong>OptionsGyani Pro: ₹499/mo</strong></span>
+          <div className="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-3 px-4 py-2 rounded-2xl sm:rounded-full bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-400 text-center">
+            <TrendingUp className="w-4 h-4 hidden sm:block" />
+            <span className="text-xs sm:text-sm">Sensibull: ₹2,499/mo · Quantsapp: ₹999/mo</span>
+            <span className="text-xs sm:text-sm font-bold">OptionsGyani Pro: ₹499/mo</span>
           </div>
         </div>
 
@@ -553,8 +554,8 @@ export default function PricingPage() {
         {/* ── Feature comparison table ── */}
         <div className="mb-16">
           <h2 className="text-2xl font-bold text-white text-center mb-6">Full Feature Comparison</h2>
-          <div className="overflow-x-auto rounded-2xl border border-slate-800">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 rounded-2xl border border-slate-800">
+            <table className="w-full text-sm min-w-[480px]">
               <thead>
                 <tr className="border-b border-slate-800 bg-slate-900/60">
                   <th className="text-left px-5 py-3.5 text-slate-400 font-semibold w-1/3">Feature</th>

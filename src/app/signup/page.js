@@ -56,8 +56,8 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-[var(--color-background)] flex items-center justify-center px-4 relative overflow-hidden">
-      <div className="absolute top-[-20%] right-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-20%] left-[-10%] w-[40%] h-[40%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-20%] right-[-10%] w-[70%] h-[70%] md:w-[40%] md:h-[40%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-20%] left-[-10%] w-[70%] h-[70%] md:w-[40%] md:h-[40%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="w-full max-w-md z-10">
         <Link href="/" className="flex items-center justify-center gap-2 mb-10">
@@ -65,7 +65,7 @@ export default function SignupPage() {
           <span className="text-2xl font-bold text-white">OptionsGyani</span>
         </Link>
 
-        <div className="glass-card rounded-2xl p-8">
+        <div className="glass-card rounded-2xl p-5 sm:p-8">
           <h1 className="text-2xl font-bold text-white mb-2">Create your account</h1>
           <p className="text-slate-400 text-sm mb-8">Start trading smarter with OptionsGyani — it&apos;s free.</p>
 

@@ -1090,13 +1090,13 @@ function BacktestContent() {
             {compareMode && summaryB && summary && (
               <div className="glass-card rounded-2xl p-5 mb-8 border border-violet-500/20">
                 <h3 className="text-sm font-semibold text-white mb-4 uppercase tracking-wider">Strategy Comparison</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                <div className="overflow-x-auto -mx-5 px-5">
+                  <table className="w-full text-sm min-w-[360px]">
                     <thead>
                       <tr className="text-[10px] text-slate-500 uppercase tracking-wider">
                         <th className="text-left pb-2">Metric</th>
-                        <th className="text-right pb-2 text-blue-400">{selectedStrategy.replace(/-/g, " ")}</th>
-                        <th className="text-right pb-2 text-violet-400">{strategyB.replace(/-/g, " ")}</th>
+                        <th className="text-right pb-2 text-blue-400 truncate max-w-[100px]">{selectedStrategy.replace(/-/g, " ")}</th>
+                        <th className="text-right pb-2 text-violet-400 truncate max-w-[100px]">{strategyB.replace(/-/g, " ")}</th>
                         <th className="text-right pb-2">Winner</th>
                       </tr>
                     </thead>

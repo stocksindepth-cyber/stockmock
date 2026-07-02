@@ -92,12 +92,12 @@ export default function Home() {
       <HomeAuthRedirect />
 
       {/* Background glows */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none" />
-      <div className="absolute top-[30%] right-[10%] w-[30%] h-[30%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[-10%] left-[-10%] w-[70%] h-[70%] md:w-[40%] md:h-[40%] bg-blue-600/20 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[70%] h-[70%] md:w-[40%] md:h-[40%] bg-emerald-600/10 rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-[30%] right-[10%] w-[50%] h-[50%] md:w-[30%] md:h-[30%] bg-blue-600/10 rounded-full blur-[120px] pointer-events-none" />
 
       {/* ── Hero ── */}
-      <main className="relative pt-24 pb-16 md:pt-36 md:pb-28 px-6 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto z-10 gap-10 md:gap-12">
+      <main className="relative pt-20 pb-12 md:pt-36 md:pb-28 px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between max-w-7xl mx-auto z-10 gap-8 md:gap-12">
 
         <div className="w-full md:w-1/2 flex flex-col items-center md:items-start text-center md:text-left">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-emerald-500/30 mb-8">
@@ -105,7 +105,7 @@ export default function Home() {
             <span className="text-sm font-medium text-emerald-200">The Advanced Options Analytics Tool for NSE</span>
           </div>
 
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.1]">
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 leading-[1.1]">
             Build &amp; Backtest <br className="hidden md:block" />
             <span className="bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">Option Strategies</span>
           </h1>
@@ -237,11 +237,11 @@ export default function Home() {
       </section>
 
       {/* ── vs Competitors ── */}
-      <section className="relative py-16 px-6 z-10 border-y border-white/5 bg-[#0a0f1c]">
+      <section className="relative py-16 px-4 sm:px-6 z-10 border-y border-white/5 bg-[#0a0f1c]">
         <div className="max-w-4xl mx-auto text-center">
           <p className="text-slate-400 text-sm font-semibold uppercase tracking-widest mb-6">How we compare</p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div className="overflow-x-auto -mx-4 sm:mx-0 px-4 sm:px-0">
+            <table className="w-full text-sm min-w-[480px]">
               <thead>
                 <tr>
                   <th className="text-left py-3 px-4 text-slate-500 font-medium">Feature</th>

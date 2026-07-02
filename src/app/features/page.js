@@ -109,7 +109,7 @@ export default function FeaturesPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight"
+            className="text-3xl sm:text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight"
           >
             Built for traders who <br className="hidden md:block"/> rely on <span className="bg-gradient-to-r from-emerald-400 to-blue-500 bg-clip-text text-transparent">Math, not Luck.</span>
           </motion.h1>
@@ -125,7 +125,7 @@ export default function FeaturesPage() {
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-24">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8 mb-16 sm:mb-24">
           {features.map((feature, idx) => {
             const Icon = feature.icon;
             return (
@@ -171,7 +171,7 @@ export default function FeaturesPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="bg-gradient-to-br from-indigo-900/40 to-[#0B1120] border border-indigo-500/30 rounded-3xl p-10 lg:p-16 text-center max-w-4xl mx-auto shadow-2xl relative overflow-hidden"
+          className="bg-gradient-to-br from-indigo-900/40 to-[#0B1120] border border-indigo-500/30 rounded-3xl p-6 sm:p-10 lg:p-16 text-center max-w-4xl mx-auto shadow-2xl relative overflow-hidden"
         >
           <div className="absolute inset-0 bg-[url('/noise.png')] opacity-20 mix-blend-overlay" />
           <div className="relative z-10">

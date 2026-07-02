@@ -916,7 +916,7 @@ function PaperTradeContent() {
               {/* Index selector */}
               <div>
                 <p className="text-xs font-semibold text-slate-500 uppercase tracking-widest mb-2">Underlying</p>
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                   {INDICES.map((idx) => {
                     const c = COLOR_MAP[idx.color];
                     const active = selIndex === idx.id;
@@ -995,9 +995,9 @@ function PaperTradeContent() {
                   Lots <span className="normal-case text-slate-400 font-normal">(1 lot = {indexMeta.lotSize} qty)</span>
                 </p>
                 <div className="flex items-center gap-3">
-                  <button onClick={() => setSelLots((l) => Math.max(1, l - 1))} className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all text-lg">−</button>
+                  <button onClick={() => setSelLots((l) => Math.max(1, l - 1))} className="w-11 h-11 rounded-lg bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all text-lg">−</button>
                   <span className="text-2xl font-black text-white w-12 text-center tabular-nums">{selLots}</span>
-                  <button onClick={() => setSelLots((l) => Math.min(50, l + 1))} className="w-10 h-10 rounded-lg bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all text-lg">+</button>
+                  <button onClick={() => setSelLots((l) => Math.min(50, l + 1))} className="w-11 h-11 rounded-lg bg-white/5 border border-white/10 text-white font-bold hover:bg-white/10 transition-all text-lg">+</button>
                   <span className="text-sm text-slate-400">= {selLots * indexMeta.lotSize} units</span>
                 </div>
               </div>
@@ -1304,7 +1304,7 @@ function PaperTradeContent() {
             ) : (
               <div className="space-y-2">
                 {/* Portfolio summary bar */}
-                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2 mb-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mb-4">
                   {[
                     { label: "Total Trades",  value: closedTrades.length,       color: "text-white"         },
                     { label: "Wins",           value: winCount,                  color: "text-emerald-400"   },

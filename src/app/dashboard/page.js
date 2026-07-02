@@ -253,7 +253,7 @@ function DashboardContent() {
                 <p className="text-sm text-slate-400">Get the most out of OptionsGyani in minutes</p>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
               {ONBOARDING_STEPS.map((step, i) => (
                 <Link
                   key={step.id}
@@ -423,7 +423,7 @@ function DashboardContent() {
         {/* ── Quick Actions ── */}
         <div className="mb-8">
           <h2 className="text-sm font-semibold text-slate-400 uppercase tracking-wider mb-3">Tools</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
             {QUICK_ACTIONS.map((action) => (
               <Link
                 key={action.href}

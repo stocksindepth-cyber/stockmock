@@ -369,7 +369,7 @@ function AlertsContent() {
 
           <form onSubmit={handleCreate} className="space-y-4">
             {/* Row 1 — Symbol + Metric */}
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
               {/* Symbol */}
               <div className="space-y-1.5">
                 <label className="text-xs font-medium text-slate-400 block">Symbol</label>
