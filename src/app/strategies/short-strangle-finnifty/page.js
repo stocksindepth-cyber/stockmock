@@ -6,12 +6,12 @@ export const metadata = {
   title: "Short Strangle FINNIFTY — Tuesday Expiry Premium Harvesting | OptionsGyani",
   description: "Complete guide to trading Short Strangles on FINNIFTY. Historical data on win rates, strike selection, and delta-hedging strategies to maximize Tuesday decay.",
   keywords: "short strangle finnifty, finnifty expiry strategy, sell strangle finnifty tuesday, option premium harvesting india, delta neutral strategy finnifty",
-  alternates: { canonical: "https://optionsgyani.com/strategies/short-strangle-finnifty" },
+  alternates: { canonical: "https://www.optionsgyani.com/strategies/short-strangle-finnifty" },
   openGraph: {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Short Strangle FINNIFTY — Tuesday Expiry Backtest | OptionsGyani",
     description: "Verified historical win rate 72.5%, avg 3.2% monthly ROI. Sell wings and collect Theta.",
-    url: "https://optionsgyani.com/strategies/short-strangle-finnifty",
+    url: "https://www.optionsgyani.com/strategies/short-strangle-finnifty",
     type: "article",
   },
 };
@@ -50,7 +50,7 @@ export default function ShortStrangleFinniftyPage() {
             "headline": "Short Strangle FINNIFTY Tuesday Expiry — Strategy Guide & Backtest",
             "description": "Complete guide to selling strangles on FINNIFTY options with real historical data.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://www.optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
           }),

@@ -7,7 +7,7 @@ import {
 import DhanReferralBanner from "@/components/DhanReferralBanner";
 import { STRATEGIES, STRATEGY_SLUGS, INDEX_META, THEMES, getStrategy } from "@/data/strategies";
 
-const SITE = "https://optionsgyani.com";
+const SITE = "https://www.optionsgyani.com";
 
 // Only the data-driven slugs are valid here; anything else is a true 404
 // (static sibling routes like /strategies/iron-condor-nifty still take precedence).

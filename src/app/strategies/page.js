@@ -13,12 +13,12 @@ export const metadata = {
   title: "Best NSE Options Strategies 2025 | NIFTY & BANKNIFTY Backtested Results | OptionsGyani",
   description: "Discover the best options strategies for NSE — Iron Condor, Short Straddle, Short Strangle on NIFTY & BANKNIFTY. All strategies backtested with 8+ years of real NSE Bhavcopy data. Free to try.",
   keywords: "best nifty options strategy, banknifty weekly expiry strategy, iron condor nifty backtest, short straddle nifty historical performance, options strategy NSE, non directional options strategy india",
-  alternates: { canonical: "https://optionsgyani.com/strategies" },
+  alternates: { canonical: "https://www.optionsgyani.com/strategies" },
   openGraph: {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Best NSE Options Strategies — Backtested with Real Data | OptionsGyani",
     description: "Iron Condor, Short Straddle, Short Strangle — all backtested on 8+ years of real NSE data. Free for Indian traders.",
-    url: "https://optionsgyani.com/strategies",
+    url: "https://www.optionsgyani.com/strategies",
     type: "website",
   },
 };
@@ -267,13 +267,13 @@ export default function StrategiesPage() {
             "@type": "CollectionPage",
             "name": "NSE Options Strategies — Backtested Results",
             "description": "Iron Condor, Short Straddle, Bull Call Spread — backtested on 8+ years of real NSE data.",
-            "url": "https://optionsgyani.com/strategies",
+            "url": "https://www.optionsgyani.com/strategies",
             "publisher": { "@type": "Organization", "name": "OptionsGyani" },
             "hasPart": STRATEGIES.map(s => ({
               "@type": "Article",
               "name": s.name,
               "description": s.description,
-              "url": `https://optionsgyani.com/strategies/${s.slug}`,
+              "url": `https://www.optionsgyani.com/strategies/${s.slug}`,
             })),
           }),
         }}

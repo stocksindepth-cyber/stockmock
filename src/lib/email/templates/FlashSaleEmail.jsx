@@ -17,7 +17,7 @@ export function FlashSaleEmail({ name }) {
 
           {/* Logo bar */}
           <Section style={{ padding: "18px 40px", borderBottom: "1px solid #1c1c1e" }}>
-            <Img src="https://optionsgyani.com/logo.png" width="28" height="28" alt="OptionsGyani" style={{ display: "inline-block", verticalAlign: "middle" }} />
+            <Img src="https://www.optionsgyani.com/logo.png" width="28" height="28" alt="OptionsGyani" style={{ display: "inline-block", verticalAlign: "middle" }} />
             <Text style={{ display: "inline-block", verticalAlign: "middle", color: "#f4f4f5", fontSize: "15px", fontWeight: "600", margin: "0 0 0 9px", fontFamily: fontStack }}>OptionsGyani</Text>
           </Section>
 
@@ -112,7 +112,7 @@ export function FlashSaleEmail({ name }) {
           {/* CTA */}
           <Section style={{ padding: "24px 40px 40px", textAlign: "center" }}>
             <Button
-              href="https://optionsgyani.com/pricing"
+              href="https://www.optionsgyani.com/pricing"
               style={{ backgroundColor: "#f59e0b", color: "#000000", borderRadius: "10px", padding: "16px 40px", fontSize: "15px", fontWeight: "800", textDecoration: "none", display: "inline-block", letterSpacing: "0.01em", fontFamily: fontStack }}
             >
               Claim 30% Off → Use Code OG30
@@ -127,7 +127,7 @@ export function FlashSaleEmail({ name }) {
             <Text style={{ color: "#3f3f46", fontSize: "12px", margin: "0 0 4px", fontFamily: fontStack }}>
               © 2026 OptionsGyani · Educational use only · Not SEBI registered
             </Text>
-            <Link href="https://optionsgyani.com/profile" style={{ color: "#3f3f46", fontSize: "12px", textDecoration: "underline", fontFamily: fontStack }}>
+            <Link href="https://www.optionsgyani.com/profile" style={{ color: "#3f3f46", fontSize: "12px", textDecoration: "underline", fontFamily: fontStack }}>
               Unsubscribe
             </Link>
           </Section>

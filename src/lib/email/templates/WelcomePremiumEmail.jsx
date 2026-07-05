@@ -64,7 +64,7 @@ export function WelcomePremiumEmail({ name, email, plan, expiryDate, features })
             <Row>
               <Column style={{ verticalAlign: "middle" }}>
                 <Img
-                  src="https://optionsgyani.com/logo.png"
+                  src="https://www.optionsgyani.com/logo.png"
                   width="36"
                   height="36"
                   alt="OptionsGyani"
@@ -271,7 +271,7 @@ export function WelcomePremiumEmail({ name, email, plan, expiryDate, features })
             }}
           >
             <Button
-              href="https://optionsgyani.com/backtest"
+              href="https://www.optionsgyani.com/backtest"
               style={{
                 backgroundColor: "#f59e0b",
                 color: "#000000",

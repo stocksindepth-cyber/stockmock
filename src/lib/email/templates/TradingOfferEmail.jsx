@@ -42,7 +42,7 @@ export default function TradingOfferEmail({ name = "Trader", coupon = "OG30", ex
         </div>
 
         <div style={{ marginBottom: 8 }}>
-          <a href={`https://optionsgyani.com/pricing?coupon=${coupon}`}
+          <a href={`https://www.optionsgyani.com/pricing?coupon=${coupon}`}
             style={{ display: "inline-block", background: "linear-gradient(90deg, #f59e0b, #d97706)", color: "#000000", fontSize: 16, fontWeight: 800, textDecoration: "none", padding: "16px 40px", borderRadius: 50, letterSpacing: "-0.2px" }}>
             Claim {discountPct}% Off → Use Code {coupon}
           </a>
@@ -171,7 +171,7 @@ export default function TradingOfferEmail({ name = "Trader", coupon = "OG30", ex
           <span style={{ color: "#64748b", fontSize: 14, marginLeft: 6 }}>with code {coupon}</span>
         </div>
 
-        <a href={`https://optionsgyani.com/pricing?coupon=${coupon}`}
+        <a href={`https://www.optionsgyani.com/pricing?coupon=${coupon}`}
           style={{ display: "inline-block", background: "linear-gradient(90deg, #3b82f6, #6366f1)", color: "#ffffff", fontSize: 16, fontWeight: 800, textDecoration: "none", padding: "16px 48px", borderRadius: 50, marginBottom: 12 }}>
           Upgrade to Pro — {discountPct}% Off →
         </a>

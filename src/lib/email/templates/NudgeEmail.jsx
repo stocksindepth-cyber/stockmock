@@ -74,7 +74,7 @@ export function NudgeEmail({ name, daysSinceLogin, recentMarketMove, missedOppor
             <Row>
               <Column style={{ verticalAlign: "middle" }}>
                 <Img
-                  src="https://optionsgyani.com/logo.png"
+                  src="https://www.optionsgyani.com/logo.png"
                   width="36"
                   height="36"
                   alt="OptionsGyani"
@@ -386,7 +386,7 @@ export function NudgeEmail({ name, daysSinceLogin, recentMarketMove, missedOppor
           {/* CTA */}
           <Section style={{ padding: "32px 40px", textAlign: "center", marginTop: "8px" }}>
             <Button
-              href="https://optionsgyani.com"
+              href="https://www.optionsgyani.com"
               style={{
                 backgroundColor: "#22d3ee",
                 color: "#000000",
@@ -426,7 +426,7 @@ export function NudgeEmail({ name, daysSinceLogin, recentMarketMove, missedOppor
               }}
             >
               <Link
-                href="https://optionsgyani.com/profile"
+                href="https://www.optionsgyani.com/profile"
                 style={{ color: "#52525b", textDecoration: "underline" }}
               >
                 Unsubscribe from these emails

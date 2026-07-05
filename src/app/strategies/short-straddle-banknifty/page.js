@@ -6,12 +6,12 @@ export const metadata = {
   title: "Short Straddle BANKNIFTY — Weekly Expiry Backtest Data | OptionsGyani",
   description: "Complete Short Straddle guide for BANKNIFTY weekly expiry — entry rules, strike selection, stop loss, and verified historical backtest data from 2016–2024.",
   keywords: "short straddle banknifty, banknifty straddle strategy, sell straddle banknifty weekly, banknifty options premium selling, short straddle backtest india, banknifty expiry strategy",
-  alternates: { canonical: "https://optionsgyani.com/strategies/short-straddle-banknifty" },
+  alternates: { canonical: "https://www.optionsgyani.com/strategies/short-straddle-banknifty" },
   openGraph: {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Short Straddle BANKNIFTY Weekly — Strategy & Backtest Data | OptionsGyani",
     description: "Verified historical win rate 62.1%, avg 4.1% monthly. Real NSE tick-level backtest.",
-    url: "https://optionsgyani.com/strategies/short-straddle-banknifty",
+    url: "https://www.optionsgyani.com/strategies/short-straddle-banknifty",
     type: "article",
   },
 };
@@ -51,7 +51,7 @@ export default function ShortStraddleBankNiftyPage() {
             "headline": "Short Straddle BANKNIFTY Weekly Expiry — Strategy Guide & Backtest",
             "description": "Complete guide to selling straddles on BANKNIFTY weekly options with real historical data.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://www.optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
           }),

@@ -6,12 +6,12 @@ export const metadata = {
   title: "Iron Condor NIFTY — Backtest Results 2016–2024 | OptionsGyani",
   description: "Complete Iron Condor strategy guide for NIFTY — entry rules, expiry selection, strike selection, stop loss, and backtested P&L results. Free backtest tool included.",
   keywords: "iron condor nifty strategy, nifty iron condor backtest, iron condor weekly expiry india, best iron condor strike selection nifty, nifty options range strategy",
-  alternates: { canonical: "https://optionsgyani.com/strategies/iron-condor-nifty" },
+  alternates: { canonical: "https://www.optionsgyani.com/strategies/iron-condor-nifty" },
   openGraph: {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Iron Condor NIFTY — Backtest (2016–2024) | OptionsGyani",
     description: "Historical win rate 68.4%, average 2.8% monthly return. Real NSE data backtest for Iron Condor on NIFTY.",
-    url: "https://optionsgyani.com/strategies/iron-condor-nifty",
+    url: "https://www.optionsgyani.com/strategies/iron-condor-nifty",
     type: "article",
   },
 };
@@ -51,10 +51,10 @@ export default function IronCondorNiftyPage() {
             "headline": "Iron Condor NIFTY Strategy — Backtest Results 2016–2024",
             "description": "Complete Iron Condor guide for NIFTY weekly expiry with real backtested data.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://www.optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
-            "mainEntityOfPage": "https://optionsgyani.com/strategies/iron-condor-nifty",
+            "mainEntityOfPage": "https://www.optionsgyani.com/strategies/iron-condor-nifty",
           }),
         }}
       />

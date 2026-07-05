@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 export const metadata = {
-  alternates: { canonical: "https://optionsgyani.com/refund" },
+  alternates: { canonical: "https://www.optionsgyani.com/refund" },
   title: "Refund & Cancellation Policy | OptionsGyani",
   description: "OptionsGyani refund and cancellation policy for Pro and Elite subscription plans.",
 };

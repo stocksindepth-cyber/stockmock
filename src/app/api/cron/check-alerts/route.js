@@ -58,7 +58,7 @@ function isConditionMet(alert, ivStats) {
 
 /** Fetch IV stats for a given symbol from the internal API. */
 async function fetchIVStats(symbol) {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://optionsgyani.com";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.optionsgyani.com";
   const url     = `${baseUrl}/api/chain/iv-stats?underlying=${encodeURIComponent(symbol)}`;
 
   const res = await fetch(url, { cache: "no-store" });

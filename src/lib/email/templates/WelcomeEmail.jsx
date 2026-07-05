@@ -49,7 +49,7 @@ export function WelcomeEmail({ name, email }) {
             <Row>
               <Column style={{ verticalAlign: "middle" }}>
                 <Img
-                  src="https://optionsgyani.com/logo.png"
+                  src="https://www.optionsgyani.com/logo.png"
                   width="36"
                   height="36"
                   alt="OptionsGyani"
@@ -304,7 +304,7 @@ export function WelcomeEmail({ name, email }) {
             }}
           >
             <Button
-              href="https://optionsgyani.com/backtest"
+              href="https://www.optionsgyani.com/backtest"
               style={{
                 backgroundColor: "#22d3ee",
                 color: "#000000",

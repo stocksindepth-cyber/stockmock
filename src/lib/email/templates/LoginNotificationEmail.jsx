@@ -50,7 +50,7 @@ export function LoginNotificationEmail({ name, email, loginTime, ipAddress, devi
             <Row>
               <Column style={{ verticalAlign: "middle" }}>
                 <Img
-                  src="https://optionsgyani.com/logo.png"
+                  src="https://www.optionsgyani.com/logo.png"
                   width="36"
                   height="36"
                   alt="OptionsGyani"
@@ -250,7 +250,7 @@ export function LoginNotificationEmail({ name, email, loginTime, ipAddress, devi
             <Row>
               <Column style={{ width: "48%", verticalAlign: "middle" }}>
                 <Button
-                  href="https://optionsgyani.com"
+                  href="https://www.optionsgyani.com"
                   style={{
                     backgroundColor: "transparent",
                     color: "#f4f4f5",
@@ -274,7 +274,7 @@ export function LoginNotificationEmail({ name, email, loginTime, ipAddress, devi
               <Column style={{ width: "4%", verticalAlign: "middle" }} />
               <Column style={{ width: "48%", verticalAlign: "middle" }}>
                 <Button
-                  href="https://optionsgyani.com/profile"
+                  href="https://www.optionsgyani.com/profile"
                   style={{
                     backgroundColor: "#ef4444",
                     color: "#ffffff",
@@ -322,7 +322,7 @@ export function LoginNotificationEmail({ name, email, loginTime, ipAddress, devi
             >
               You cannot unsubscribe from security alerts.{" "}
               <Link
-                href="https://optionsgyani.com/profile"
+                href="https://www.optionsgyani.com/profile"
                 style={{ color: "#22d3ee", textDecoration: "none" }}
               >
                 Manage preferences

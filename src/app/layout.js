@@ -26,7 +26,7 @@ export const metadata = {
   title: "OptionsGyani — Free NSE Options Backtesting Tool",
   description: "Free options analytics for NSE traders. Backtest Iron Condor, Short Straddle, and 10+ strategies on 8+ years of real NIFTY & BANKNIFTY data. Live option chain with IV, Greeks, IVP/IVR.",
   keywords: "options backtesting India, free NSE options tool, iron condor nifty backtest, short straddle banknifty, option chain IV analysis, IV percentile IVP NIFTY, options strategy builder NSE, nifty weekly expiry strategy, india vix options, options simulator historical data, banknifty options analytics, free options analytics platform India",
-  metadataBase: new URL("https://optionsgyani.com"),
+  metadataBase: new URL("https://www.optionsgyani.com"),
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -36,7 +36,7 @@ export const metadata = {
   openGraph: {
     title: "OptionsGyani — Free NSE Options Analytics & Backtesting Platform",
     description: "Backtest Iron Condor, Short Straddle, and 10+ strategies on 8+ years of real NIFTY & BANKNIFTY data. Live option chain, IVP/IVR, OI analysis. Free for Indian traders.",
-    url: "https://optionsgyani.com",
+    url: "https://www.optionsgyani.com",
     siteName: "OptionsGyani",
     // og:image is provided site-wide by the file convention
     // src/app/opengraph-image.png (inherited by every route, incl. child
@@ -54,7 +54,7 @@ export const metadata = {
   alternates: {
     // Each page sets its own canonical. Root only declares LLMs.txt.
     types: {
-      "text/plain": "https://optionsgyani.com/llms.txt",
+      "text/plain": "https://www.optionsgyani.com/llms.txt",
     },
   },
   robots: {
@@ -78,7 +78,7 @@ export default function RootLayout({ children }) {
       <head>
         {/* Font preconnects removed — next/font handles Inter natively */}
         {/* LLMs.txt discovery — helps ChatGPT, Claude, Perplexity, Gemini find our content */}
-        <link rel="ai-content" type="text/plain" href="https://optionsgyani.com/llms.txt" />
+        <link rel="ai-content" type="text/plain" href="https://www.optionsgyani.com/llms.txt" />
         {/* JSON-LD structured data for AI/LLM understanding */}
         <script
           type="application/ld+json"
@@ -87,8 +87,8 @@ export default function RootLayout({ children }) {
               "@context": "https://schema.org",
               "@type": "WebApplication",
               "name": "OptionsGyani",
-              "url": "https://optionsgyani.com",
-              "logo": "https://optionsgyani.com/logo.png",
+              "url": "https://www.optionsgyani.com",
+              "logo": "https://www.optionsgyani.com/logo.png",
               "description": "India's free options analytics platform. Backtest Iron Condor, Short Straddle, and 10+ strategies on 8+ years of real NSE Bhavcopy data. Live option chain with IV Percentile, Greeks, OI analysis.",
               "applicationCategory": "FinanceApplication",
               "operatingSystem": "Web",
@@ -115,9 +115,9 @@ export default function RootLayout({ children }) {
               "provider": {
                 "@type": "Organization",
                 "name": "OptionsGyani Analytics",
-                "url": "https://optionsgyani.com",
+                "url": "https://www.optionsgyani.com",
                 "email": "support@optionsgyani.com",
-                "sameAs": ["https://optionsgyani.com"]
+                "sameAs": ["https://www.optionsgyani.com"]
               }
             })
           }}

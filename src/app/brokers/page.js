@@ -5,12 +5,12 @@ import { ARTICLES, BROKERS, DHAN_REFERRAL } from "@/data/brokers";
 export const metadata = {
   title: "Broker Guides for Indian Options Traders 2025 — OptionsGyani",
   description: "In-depth broker reviews, comparisons and guides for Indian F&O traders. Compare Dhan, Zerodha, Upstox, Angel One on brokerage, platform, and options analytics.",
-  alternates: { canonical: "https://optionsgyani.com/brokers" },
+  alternates: { canonical: "https://www.optionsgyani.com/brokers" },
   openGraph: {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Broker Guides for Indian F&O Traders 2025",
     description: "Honest broker reviews and comparisons for NIFTY and BANKNIFTY options traders in India.",
-    url: "https://optionsgyani.com/brokers",
+    url: "https://www.optionsgyani.com/brokers",
     siteName: "OptionsGyani",
   },
 };
@@ -38,13 +38,13 @@ export default function BrokersHubPage() {
     "@type": "CollectionPage",
     "name": "Broker Guides for Indian Options Traders",
     "description": "In-depth broker reviews and comparisons for Indian F&O and options traders.",
-    "url": "https://optionsgyani.com/brokers",
-    "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
+    "url": "https://www.optionsgyani.com/brokers",
+    "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://www.optionsgyani.com" },
     "breadcrumb": {
       "@type": "BreadcrumbList",
       "itemListElement": [
-        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://optionsgyani.com" },
-        { "@type": "ListItem", "position": 2, "name": "Broker Guides", "item": "https://optionsgyani.com/brokers" },
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://www.optionsgyani.com" },
+        { "@type": "ListItem", "position": 2, "name": "Broker Guides", "item": "https://www.optionsgyani.com/brokers" },
       ],
     },
   };

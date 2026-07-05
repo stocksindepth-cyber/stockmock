@@ -6,12 +6,12 @@ export const metadata = {
   title: "Calendar Spread NIFTY — Volatility Expansion Trading | OptionsGyani",
   description: "Learn to trade Calendar Spreads on NIFTY index options. Structure multi-expiry positions to profit from Theta disparities.",
   keywords: "calendar spread nifty, horizontal spread options, nifty multi expiry options, volatility expansion strategy, long calendar spread",
-  alternates: { canonical: "https://optionsgyani.com/strategies/calendar-spread-nifty" },
+  alternates: { canonical: "https://www.optionsgyani.com/strategies/calendar-spread-nifty" },
   openGraph: {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Calendar Spread NIFTY — Playbook & Data | OptionsGyani",
     description: "Verified historical win rate 64.3%. Cash in on differing time decay curves.",
-    url: "https://optionsgyani.com/strategies/calendar-spread-nifty",
+    url: "https://www.optionsgyani.com/strategies/calendar-spread-nifty",
     type: "article",
   },
 };
@@ -50,7 +50,7 @@ export default function CalendarSpreadNiftyPage() {
             "headline": "Calendar Spread NIFTY Multi-Expiry — Strategy Guide & Backtest",
             "description": "Complete guide to trading the Calendar Spread on NIFTY index options.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://www.optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
           }),

@@ -4,12 +4,12 @@ export const metadata = {
   title: "OptionsGyani vs Sensibull, Opstra & Others — Honest Comparison",
   description:
     "Compare OptionsGyani with Sensibull, Opstra, Quantsapp and other options analytics platforms. Honest feature and price comparison for Indian F&O traders.",
-  alternates: { canonical: "https://optionsgyani.com/compare" },
+  alternates: { canonical: "https://www.optionsgyani.com/compare" },
   openGraph: {
     title: "OptionsGyani vs Sensibull, Opstra & Others — Honest Comparison",
     description:
       "Compare OptionsGyani with Sensibull, Opstra, Quantsapp and other options analytics platforms. Honest feature and price comparison for Indian F&O traders.",
-    url: "https://optionsgyani.com/compare",
+    url: "https://www.optionsgyani.com/compare",
     siteName: "OptionsGyani",
     type: "website",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani Comparison" }],

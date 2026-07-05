@@ -4,12 +4,12 @@ export const metadata = {
   title: "Sensibull vs OptionsGyani — Which is Better for NSE Options Trading?",
   description:
     "Sensibull vs OptionsGyani: honest feature comparison. Sensibull costs ₹2,499/month and lacks backtesting. OptionsGyani costs ₹499/month with 8+ years of NSE backtest data and paper trading.",
-  alternates: { canonical: "https://optionsgyani.com/compare/sensibull-vs-optionsgyani" },
+  alternates: { canonical: "https://www.optionsgyani.com/compare/sensibull-vs-optionsgyani" },
   openGraph: {
     title: "Sensibull vs OptionsGyani — Which is Better for NSE Options Trading?",
     description:
       "Sensibull vs OptionsGyani: honest feature comparison. Sensibull costs ₹2,499/month and lacks backtesting. OptionsGyani costs ₹499/month with 8+ years of NSE backtest data and paper trading.",
-    url: "https://optionsgyani.com/compare/sensibull-vs-optionsgyani",
+    url: "https://www.optionsgyani.com/compare/sensibull-vs-optionsgyani",
     siteName: "OptionsGyani",
     type: "article",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Sensibull vs OptionsGyani" }],
@@ -22,11 +22,11 @@ const jsonLd = {
   headline: "Sensibull vs OptionsGyani — Which is Better for NSE Options Trading?",
   description:
     "Honest feature and price comparison between Sensibull and OptionsGyani for Indian F&O traders.",
-  url: "https://optionsgyani.com/compare/sensibull-vs-optionsgyani",
+  url: "https://www.optionsgyani.com/compare/sensibull-vs-optionsgyani",
   publisher: {
     "@type": "Organization",
     name: "OptionsGyani",
-    url: "https://optionsgyani.com",
+    url: "https://www.optionsgyani.com",
   },
   dateModified: "2026-07-02",
 };

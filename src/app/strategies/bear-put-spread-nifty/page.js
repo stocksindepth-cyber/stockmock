@@ -6,12 +6,12 @@ export const metadata = {
   title: "Bear Put Spread NIFTY — Directional Downside Edge | OptionsGyani",
   description: "Learn how to execute a Bear Put Spread on NIFTY index options. Cap your downside risk while participating in market corrections.",
   keywords: "bear put spread nifty, bear put spread india, defined risk bearish option strategy, nifty options selling, debit spread nifty",
-  alternates: { canonical: "https://optionsgyani.com/strategies/bear-put-spread-nifty" },
+  alternates: { canonical: "https://www.optionsgyani.com/strategies/bear-put-spread-nifty" },
   openGraph: {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Bear Put Spread NIFTY — Strategy & Backtest | OptionsGyani",
     description: "Verified historical win rate 51.8%, avg 5.1% ROI per trade. Safely short NIFTY without huge margins.",
-    url: "https://optionsgyani.com/strategies/bear-put-spread-nifty",
+    url: "https://www.optionsgyani.com/strategies/bear-put-spread-nifty",
     type: "article",
   },
 };
@@ -50,7 +50,7 @@ export default function BearPutSpreadNiftyPage() {
             "headline": "Bear Put Spread NIFTY — Verified Downside Strategy & Data",
             "description": "Complete Bear Put Spread guide for NIFTY with real historical data.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://www.optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
           }),

@@ -6,12 +6,12 @@ export const metadata = {
   title: "NIFTY Weekly Expiry Options Strategy Data Guide 2025 | OptionsGyani",
   description: "The definitive quantitative guide to trading NIFTY weekly expiry options. Backed by 8 years of NSE 1-minute tick data for Monday vs Thursday decay metrics.",
   keywords: "nifty weekly expiry strategy, nifty thursday expiry options, weekly options india guide, best day to sell nifty options, nifty expiry day strategy, 0dte nifty options",
-  alternates: { canonical: "https://optionsgyani.com/strategies/nifty-weekly-expiry-guide" },
+  alternates: { canonical: "https://www.optionsgyani.com/strategies/nifty-weekly-expiry-guide" },
   openGraph: {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "NIFTY Weekly Expiry Playbook 2025 (Backtest Verified) | OptionsGyani",
     description: "Daily quantitative roadmap for NIFTY weekly options, built on 8 years of tick data.",
-    url: "https://optionsgyani.com/strategies/nifty-weekly-expiry-guide",
+    url: "https://www.optionsgyani.com/strategies/nifty-weekly-expiry-guide",
     type: "article",
   },
 };
@@ -90,10 +90,10 @@ export default function NiftyWeeklyExpiryGuidePage() {
             "headline": "NIFTY Weekly Expiry Options Strategy — Quantitative Trading Playbook",
             "description": "Day-by-day structural guide for trading NIFTY weekly options — best entry days, Theta decay schedules, and edge-based strategy selection.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://www.optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
-            "mainEntityOfPage": "https://optionsgyani.com/strategies/nifty-weekly-expiry-guide",
+            "mainEntityOfPage": "https://www.optionsgyani.com/strategies/nifty-weekly-expiry-guide",
           }),
         }}
       />

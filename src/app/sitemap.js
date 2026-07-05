@@ -1,7 +1,7 @@
 import { STRATEGY_SLUGS } from "@/data/strategies";
 
 export default function sitemap() {
-  const baseUrl = "https://optionsgyani.com";
+  const baseUrl = "https://www.optionsgyani.com";
 
   const staticPages = [
     { url: baseUrl,                           lastModified: new Date(), changeFrequency: "daily",   priority: 1.0 },

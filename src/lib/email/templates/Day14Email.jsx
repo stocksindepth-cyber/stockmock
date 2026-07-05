@@ -23,7 +23,7 @@ export function Day14Email({ name }) {
 
           {/* Logo */}
           <Section style={{ padding: "20px 40px", borderBottom: "1px solid #1c1c1e" }}>
-            <Img src="https://optionsgyani.com/logo.png" width="32" height="32" alt="OptionsGyani" style={{ display: "inline-block", verticalAlign: "middle" }} />
+            <Img src="https://www.optionsgyani.com/logo.png" width="32" height="32" alt="OptionsGyani" style={{ display: "inline-block", verticalAlign: "middle" }} />
             <Text style={{ display: "inline-block", verticalAlign: "middle", color: "#f4f4f5", fontSize: "16px", fontWeight: "600", margin: "0 0 0 10px", fontFamily: fontStack }}>
               OptionsGyani
             </Text>
@@ -81,7 +81,7 @@ export function Day14Email({ name }) {
 
           {/* CTA */}
           <Section style={{ padding: "0 40px 40px", textAlign: "center" }}>
-            <Button href="https://optionsgyani.com/pricing" style={{ backgroundColor: "#f59e0b", color: "#000000", borderRadius: "8px", padding: "14px 36px", fontSize: "14px", fontWeight: "700", textDecoration: "none", display: "inline-block", fontFamily: fontStack }}>
+            <Button href="https://www.optionsgyani.com/pricing" style={{ backgroundColor: "#f59e0b", color: "#000000", borderRadius: "8px", padding: "14px 36px", fontSize: "14px", fontWeight: "700", textDecoration: "none", display: "inline-block", fontFamily: fontStack }}>
               Upgrade to Pro →
             </Button>
             <Text style={{ color: "#52525b", fontSize: "12px", margin: "14px 0 0", fontFamily: fontStack }}>
@@ -94,7 +94,7 @@ export function Day14Email({ name }) {
             <Text style={{ color: "#3f3f46", fontSize: "12px", margin: "0 0 4px", fontFamily: fontStack }}>
               © 2026 OptionsGyani · Educational use only · Not SEBI registered
             </Text>
-            <Link href="https://optionsgyani.com/profile" style={{ color: "#3f3f46", fontSize: "12px", textDecoration: "underline", fontFamily: fontStack }}>
+            <Link href="https://www.optionsgyani.com/profile" style={{ color: "#3f3f46", fontSize: "12px", textDecoration: "underline", fontFamily: fontStack }}>
               Unsubscribe
             </Link>
           </Section>

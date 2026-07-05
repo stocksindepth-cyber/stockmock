@@ -15,12 +15,12 @@ export async function generateMetadata({ params }) {
   return {
     title: `${guide.title} | OptionsGyani`,
     description: guide.meta,
-    alternates: { canonical: `https://optionsgyani.com/learn/${slug}` },
+    alternates: { canonical: `https://www.optionsgyani.com/learn/${slug}` },
     openGraph: {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
       title: `${guide.title} | OptionsGyani`,
       description: guide.meta,
-      url: `https://optionsgyani.com/learn/${slug}`,
+      url: `https://www.optionsgyani.com/learn/${slug}`,
       type: "article",
     },
   };

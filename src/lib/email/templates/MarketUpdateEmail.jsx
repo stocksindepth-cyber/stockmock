@@ -105,7 +105,7 @@ export function MarketUpdateEmail({
             <Row>
               <Column style={{ verticalAlign: "middle" }}>
                 <Img
-                  src="https://optionsgyani.com/logo.png"
+                  src="https://www.optionsgyani.com/logo.png"
                   width="36"
                   height="36"
                   alt="OptionsGyani"
@@ -477,7 +477,7 @@ export function MarketUpdateEmail({
           {/* CTA */}
           <Section style={{ padding: "32px 40px", textAlign: "center" }}>
             <Button
-              href="https://optionsgyani.com/chain"
+              href="https://www.optionsgyani.com/chain"
               style={{
                 backgroundColor: "#22d3ee",
                 color: "#000000",
@@ -517,7 +517,7 @@ export function MarketUpdateEmail({
               }}
             >
               <Link
-                href="https://optionsgyani.com/profile"
+                href="https://www.optionsgyani.com/profile"
                 style={{ color: "#52525b", textDecoration: "underline" }}
               >
                 Unsubscribe from market updates

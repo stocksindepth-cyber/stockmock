@@ -2,7 +2,7 @@
 export const metadata = {
   title: "Terms of Service | OptionsGyani",
   description: "Terms of Service for OptionsGyani — the free NSE options analytics and backtesting platform.",
-  alternates: { canonical: "https://optionsgyani.com/terms" },
+  alternates: { canonical: "https://www.optionsgyani.com/terms" },
 };
 
 export default function TermsLayout({ children }) {

@@ -2,7 +2,7 @@
 export const metadata = {
   title: "Privacy Policy | OptionsGyani",
   description: "Privacy Policy for OptionsGyani — how we collect, use, and protect your data.",
-  alternates: { canonical: "https://optionsgyani.com/privacy" },
+  alternates: { canonical: "https://www.optionsgyani.com/privacy" },
 };
 
 export default function PrivacyLayout({ children }) {

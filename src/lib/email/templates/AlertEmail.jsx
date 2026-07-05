@@ -137,7 +137,7 @@ export default function AlertEmail({
 
             {/* ── CTA ── */}
             <Button
-              href={`https://optionsgyani.com/chain?symbol=${symbol}`}
+              href={`https://www.optionsgyani.com/chain?symbol=${symbol}`}
               style={{
                 display: "block", textAlign: "center", backgroundColor: accentColor,
                 color: "#ffffff", padding: "14px 24px", borderRadius: "10px",
@@ -147,7 +147,7 @@ export default function AlertEmail({
               View Live {symbol} Option Chain →
             </Button>
             <Button
-              href="https://optionsgyani.com/backtest"
+              href="https://www.optionsgyani.com/backtest"
               style={{
                 display: "block", textAlign: "center", backgroundColor: "transparent",
                 color: "#9ca3af", padding: "10px 24px", borderRadius: "10px",
@@ -164,7 +164,7 @@ export default function AlertEmail({
             <Text style={{ fontSize: "12px", color: "#6b7280", margin: "0 0 6px" }}>
               Manage your alerts at any time
             </Text>
-            <Link href="https://optionsgyani.com/alerts" style={{ fontSize: "13px", color: "#6366f1", fontWeight: "600" }}>
+            <Link href="https://www.optionsgyani.com/alerts" style={{ fontSize: "13px", color: "#6366f1", fontWeight: "600" }}>
               optionsgyani.com/alerts →
             </Link>
           </Section>
@@ -178,7 +178,7 @@ export default function AlertEmail({
             </Text>
             <Text style={{ fontSize: "11px", color: "#374151", margin: "0" }}>
               You received this because you set up an IV alert.{" "}
-              <Link href="https://optionsgyani.com/alerts" style={{ color: "#6b7280" }}>Manage alerts</Link>
+              <Link href="https://www.optionsgyani.com/alerts" style={{ color: "#6b7280" }}>Manage alerts</Link>
             </Text>
           </Section>
 

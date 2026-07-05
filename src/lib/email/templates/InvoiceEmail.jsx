@@ -59,7 +59,7 @@ export function InvoiceEmail({
             <Row>
               <Column style={{ verticalAlign: "middle" }}>
                 <Img
-                  src="https://optionsgyani.com/logo.png"
+                  src="https://www.optionsgyani.com/logo.png"
                   width="36"
                   height="36"
                   alt="OptionsGyani"
@@ -502,7 +502,7 @@ export function InvoiceEmail({
           {/* CTA */}
           <Section style={{ padding: "32px 40px", textAlign: "center" }}>
             <Button
-              href="https://optionsgyani.com/profile"
+              href="https://www.optionsgyani.com/profile"
               style={{
                 backgroundColor: "#22d3ee",
                 color: "#000000",

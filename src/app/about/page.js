@@ -2,7 +2,7 @@ import { Target, Database, TrendingUp, Shield, Zap, Briefcase, BarChart2, Code2,
 import Link from "next/link";
 
 export const metadata = {
-  alternates: { canonical: "https://optionsgyani.com/about" },
+  alternates: { canonical: "https://www.optionsgyani.com/about" },
   title: "About OptionsGyani — Built by a Trader, Engineered for Scale",
   description: "OptionsGyani was built by a 5-year F&O trader and Engineering Manager with experience at Morgan Stanley, Intuit, WalmartLabs, and IBM Labs. Real data, serious tools, no fluff.",
 };

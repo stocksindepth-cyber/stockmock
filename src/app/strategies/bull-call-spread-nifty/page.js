@@ -6,12 +6,12 @@ export const metadata = {
   title: "Bull Call Spread NIFTY — Verified Pre-Event Strategy & Backtest Data | OptionsGyani",
   description: "Complete Bull Call Spread guide for NIFTY — entry rules, strike selection, payoff calculation, and real tick-level backtest data for Union Budget and RBI policy.",
   keywords: "bull call spread nifty, bull call spread strategy india, debit spread nifty, nifty call spread strategy, directional options strategy nse, pre event options strategy india",
-  alternates: { canonical: "https://optionsgyani.com/strategies/bull-call-spread-nifty" },
+  alternates: { canonical: "https://www.optionsgyani.com/strategies/bull-call-spread-nifty" },
   openGraph: {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
     title: "Bull Call Spread NIFTY — Pre-Event Backtest Data | OptionsGyani",
     description: "Verified historical win rate 54.2%, avg 8.3% ROI per trade. Real NSE tick-level backtest on pre-event setups.",
-    url: "https://optionsgyani.com/strategies/bull-call-spread-nifty",
+    url: "https://www.optionsgyani.com/strategies/bull-call-spread-nifty",
     type: "article",
   },
 };
@@ -57,7 +57,7 @@ export default function BullCallSpreadNiftyPage() {
             "headline": "Bull Call Spread NIFTY — Verified Pre-Event Strategy & Backtest Data",
             "description": "Complete Bull Call Spread guide for NIFTY with real historical data.",
             "author": { "@type": "Organization", "name": "OptionsGyani" },
-            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://optionsgyani.com" },
+            "publisher": { "@type": "Organization", "name": "OptionsGyani", "url": "https://www.optionsgyani.com" },
             "datePublished": "2025-01-01",
             "dateModified": new Date().toISOString().split("T")[0],
           }),
