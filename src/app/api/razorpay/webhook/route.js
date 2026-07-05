@@ -37,19 +37,18 @@ export async function POST(request) {
     // ── Handle payment captured ───────────────────────────────────────────────
     if (event.event === "payment.captured") {
       const payment = event.payload.payment.entity;
-      const { userId, planId } = payment.notes || {};
+      const { userId, planId, billing, product_brand } = payment.notes || {};
+
+      // Brand guard — the Razorpay account is shared across GrahAI products;
+      // only process payments created by OptionsGyani's own order route.
+      if (product_brand && product_brand !== "optionsgyani") {
+        return NextResponse.json({ status: "ok", note: `other brand: ${product_brand}` });
+      }
 
       if (!userId || !planId) {
         console.warn("[Razorpay Webhook] Missing userId or planId in payment notes — skipping");
         return NextResponse.json({ status: "ok", note: "no userId in notes" });
       }
-
-      const isAnnual = planId.includes("annual") || (payment.description || "").toLowerCase().includes("annual");
-      const durationDays = isAnnual ? 365 : 30;
-      const dbPlan = planId.replace("_monthly", "").replace("_annual", ""); // "pro" | "elite"
-
-      const expiryDate = new Date();
-      expiryDate.setDate(expiryDate.getDate() + durationDays);
 
       const db = getAdminFirestore();
 
@@ -63,6 +62,36 @@ export async function POST(request) {
         console.log(`[Razorpay Webhook] Payment ${payment.id} already processed — skipping`);
         return NextResponse.json({ status: "ok", note: "already processed" });
       }
+
+      // One-time credit pack: grant credits, don't touch the plan
+      if (planId === "credits50") {
+        await db.doc(`users/${userId}`).update({
+          backtestCredits: admin.firestore.FieldValue.increment(50),
+          lastPaymentId: payment.id,
+          lastPaymentDate: new Date().toISOString(),
+        });
+        await db.collection("transactions").add({
+          userId,
+          purchasedPlan: "credits50",
+          creditsGranted: 50,
+          razorpayOrderId: payment.order_id,
+          razorpayPaymentId: payment.id,
+          amount: payment.amount,
+          currency: payment.currency,
+          status: "PAID_SUCCESS",
+          source: "razorpay_webhook",
+          timestamp: admin.firestore.FieldValue.serverTimestamp(),
+        });
+        console.log(`[Razorpay Webhook] ✓ User ${userId} granted 50 backtest credits. Payment: ${payment.id}`);
+        return NextResponse.json({ status: "ok" });
+      }
+
+      const isAnnual = billing === "annual" || planId.includes("annual") || (payment.description || "").toLowerCase().includes("annual");
+      const durationDays = isAnnual ? 365 : 30;
+      const dbPlan = planId.replace("_monthly", "").replace("_annual", ""); // "pro" | "elite"
+
+      const expiryDate = new Date();
+      expiryDate.setDate(expiryDate.getDate() + durationDays);
 
       // Upgrade the user's plan
       await db.doc(`users/${userId}`).update({

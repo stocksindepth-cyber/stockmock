@@ -49,7 +49,8 @@ const PLANS = [
     id: "pro_monthly",
     name: "Pro",
     monthlyPrice: 499,
-    annualPrice: 399,
+    annualPrice: 333,
+    annualTotal: 3999,
     dbPlan: "pro",
     durationDays: 30,
     badge: "Most Popular",
@@ -75,8 +76,9 @@ const PLANS = [
   {
     id: "elite_monthly",
     name: "Elite",
-    monthlyPrice: 999,
-    annualPrice: 799,
+    monthlyPrice: 1499,
+    annualPrice: 833,
+    annualTotal: 9999,
     dbPlan: "elite",
     durationDays: 30,
     badge: null,
@@ -135,7 +137,7 @@ const FAQ = [
   },
   {
     q: "How is this different from Sensibull or Opstra?",
-    a: "Sensibull starts at ₹2,499/month. Opstra's backtest data is limited. We give you 8+ years of real NSE Bhavcopy data, unlimited backtests, and a simpler UX — starting at ₹499/month. No compromise.",
+    a: "Sensibull Pro is ₹800/month (₹640/mo billed annually), Opstra PRO is ₹1,000/month, and Quantsapp Pro is ₹2,950/month. OptionsGyani Pro gives you 8+ years of real NSE Bhavcopy data, unlimited backtests, and a simpler UX at ₹499/month — and unlike most, our free plan never expires.",
   },
   {
     q: "What is the Dhan referral?",
@@ -187,6 +189,88 @@ export default function PricingPage() {
       ? Math.round(base * (1 - couponData.discountPct / 100))
       : base;
 
+  const handleBuyCredits = async () => {
+    trackPlanClick("credits50", "onetime");
+    if (!currentUser) {
+      router.push("/login?redirect=/pricing");
+      return;
+    }
+    setProcessingId("credits50");
+    try {
+      const orderRes = await fetch("/api/razorpay/order", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          planId: "credits50",
+          billing: "onetime",
+          planName: "50 Backtest Credits",
+          userId: currentUser.uid,
+        }),
+      });
+      const order = await orderRes.json();
+      if (order.error) throw new Error(order.error);
+
+      trackPaymentInitiated("credits50", 299, "onetime");
+
+      await new Promise((resolve, reject) => {
+        if (window.Razorpay) return resolve();
+        const script = document.createElement("script");
+        script.src = "https://checkout.razorpay.com/v1/checkout.js";
+        script.onload = resolve;
+        script.onerror = reject;
+        document.head.appendChild(script);
+      });
+
+      const rzp = new window.Razorpay({
+        key: order.keyId,
+        amount: order.amount,
+        currency: "INR",
+        order_id: order.orderId,
+        name: "OptionsGyani",
+        description: "50 Backtest Credits — one-time",
+        image: "/favicon.ico",
+        prefill: { email: currentUser.email, name: currentUser.displayName || "" },
+        theme: { color: "#F59E0B" },
+        handler: async (response) => {
+          try {
+            const verifyRes = await fetch("/api/razorpay/verify", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                userId: currentUser.uid,
+                planId: "credits50",
+                billing: "onetime",
+              }),
+            });
+            const verifyData = await verifyRes.json();
+            if (!verifyRes.ok || !verifyData.success) throw new Error(verifyData.error || "Verification failed");
+            trackPaymentSuccess("credits50", 299, "onetime", response.razorpay_payment_id);
+            window.location.href = "/backtest?credits=50";
+          } catch {
+            setModal({
+              type: "warning",
+              title: "Payment Received — Credits Pending",
+              message: "Your payment succeeded but credit activation failed. Contact support with your Payment ID.",
+              details: [
+                { label: "Payment ID", value: response.razorpay_payment_id, highlight: "text-amber-400 font-mono text-xs break-all" },
+                { label: "Support", value: "support@optionsgyani.com", highlight: "text-blue-400" },
+              ],
+              actions: [{ label: "OK", onClick: () => setModal(null), variant: "primary" }],
+            });
+          }
+        },
+        modal: { ondismiss: () => { trackPaymentCancelled("credits50"); setProcessingId(null); } },
+      });
+      rzp.open();
+    } catch (err) {
+      console.error("Credit pack purchase failed:", err);
+      setProcessingId(null);
+    }
+  };
+
   const handleSubscribe = async (plan) => {
     const billing = annual ? "annual" : "monthly";
     trackPlanClick(plan.dbPlan || plan.id, billing);
@@ -201,7 +285,7 @@ export default function PricingPage() {
     }
 
     setProcessingId(plan.id);
-    const basePrice = annual ? plan.annualPrice : plan.monthlyPrice;
+    const basePrice = annual ? plan.annualTotal : plan.monthlyPrice;
     const durationDays = annual ? 365 : plan.durationDays;
 
     try {
@@ -209,8 +293,8 @@ export default function PricingPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          amount: basePrice,
           planId: plan.dbPlan,
+          billing: annual ? "annual" : "monthly",
           planName: plan.name,
           userId: currentUser.uid,
           couponCode: couponState === "valid" ? couponInput.trim().toUpperCase() : undefined,
@@ -260,6 +344,7 @@ export default function PricingPage() {
                   razorpay_signature: response.razorpay_signature,
                   userId: currentUser.uid,
                   planId: plan.dbPlan,
+                  billing: annual ? "annual" : "monthly",
                   durationDays,
                 }),
               });
@@ -342,7 +427,7 @@ export default function PricingPage() {
         <div className="flex justify-center mb-8">
           <div className="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-3 px-4 py-2 rounded-2xl sm:rounded-full bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-400 text-center">
             <TrendingUp className="w-4 h-4 hidden sm:block" />
-            <span className="text-xs sm:text-sm">Sensibull: ₹2,499/mo · Quantsapp: ₹999/mo</span>
+            <span className="text-xs sm:text-sm">Sensibull Pro: ₹800/mo · Opstra: ₹1,000/mo · Quantsapp: ₹2,950/mo</span>
             <span className="text-xs sm:text-sm font-bold">OptionsGyani Pro: ₹499/mo</span>
           </div>
         </div>
@@ -458,7 +543,7 @@ export default function PricingPage() {
                     </p>
                   )}
                   {annual && displayPrice > 0 && (
-                    <p className="text-xs text-slate-500">Billed annually · ₹{displayPrice * 12}/year</p>
+                    <p className="text-xs text-slate-500">Billed today · ₹{couponState === "valid" && couponData?.discountPct ? Math.round(plan.annualTotal * (1 - couponData.discountPct / 100)) : plan.annualTotal} for 12 months</p>
                   )}
                   {!annual && displayPrice > 0 && (
                     <p className="text-xs text-slate-500">Billed monthly · +18% GST at checkout</p>
@@ -534,6 +619,27 @@ export default function PricingPage() {
               </div>
             );
           })}
+        </div>
+
+        {/* ── One-time credit pack ── */}
+        <div className="max-w-2xl mx-auto mb-16">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl border border-amber-500/25 bg-amber-500/5">
+            <div>
+              <p className="text-sm font-bold text-white flex items-center gap-2">
+                <Zap className="w-4 h-4 text-amber-400" /> Not ready for a subscription?
+              </p>
+              <p className="text-xs text-slate-400 mt-1">
+                One-time <span className="text-amber-300 font-semibold">₹299 credit pack</span> — 50 extra backtests, no expiry, no auto-renewal. Credits kick in after your free daily limit.
+              </p>
+            </div>
+            <button
+              onClick={handleBuyCredits}
+              disabled={processingId === "credits50"}
+              className="shrink-0 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-bold transition-colors disabled:opacity-60"
+            >
+              {processingId === "credits50" ? <Loader2 className="w-4 h-4 animate-spin" /> : "Buy 50 credits — ₹299"}
+            </button>
+          </div>
         </div>
 
         {/* ── Social proof strip ── */}

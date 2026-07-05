@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
+import { PLAN_PRICES, PRODUCT_BRAND, getPlanAmount } from "@/lib/planPricing";
 
 // ── Server-side coupon registry (single source of truth — never trust client price) ──
 const COUPONS = {
-  OG30: { discountPct: 30, expiresAt: "2026-07-07T23:59:59+05:30", active: true, plans: ["pro", "elite"] },
+  OG30: { discountPct: 30, expiresAt: "2026-07-09T23:59:59+05:30", active: true, plans: ["pro", "elite"] },
 };
 
 function applyCoupon(code, planId, originalAmount) {
@@ -17,14 +18,19 @@ function applyCoupon(code, planId, originalAmount) {
 
 export async function POST(request) {
   try {
-    const { amount, planId, planName, userId, couponCode } = await request.json();
+    const { planId, billing, planName, userId, couponCode } = await request.json();
 
-    if (!amount || !planId || !userId) {
+    if (!planId || !userId || !billing) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Apply coupon discount server-side — client-supplied amount is ignored
-    const { finalAmount, discountPct, discountAmount } = applyCoupon(couponCode, planId, amount);
+    // Price is derived server-side from the registry — client never sets it
+    const baseAmount = getPlanAmount(planId, billing);
+    if (!baseAmount) {
+      return NextResponse.json({ error: `Unknown plan/billing: ${planId}/${billing}` }, { status: 400 });
+    }
+
+    const { finalAmount, discountPct, discountAmount } = applyCoupon(couponCode, planId, baseAmount);
 
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -51,7 +57,15 @@ export async function POST(request) {
         amount: finalAmount * 100,
         currency: "INR",
         receipt: `rcpt_${userId.substring(0, 10)}_${Date.now().toString(36)}`,
-        notes: { userId, planId, planName, couponCode: couponCode || "", discountPct: String(discountPct) },
+        notes: {
+          userId,
+          planId,
+          billing,
+          planName: planName || planId,
+          product_brand: PRODUCT_BRAND,
+          couponCode: couponCode || "",
+          discountPct: String(discountPct),
+        },
       }),
     });
 

@@ -23,7 +23,7 @@ const TESTIMONIALS = [
     avatar: "PS",
     color: "from-violet-600 to-purple-700",
     stars: 5,
-    text: "I used to pay ₹2,499/month for Sensibull and still couldn't backtest properly. OptionsGyani at ₹499 gives me everything I need — Greeks, OI analysis, and unlimited backtests. No-brainer switch.",
+    text: "I used to pay ₹800/month for Sensibull and still couldn't backtest properly. OptionsGyani at ₹499 gives me everything I need — Greeks, OI analysis, and unlimited backtests. No-brainer switch.",
   },
   {
     name: "Rohit Agarwal",
@@ -46,7 +46,7 @@ const TESTIMONIALS = [
 const STATS = [
   { value: "8+",   label: "Years NSE Data",    sub: "2016 to today" },
   { value: "12+",  label: "Strategies",         sub: "Iron Condor, Straddle & more" },
-  { value: "₹499", label: "Pro Plan / Month",   sub: "vs ₹2,499 at Sensibull" },
+  { value: "₹499", label: "Pro Plan / Month",   sub: "vs ₹800 at Sensibull Pro" },
   { value: "100%", label: "Real Bhavcopy Data", sub: "No synthetic prices" },
 ];
 
@@ -252,7 +252,7 @@ export default function Home() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {[
-                  ["Price/month",       "₹499",          "₹2,499",  "₹999"],
+                  ["Price/month",       "₹499",          "₹800",    "₹1,000"],
                   ["NSE Backtest data", "8+ years real", "Limited", "3 years"],
                   ["IVP / IVR",         "✓",             "✓",       "✓"],
                   ["A/B Comparison",    "✓",             "✗",       "✗"],

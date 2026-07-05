@@ -63,7 +63,7 @@ const rows = [
   {
     feature: "Price",
     og: <span className="text-white font-semibold">₹499/mo</span>,
-    sensibull: <span className="text-white font-semibold">₹2,499/mo</span>,
+    sensibull: <span className="text-white font-semibold">₹800/mo</span>,
     opstra: <span className="text-emerald-400 font-semibold">Free</span>,
     quantsapp: <span className="text-white font-semibold">₹1,499/mo</span>,
     zerodha: <span className="text-slate-400 text-sm">₹0 (broker)</span>,
@@ -82,7 +82,7 @@ const compareCards = [
   {
     slug: "sensibull-vs-optionsgyani",
     title: "Sensibull vs OptionsGyani",
-    subtitle: "Sensibull costs ₹2,499/mo and has no backtesting. See how they compare.",
+    subtitle: "Sensibull costs ₹800/mo and has no backtesting. See how they compare.",
     tag: "Most searched",
   },
 ];

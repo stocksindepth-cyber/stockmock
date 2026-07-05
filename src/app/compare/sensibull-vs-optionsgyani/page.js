@@ -3,12 +3,12 @@ import Link from "next/link";
 export const metadata = {
   title: "Sensibull vs OptionsGyani — Which is Better for NSE Options Trading?",
   description:
-    "Sensibull vs OptionsGyani: honest feature comparison. Sensibull costs ₹2,499/month and lacks backtesting. OptionsGyani costs ₹499/month with 8+ years of NSE backtest data and paper trading.",
+    "Sensibull vs OptionsGyani: honest feature comparison. Sensibull Pro costs ₹800/month and lacks backtesting. OptionsGyani costs ₹499/month with 8+ years of NSE backtest data and paper trading.",
   alternates: { canonical: "https://www.optionsgyani.com/compare/sensibull-vs-optionsgyani" },
   openGraph: {
     title: "Sensibull vs OptionsGyani — Which is Better for NSE Options Trading?",
     description:
-      "Sensibull vs OptionsGyani: honest feature comparison. Sensibull costs ₹2,499/month and lacks backtesting. OptionsGyani costs ₹499/month with 8+ years of NSE backtest data and paper trading.",
+      "Sensibull vs OptionsGyani: honest feature comparison. Sensibull Pro costs ₹800/month and lacks backtesting. OptionsGyani costs ₹499/month with 8+ years of NSE backtest data and paper trading.",
     url: "https://www.optionsgyani.com/compare/sensibull-vs-optionsgyani",
     siteName: "OptionsGyani",
     type: "article",
@@ -32,7 +32,7 @@ const jsonLd = {
 };
 
 const tableRows = [
-  { feature: "Price", sensibull: "₹2,499/month (Pro)", og: "₹499/month" },
+  { feature: "Price", sensibull: "₹800/month (Pro) · free for Zerodha users", og: "₹499/month" },
   { feature: "Annual cost", sensibull: "₹29,988", og: "₹5,988" },
   { feature: "Free tier", sensibull: "No", og: "Yes (3 backtests/day)", ogGood: true },
   { feature: "Options strategies", sensibull: "18+ pre-built", og: "Build custom" },
@@ -46,8 +46,8 @@ const tableRows = [
 
 const faqs = [
   {
-    q: "Is Sensibull worth ₹2,499/month?",
-    a: "Sensibull is a well-built platform with solid strategy templates and deep Zerodha integration. If you primarily use Zerodha and need pre-built visual strategies, it can be worth it. However, at ₹2,499/month (₹29,988/year) it is among the pricier options tools in India, and it does not include backtesting, which is a significant gap for quantitative traders.",
+    q: "Is Sensibull worth ₹800/month?",
+    a: "Sensibull is a well-built platform with solid strategy templates and deep Zerodha integration. If you primarily use Zerodha and need pre-built visual strategies, it can be worth it. However, at ₹800/month (₹7,680/year billed annually) it is a paid add-on unless you trade with Zerodha, and it does not include backtesting, which is a significant gap for quantitative traders.",
   },
   {
     q: "Does Sensibull have backtesting?",
@@ -166,7 +166,7 @@ export default function SensibullVsOptionsGyaniPage() {
               {[
                 "Backtesting on 8+ years of real NSE tick data — Sensibull has none.",
                 "Live paper trading with real NSE prices — Sensibull has none.",
-                "₹2,000/month cheaper at the paid tier (₹499 vs ₹2,499).",
+                "₹300/month cheaper at the paid tier (₹499 vs ₹800), and our free plan never expires.",
                 "Broker-agnostic — works with Zerodha, Dhan, Upstox, or any broker.",
                 "IVP displayed directly on the option chain for faster screening.",
                 "Free tier available — 3 backtests per day, no credit card required.",

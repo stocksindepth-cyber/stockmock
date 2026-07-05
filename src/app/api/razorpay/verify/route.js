@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import crypto from "crypto";
 import { getAdminFirestore } from "@/lib/firebase/admin";
 import admin from "firebase-admin";
+import { PLAN_PRICES, getPlanAmount } from "@/lib/planPricing";
 
 export async function POST(request) {
   try {
@@ -16,7 +17,8 @@ export async function POST(request) {
       razorpay_payment_id,
       razorpay_signature,
       userId,
-      planId,     // e.g. "pro" | "elite"
+      planId,     // "pro" | "elite" | "credits50"
+      billing,    // "monthly" | "annual" | "onetime"
       durationDays,
     } = await request.json();
 
@@ -42,8 +44,34 @@ export async function POST(request) {
       return NextResponse.json({ error: "Payment verification failed — invalid signature" }, { status: 400 });
     }
 
-    // ── 3. Activate subscription in Firestore via Admin SDK ───────────────────
+    // ── 3. Activate purchase in Firestore via Admin SDK ───────────────────────
     const db = getAdminFirestore();
+    const effectiveBilling = billing || (durationDays === 365 ? "annual" : "monthly");
+    const paidAmount = getPlanAmount(planId, effectiveBilling); // rupees, from registry
+
+    // One-time credit pack: grant credits, don't touch the plan
+    if (planId === "credits50") {
+      await db.doc(`users/${userId}`).update({
+        backtestCredits: admin.firestore.FieldValue.increment(PLAN_PRICES.credits50.credits),
+        lastPaymentId: razorpay_payment_id,
+        lastPaymentDate: new Date().toISOString(),
+      });
+      await db.collection("transactions").add({
+        userId,
+        purchasedPlan: "credits50",
+        creditsGranted: PLAN_PRICES.credits50.credits,
+        razorpayOrderId: razorpay_order_id,
+        razorpayPaymentId: razorpay_payment_id,
+        amount: (paidAmount || 0) * 100,
+        currency: "INR",
+        status: "PAID_SUCCESS",
+        source: "razorpay_verified",
+        timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      });
+      console.log(`[Razorpay Verify] ✓ User ${userId} bought ${PLAN_PRICES.credits50.credits} backtest credits. Payment: ${razorpay_payment_id}`);
+      return NextResponse.json({ success: true, credits: PLAN_PRICES.credits50.credits, paymentId: razorpay_payment_id });
+    }
+
     const days = durationDays || 30;
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + days);
@@ -64,7 +92,7 @@ export async function POST(request) {
       durationDays: days,
       razorpayOrderId: razorpay_order_id,
       razorpayPaymentId: razorpay_payment_id,
-      amount: days === 365 ? (planId === "elite" ? 79900 : 39900) : (planId === "elite" ? 99900 : 49900),
+      amount: (paidAmount || 0) * 100,
       currency: "INR",
       status: "PAID_SUCCESS",
       source: "razorpay_verified",
@@ -96,7 +124,7 @@ export async function POST(request) {
           email: userData.email,
           invoiceId: `OG-${Date.now()}`,
           plan: planId,
-          amount: days === 365 ? (planId === 'pro' ? 4999 : 9999) : (planId === 'pro' ? 499 : 999),
+          amount: paidAmount || 0,
           paymentId: razorpay_payment_id,
           paymentDate: new Date().toISOString().split('T')[0],
           expiryDate: expiryDate.toISOString().split('T')[0],

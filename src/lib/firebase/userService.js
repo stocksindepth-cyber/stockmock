@@ -48,9 +48,25 @@ export async function checkAndIncrementSimulationLimit(userId) {
     }
 
     if (currentRunCount >= limit && data.plan === "free") {
-      return { 
-        allowed: false, 
-        message: `You have reached your daily limit of ${limit} simulations. Please upgrade to Pro for unlimited backtesting.` 
+      // Paid credit packs let free users continue past the daily limit
+      const credits = data.backtestCredits || 0;
+      if (credits > 0) {
+        await updateDoc(userRef, {
+          backtestCredits: credits - 1,
+          simulationsRunToday: currentRunCount + 1,
+          lastSimulationDate: today,
+        });
+        await logUserActivity(userId, "SIMULATION_RUN", {
+          dailyRunCount: currentRunCount + 1,
+          planAtExecution: data.plan,
+          usedCredit: true,
+          creditsLeft: credits - 1,
+        });
+        return { allowed: true, count: currentRunCount + 1, limit, creditsLeft: credits - 1 };
+      }
+      return {
+        allowed: false,
+        message: `You have reached your daily limit of ${limit} simulations. Upgrade to Pro for unlimited backtesting, or grab a ₹299 credit pack (50 backtests) on the pricing page.`
       };
     }
 
