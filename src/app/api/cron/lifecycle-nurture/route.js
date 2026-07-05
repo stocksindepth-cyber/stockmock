@@ -13,6 +13,7 @@
  * so the same email is never sent twice to the same user.
  */
 export const runtime = "nodejs";
+export const maxDuration = 300;
 
 import { NextResponse } from "next/server";
 import { getAdminFirestore } from "@/lib/firebase/admin";
@@ -43,32 +44,36 @@ async function getUsersInWindow(db, { from, to }, planFilter = null) {
   return snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 }
 
+const DELAY_MS = 700; // sequential sends — stay under Resend's rate limit
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
 async function sendSequence({ db, users, sequenceKey, emailType, props = {} }) {
   const results = { sent: 0, skipped: 0, failed: 0 };
 
-  await Promise.allSettled(
-    users.map(async (user) => {
-      if (!user.email) { results.skipped++; return; }
+  for (const user of users) {
+    if (!user.email) { results.skipped++; continue; }
 
-      // Skip if already sent this sequence
-      const alreadySent = (user.nurtureEmailsSent || []).includes(sequenceKey);
-      if (alreadySent) { results.skipped++; return; }
+    // Skip if already sent this sequence
+    const alreadySent = (user.nurtureEmailsSent || []).includes(sequenceKey);
+    if (alreadySent) { results.skipped++; continue; }
 
-      const name = user.displayName || user.email.split("@")[0];
+    const name = user.displayName || user.email.split("@")[0];
 
-      const result = await sendEmail(emailType, user.email, { name, email: user.email, ...props });
+    const result = await sendEmail(emailType, user.email, { name, email: user.email, ...props })
+      .catch((e) => ({ success: false, error: e.message }));
 
-      if (result.success) {
-        // Mark as sent so we never re-send
-        await db.collection("users").doc(user.id).update({
-          nurtureEmailsSent: [...(user.nurtureEmailsSent || []), sequenceKey],
-        });
-        results.sent++;
-      } else {
-        results.failed++;
-      }
-    })
-  );
+    if (result.success) {
+      // Mark as sent so we never re-send
+      await db.collection("users").doc(user.id).update({
+        nurtureEmailsSent: [...(user.nurtureEmailsSent || []), sequenceKey],
+      });
+      results.sent++;
+    } else {
+      results.failed++;
+    }
+
+    await sleep(DELAY_MS);
+  }
 
   return results;
 }
