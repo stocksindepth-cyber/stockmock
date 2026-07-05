@@ -29,6 +29,14 @@
     {
       "path": "/api/cron/poll-chains",
       "schedule": "*/3 * * * *"
+    },
+    {
+      "path": "/api/cron/market-digest",
+      "schedule": "15 14 * * 1-5"
+    },
+    {
+      "path": "/api/cron/market-digest",
+      "schedule": "45 14 * * 1-5"
     }
   ],
   "headers": [

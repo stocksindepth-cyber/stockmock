@@ -20,13 +20,15 @@ import { sendEmail } from "@/lib/email/sender";
 
 const CRON_SECRET = process.env.EMAIL_CRON_SECRET;
 
-// Window: users created within [daysAgo-1, daysAgo] day boundaries
-function dayWindow(daysAgo) {
+// Window: users created between maxDaysAgo and minDaysAgo ago.
+// Wide ranges (not exact 1-day slots) so a missed cron run self-heals on the
+// next run — idempotency is guaranteed by nurtureEmailsSent[], not the window.
+function dayWindow(minDaysAgo, maxDaysAgo) {
   const now = Date.now();
   const msPerDay = 86400000;
   return {
-    from: new Date(now - (daysAgo + 1) * msPerDay),
-    to:   new Date(now - daysAgo * msPerDay),
+    from: new Date(now - maxDaysAgo * msPerDay),
+    to:   new Date(now - minDaysAgo * msPerDay),
   };
 }
 
@@ -83,7 +85,7 @@ export async function GET(request) {
 
   try {
     // ── Day 3: Activation ─────────────────────────────────────────────────────
-    const day3Users = await getUsersInWindow(db, dayWindow(3));
+    const day3Users = await getUsersInWindow(db, dayWindow(3, 7));
     log.day3 = await sendSequence({
       db,
       users: day3Users,
@@ -92,7 +94,7 @@ export async function GET(request) {
     });
 
     // ── Day 7: Re-engagement nudge (free users only) ──────────────────────────
-    const day7Users = await getUsersInWindow(db, dayWindow(7));
+    const day7Users = await getUsersInWindow(db, dayWindow(7, 14));
     const day7Free  = day7Users.filter((u) => !u.plan || u.plan === "free");
     log.day7 = await sendSequence({
       db,
@@ -103,7 +105,7 @@ export async function GET(request) {
     });
 
     // ── Day 14: Upgrade pitch (free users only) ───────────────────────────────
-    const day14Users = await getUsersInWindow(db, dayWindow(14));
+    const day14Users = await getUsersInWindow(db, dayWindow(14, 30));
     const day14Free  = day14Users.filter((u) => !u.plan || u.plan === "free");
     log.day14 = await sendSequence({
       db,
