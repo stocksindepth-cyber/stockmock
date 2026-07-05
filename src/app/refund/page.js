@@ -41,7 +41,7 @@ export default function RefundPage() {
           <Section title="2. Free Trial">
             <p>
               OptionsGyani does not offer a time-limited free trial. Instead, we offer a permanently free plan with
-              access to core features including 5 backtests per day, live option chain, paper trading (10 trades/month),
+              access to core features including 3 backtests per day, live option chain, paper trading,
               and the full Options Academy. We strongly encourage you to use the free plan thoroughly before upgrading
               to a paid subscription.
             </p>

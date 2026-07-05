@@ -394,9 +394,11 @@ function DashboardContent() {
             <p className="text-3xl font-bold text-white capitalize">
               {userProfile?.plan || "Free"}
             </p>
-            {isPro && userProfile?.subscriptionExpiry ? (
+            {isPro ? (
               <p className="text-xs text-emerald-400 mt-2">
-                Active until {new Date(userProfile.subscriptionExpiry).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}
+                {userProfile?.subscriptionExpiry
+                  ? <>Active until {new Date(userProfile.subscriptionExpiry).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</>
+                  : "Unlimited access included"}
               </p>
             ) : (
               <p className="text-xs text-slate-500 mt-2">

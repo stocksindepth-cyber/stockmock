@@ -114,8 +114,8 @@ export async function POST(request) {
           plan: planId,
           expiryDate: expiryDate.toISOString().split('T')[0],
           features: planId === 'pro'
-            ? ['Unlimited backtests', 'All 12 strategies', 'A/B comparison', 'SL/TP controls', 'Priority support']
-            : ['Everything in Pro', 'API access', 'Custom strategies', 'White-glove support'],
+            ? ['Unlimited backtests', '8+ years of NSE data', 'A/B comparison', 'SL/TP controls', 'CSV export', 'Priority support']
+            : ['Everything in Pro', 'Unlimited IV alerts', 'CSV + JSON export', 'Early access to new features'],
         });
 
         // Invoice email

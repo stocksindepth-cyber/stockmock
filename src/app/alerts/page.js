@@ -49,8 +49,9 @@ const SYMBOL_STYLES = {
   FINNIFTY:  { badge: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30", dot: "bg-emerald-400" },
 };
 
-const FREE_LIMIT = 5;
-const PRO_LIMIT  = 20;
+const FREE_LIMIT  = 5;
+const PRO_LIMIT   = 20;
+const ELITE_LIMIT = 999; // effectively unlimited
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -169,7 +170,7 @@ function AlertsContent() {
   const router = useRouter();
 
   const isPro   = userProfile?.plan && userProfile.plan !== "free";
-  const maxAlerts = isPro ? PRO_LIMIT : FREE_LIMIT;
+  const maxAlerts = userProfile?.plan === "elite" ? ELITE_LIMIT : isPro ? PRO_LIMIT : FREE_LIMIT;
 
   // Form state
   const [symbol,    setSymbol]    = useState("NIFTY");

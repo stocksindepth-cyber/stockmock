@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { Plus, RotateCcw, Sparkles, Target, Zap, BookMarked, Check, Save, Lock } from "lucide-react";
 import PayoffChart from "@/components/PayoffChart";
 import StrategyLegRow from "@/components/StrategyLegRow";
@@ -82,6 +82,23 @@ function BuilderContent() {
     () => UNDERLYINGS.find((u) => u.id === underlying) ?? UNDERLYINGS[0],
     [underlying]
   );
+
+  // Prefill live spot so payoff/POP numbers start from the real market level,
+  // not a stale hardcoded default. Falls back silently to defaultSpot.
+  useEffect(() => {
+    let cancelled = false;
+    fetch(`/api/spot?symbol=${underlying}`)
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (cancelled || !d?.spot) return;
+        const meta = UNDERLYINGS.find((u) => u.id === underlying) ?? UNDERLYINGS[0];
+        const atm = Math.round(d.spot / meta.step) * meta.step;
+        setSpotPrice(atm);
+        setLegs((prev) => (prev.length === 1 ? [{ ...prev[0], strike: atm }] : prev));
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [underlying]);
 
   // ── Leg mutations ─────────────────────────────────────────────────────────
   const addLeg = useCallback(() => {

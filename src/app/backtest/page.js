@@ -13,6 +13,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { checkAndIncrementSimulationLimit } from "@/lib/firebase/userService";
+import Link from "next/link";
 import UpgradeBanner from "@/components/UpgradeBanner";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DhanReferralBanner from "@/components/DhanReferralBanner";
@@ -455,17 +456,29 @@ function BacktestContent() {
 
   useEffect(() => setMounted(true), []);
 
-  // Compute date range from timeframe selector
-  const { startDate, endDate } = useMemo(() => {
+  // Compute date range from timeframe selector.
+  // Free plan is limited to the last 1 year of data (as advertised on /pricing);
+  // longer ranges are clamped and the UI shows an upgrade hint.
+  const isFreePlan = !userProfile?.plan || userProfile.plan === "free";
+  const { startDate, endDate, rangeClamped } = useMemo(() => {
     const today = new Date().toISOString().split("T")[0];
+    const oneYearAgo = (() => { const d = new Date(); d.setFullYear(d.getFullYear() - 1); return d.toISOString().split("T")[0]; })();
+
+    let start, end;
     if (timeframe === "Custom") {
-      return { startDate: customStartDate, endDate: customEndDate };
+      start = customStartDate; end = customEndDate;
+    } else {
+      const years = timeframe === "1Y" ? 1 : timeframe === "3Y" ? 3 : 5;
+      const d = new Date();
+      d.setFullYear(d.getFullYear() - years);
+      start = d.toISOString().split("T")[0]; end = today;
     }
-    const years = timeframe === "1Y" ? 1 : timeframe === "3Y" ? 3 : 5;
-    const d = new Date();
-    d.setFullYear(d.getFullYear() - years);
-    return { startDate: d.toISOString().split("T")[0], endDate: today };
-  }, [timeframe, customStartDate, customEndDate]);
+
+    if (isFreePlan && start < oneYearAgo) {
+      return { startDate: oneYearAgo, endDate: end, rangeClamped: true };
+    }
+    return { startDate: start, endDate: end, rangeClamped: false };
+  }, [timeframe, customStartDate, customEndDate, isFreePlan]);
 
   // Pattern analytics derived from streamed trades
   const { dayPatternData, monthPatternData, aiMacroContext } = useMemo(() => {
@@ -881,6 +894,12 @@ function BacktestContent() {
                   ⚠ SL/TP applied at expiry prices (theoretical). Intraday triggers coming soon.
                 </span>
               )}
+              {rangeClamped && (
+                <span className="text-[10px] text-amber-400 block mt-1">
+                  Free plan covers the last 1 year of data — range adjusted.{" "}
+                  <Link href="/pricing" className="underline">Upgrade to Pro</Link> for the full 2016–today history.
+                </span>
+              )}
             </div>
             <button
               onClick={handleRunBacktest}
@@ -989,6 +1008,49 @@ function BacktestContent() {
                 dataNote={meta.dataNote || `${trades.length} trades on real NSE Bhavcopy data`}
                 coverage={meta.coverage}
               />
+            )}
+
+            {/* Export bar — CSV for Pro+, JSON for Elite */}
+            {isComplete && trades.length > 0 && (
+              <div className="flex justify-end gap-2 mb-4">
+                {(() => {
+                  const plan = userProfile?.plan || "free";
+                  const exportRows = () => trades.map((t) => ({
+                    cycle: t.cycle, entryDate: t.entryDate, expiryDate: t.expiryDate,
+                    entrySpot: t.entrySpot, pnl: t.pnl, cumulative: t.cumulative,
+                    dayOfWeek: t.dayOfWeek, month: t.month,
+                  }));
+                  const download = (content, mime, ext) => {
+                    const blob = new Blob([content], { type: mime });
+                    const a = document.createElement("a");
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `optionsgyani-${selectedStrategy}-${underlying}-${startDate}_${endDate}.${ext}`;
+                    a.click();
+                    URL.revokeObjectURL(a.href);
+                  };
+                  const toCsv = () => {
+                    const rows = exportRows();
+                    const header = Object.keys(rows[0]).join(",");
+                    return [header, ...rows.map((r) => Object.values(r).join(","))].join("\n");
+                  };
+                  return (
+                    <>
+                      <button
+                        onClick={() => plan === "free" ? setUpgradeOpen(true) : download(toCsv(), "text/csv", "csv")}
+                        className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:border-blue-500 hover:text-white transition-colors"
+                      >
+                        {plan === "free" ? "🔒 " : ""}Export CSV
+                      </button>
+                      <button
+                        onClick={() => plan !== "elite" ? setUpgradeOpen(true) : download(JSON.stringify({ strategy: selectedStrategy, underlying, startDate, endDate, summary, trades: exportRows() }, null, 2), "application/json", "json")}
+                        className="text-xs px-3 py-1.5 rounded-lg border border-slate-700 text-slate-300 hover:border-blue-500 hover:text-white transition-colors"
+                      >
+                        {plan !== "elite" ? "🔒 " : ""}Export JSON
+                      </button>
+                    </>
+                  );
+                })()}
+              </div>
             )}
 
             {/* Summary cards — only after complete */}
