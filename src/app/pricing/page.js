@@ -40,7 +40,6 @@ const PLANS = [
       builder: "Full payoff builder",
       alerts: "5 IV alerts",
       export: false,
-      api: false,
       support: "Email support",
       dhan: true,
     },
@@ -68,7 +67,6 @@ const PLANS = [
       builder: "Full payoff builder + SL/TP controls",
       alerts: "20 IV alerts",
       export: "CSV export of backtest results",
-      api: false,
       support: "Priority email support",
       dhan: true,
     },
@@ -96,7 +94,6 @@ const PLANS = [
       builder: "Full payoff builder + SL/TP controls",
       alerts: "Unlimited IV alerts",
       export: "CSV + JSON export of backtest results",
-      api: false,
       support: "Priority support + early access to new features",
       dhan: true,
     },
@@ -585,11 +582,6 @@ export default function PricingPage() {
                     <FeatureRow text={plan.features.export} />
                   ) : (
                     <FeatureRowNo text="CSV Export" />
-                  )}
-                  {plan.features.api ? (
-                    <FeatureRow text={plan.features.api} />
-                  ) : (
-                    <FeatureRowNo text="API Access" />
                   )}
                   <FeatureRow text={plan.features.support} />
                 </div>
