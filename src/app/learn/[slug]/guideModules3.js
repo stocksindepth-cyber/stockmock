@@ -116,7 +116,7 @@ export const MODULES_ADVANCED = {
 
           <p class="text-slate-300 leading-relaxed mb-4">In practice, you don't need to calculate this manually. Platforms like OptionsGyani compute and display Max Pain in the OI analysis section. What you need to understand is how to interpret it: if NIFTY is trading at 23,400 and Max Pain is at 23,200, the theory suggests that the market has structural gravity pulling it toward 23,200 by expiry. This isn't a guarantee — it's a probabilistic pull, not a magnet.</p>
 
-          <p class="text-slate-300 leading-relaxed mb-4">Max Pain tends to be most relevant in the last 3-4 days before expiry. Earlier in the week, the open interest profile is still shifting as new positions are built. By Wednesday evening (for Thursday expiry), Max Pain has usually stabilized and provides a reasonable estimate of where option sellers would prefer the market to close.</p>
+          <p class="text-slate-300 leading-relaxed mb-4">Max Pain tends to be most relevant in the last 3-4 days before expiry. Earlier in the week, the open interest profile is still shifting as new positions are built. By Monday evening (for Tuesday expiry), Max Pain has usually stabilized and provides a reasonable estimate of where option sellers would prefer the market to close.</p>
 
           <div class="bg-amber-900/20 border-l-4 border-amber-500 p-6 rounded-r-xl mb-6">
             <h4 class="text-amber-400 font-bold mb-2">Max Pain Is a Tool, Not a Rule</h4>
@@ -752,7 +752,7 @@ export const MODULES_ADVANCED = {
 
           <p class="text-slate-300 leading-relaxed mb-4">Max Pain shifts during the week as OI changes. Heavy new put selling at a lower strike shifts Max Pain down; heavy new call selling at a higher strike shifts it up. Track how Max Pain moves throughout the week — a steady drift in one direction can confirm the likely expiry zone and help you position accordingly.</p>
 
-          <p class="text-slate-300 leading-relaxed mb-4">For BANKNIFTY, Max Pain is particularly watched by positional traders because BANKNIFTY has weekly expiry on Wednesday (vs Thursday for NIFTY), making the dynamics slightly different. BANKNIFTY also has a wider OI spread across strikes due to its higher volatility, which can make Max Pain less precise as a target level.</p>
+          <p class="text-slate-300 leading-relaxed mb-4">For BANKNIFTY, Max Pain is particularly watched by positional traders because BANKNIFTY now trades monthly-only contracts (expiring the last Tuesday of the month, after weekly BankNifty options were discontinued in 2025), so its Max Pain dynamics play out over a longer cycle than NIFTY's weekly Tuesday expiry. BANKNIFTY also has a wider OI spread across strikes due to its higher volatility, which can make Max Pain less precise as a target level.</p>
         `,
       },
       {
@@ -777,10 +777,10 @@ export const MODULES_ADVANCED = {
             <li><strong>Check OI walls:</strong> Identify the highest Call OI strike (resistance) and highest Put OI strike (support).</li>
             <li><strong>Check PCR:</strong> Is sentiment skewed bullish or bearish?</li>
             <li><strong>Synthesize a range:</strong> Your "expected expiry zone" is the overlap of all three signals. If Max Pain is 23,100, Call OI wall is at 23,200, and Put OI wall is at 23,000, your expected zone is 23,000-23,200 — consider selling a condor capped within this range.</li>
-            <li><strong>Wednesday/Thursday:</strong> Re-check Max Pain as OI rolls in. If Max Pain has drifted significantly from Monday's reading, the market structure has shifted — reassess your positioning.</li>
+            <li><strong>Monday/Tuesday:</strong> Re-check Max Pain as OI rolls in. If Max Pain has drifted significantly from earlier in the cycle, the market structure has shifted — reassess your positioning.</li>
           </ol>
 
-          <p class="text-slate-300 leading-relaxed mb-4">Never chase Max Pain as a price target for intraday trades. NIFTY can spend most of Thursday well away from Max Pain and then drift toward it in the last hour of trading — or not drift at all. The signal is for weekly positioning, not intraday scalping.</p>
+          <p class="text-slate-300 leading-relaxed mb-4">Never chase Max Pain as a price target for intraday trades. NIFTY can spend most of expiry day well away from Max Pain and then drift toward it in the last hour of trading — or not drift at all. The signal is for weekly positioning, not intraday scalping.</p>
         `,
       },
       {
@@ -819,7 +819,7 @@ export const MODULES_ADVANCED = {
 
           <p class="text-slate-300 leading-relaxed mb-4"><strong>Volatility:</strong> BANKNIFTY's realized volatility runs 20-30% higher than NIFTY's in most market environments. While NIFTY might move 80-100 points (0.35%) on a normal day, BANKNIFTY routinely moves 200-350 points (0.45-0.7%) without any specific catalyst. This translates directly into higher option premiums — a BANKNIFTY ATM weekly option is typically priced 25-35% higher than the equivalent NIFTY option on a percentage basis.</p>
 
-          <p class="text-slate-300 leading-relaxed mb-4"><strong>Expiry:</strong> BANKNIFTY has weekly expiries on Wednesday, while NIFTY expires on Thursday. This creates useful trading combinations — some traders hold NIFTY positions through Wednesday and BANKNIFTY positions through Thursday, maintaining continuous market exposure throughout the week.</p>
+          <p class="text-slate-300 leading-relaxed mb-4"><strong>Expiry:</strong> BANKNIFTY now trades monthly-only contracts, expiring the last Tuesday of the month — weekly BankNifty options were discontinued in 2025. NIFTY, by contrast, still has weekly options expiring every Tuesday. This changes how you structure the two: NIFTY suits short-dated weekly theta plays, while BANKNIFTY is now a positional, month-long exposure.</p>
 
           <div class="overflow-x-auto mb-8">
             <table class="w-full text-sm border-collapse">
@@ -837,9 +837,9 @@ export const MODULES_ADVANCED = {
                   <td class="py-3 px-4 text-slate-300">15 units</td>
                 </tr>
                 <tr class="border-b border-slate-800">
-                  <td class="py-3 px-4 text-slate-300">Weekly Expiry Day</td>
-                  <td class="py-3 px-4 text-slate-300">Thursday</td>
-                  <td class="py-3 px-4 text-slate-300">Wednesday</td>
+                  <td class="py-3 px-4 text-slate-300">Expiry Day</td>
+                  <td class="py-3 px-4 text-slate-300">Tuesday (weekly)</td>
+                  <td class="py-3 px-4 text-slate-300">Last Tuesday (monthly-only)</td>
                 </tr>
                 <tr class="border-b border-slate-800">
                   <td class="py-3 px-4 text-slate-300">Typical ATM IV</td>
@@ -871,7 +871,7 @@ export const MODULES_ADVANCED = {
             <li>Higher absolute premium per lot due to elevated IV — a 1-SD short strangle might collect ₹300-400 per lot vs ₹200-250 on NIFTY</li>
             <li>More frequent high-IVP opportunities because BANKNIFTY's IV spikes more aggressively on bank-sector news</li>
             <li>Smaller lot size (15 units) allows finer position sizing and gradual scaling</li>
-            <li>Wednesday expiry provides a separate theta collection opportunity from NIFTY's Thursday cycle</li>
+            <li>Monthly expiry (last Tuesday) provides a longer, positional theta collection opportunity distinct from NIFTY's weekly Tuesday cycle</li>
           </ul>
 
           <p class="text-slate-300 leading-relaxed mb-4"><strong>Disadvantages of selling BANKNIFTY options:</strong></p>
@@ -947,21 +947,21 @@ export const MODULES_ADVANCED = {
   },
 
   "nifty-expiry-day-strategy": {
-    title: "NIFTY Expiry Day Strategy — How to Trade Thursday Options",
-    meta: "Learn the best NIFTY expiry day strategies for Thursday trading. Understand gamma risk, theta decay, expiry-day setups, timing, and how to avoid blowups on NIFTY weekly expiry.",
+    title: "NIFTY Expiry Day Strategy — How to Trade Tuesday Options",
+    meta: "Learn the best NIFTY expiry day strategies for Tuesday trading. Understand gamma risk, theta decay, expiry-day setups, timing, and how to avoid blowups on NIFTY weekly expiry.",
     sections: [
       {
         heading: "Why Expiry Day is Unique — Max Theta Decay and Gamma Risk",
         content: `
-          <p class="text-xl leading-relaxed mb-6 text-slate-300">Thursday is the most dangerous and most profitable day in the NSE F&O calendar simultaneously. On expiry day, the mathematical behavior of options changes so dramatically from the rest of the week that strategies which work perfectly on Monday can detonate violently on Thursday. Understanding why requires a grasp of theta and gamma in their most extreme state.</p>
+          <p class="text-xl leading-relaxed mb-6 text-slate-300">Tuesday is the most dangerous and most profitable day in the NSE F&O calendar simultaneously. On expiry day, the mathematical behavior of options changes so dramatically from the rest of the week that strategies which work perfectly on Monday can detonate violently on Tuesday. Understanding why requires a grasp of theta and gamma in their most extreme state.</p>
 
-          <p class="text-slate-300 leading-relaxed mb-4"><strong>Theta at its maximum:</strong> All remaining time value in an option must decay to zero by 3:30 PM. An ATM NIFTY weekly option that had ₹200 of premium on Monday morning might have ₹80 remaining by Thursday morning and ₹0 at close. This accelerated decay means premium sellers extract the most value on expiry day — but only if they survive the gamma risk.</p>
+          <p class="text-slate-300 leading-relaxed mb-4"><strong>Theta at its maximum:</strong> All remaining time value in an option must decay to zero by 3:30 PM. An ATM NIFTY weekly option that had ₹200 of premium on Monday morning might have ₹80 remaining by Tuesday morning and ₹0 at close. This accelerated decay means premium sellers extract the most value on expiry day — but only if they survive the gamma risk.</p>
 
           <p class="text-slate-300 leading-relaxed mb-4"><strong>Gamma at its most explosive:</strong> Gamma measures how fast delta changes as the underlying moves. At expiry, ATM options have extremely high gamma — a 50-point move in NIFTY can shift the option's delta from 0.5 to 0.85 instantly, meaning the option's price change accelerates rapidly. A short ATM straddle that seemed safe at ₹100 credit can see both legs blow through simultaneously on a 150-point spike, creating losses far exceeding the premium collected.</p>
 
           <div class="bg-rose-900/20 border-l-4 border-rose-500 p-6 rounded-r-xl mb-8">
-            <h4 class="text-rose-400 font-bold mb-2">The Gamma Trap: Why Thursday Kills Undisciplined Sellers</h4>
-            <p class="text-slate-300">The scenario plays out constantly: a trader sells an ATM straddle Thursday morning for ₹120 credit. NIFTY starts at 23,200. By 11 AM, NIFTY spikes to 23,400 on global cues. The 23,200 CE is now deep ITM and trading at ₹220. The 23,200 PE is nearly worthless at ₹5. Total position loss: -₹100 on a ₹120 credit = near total wipeout. The same move on Monday would have been a manageable ₹30 loss. This is gamma risk in practice.</p>
+            <h4 class="text-rose-400 font-bold mb-2">The Gamma Trap: Why Expiry Day Kills Undisciplined Sellers</h4>
+            <p class="text-slate-300">The scenario plays out constantly: a trader sells an ATM straddle Tuesday morning for ₹120 credit. NIFTY starts at 23,200. By 11 AM, NIFTY spikes to 23,400 on global cues. The 23,200 CE is now deep ITM and trading at ₹220. The 23,200 PE is nearly worthless at ₹5. Total position loss: -₹100 on a ₹120 credit = near total wipeout. The same move on Monday would have been a manageable ₹30 loss. This is gamma risk in practice.</p>
           </div>
         `,
       },
@@ -1010,7 +1010,7 @@ export const MODULES_ADVANCED = {
       {
         heading: "Real Data — NIFTY Expiry Ranges: What % of Weeks Stay Within ±1%",
         content: `
-          <p class="text-slate-300 leading-relaxed mb-4">One of the most important pieces of data for expiry-day traders is the historical frequency distribution of NIFTY's weekly expiry moves. Understanding how often NIFTY actually stays within a given range from Monday open to Thursday close helps calibrate strike placement for selling strategies.</p>
+          <p class="text-slate-300 leading-relaxed mb-4">One of the most important pieces of data for expiry-day traders is the historical frequency distribution of NIFTY's weekly expiry moves. Understanding how often NIFTY actually stays within a given range over the weekly expiry cycle helps calibrate strike placement for selling strategies.</p>
 
           <p class="text-slate-300 leading-relaxed mb-4">Based on NIFTY weekly expiry data from 2020-2024:</p>
 
@@ -1018,7 +1018,7 @@ export const MODULES_ADVANCED = {
             <table class="w-full text-sm border-collapse">
               <thead>
                 <tr class="border-b border-slate-700">
-                  <th class="text-left py-3 px-4 text-slate-400">Weekly Range (Monday to Thursday)</th>
+                  <th class="text-left py-3 px-4 text-slate-400">Weekly Range (over the expiry cycle)</th>
                   <th class="text-left py-3 px-4 text-slate-400">Historical Frequency</th>
                   <th class="text-left py-3 px-4 text-slate-400">Implication for Sellers</th>
                 </tr>
@@ -1070,7 +1070,7 @@ export const MODULES_ADVANCED = {
             <p class="text-slate-300">OptionsGyani's <a href="/backtest" class="text-blue-400 underline">backtest tool</a> lets you simulate specific expiry-day strategies against historical NIFTY data, including entry time rules (e.g., "enter after 10:15 AM"), strike selection, and exit criteria. Run your expiry-day setup through at least 52 weeks of historical data before committing real capital. The win rate and maximum drawdown from the backtest will calibrate your position sizing far more precisely than any theoretical calculation.</p>
           </div>
 
-          <p class="text-slate-300 leading-relaxed mb-4">Finally, remember that expiry-day strategies compound their edge through repetition, not single-session home runs. A consistent iron condor or OTM strangle strategy that collects ₹3,000-5,000 per week in premium — with perhaps one loss of ₹8,000-12,000 every 5-6 weeks — produces a positive expected value over a full year. The goal is not to maximize any single Thursday; it's to run a repeatable, size-appropriate process that compounds over 52 Thursdays.</p>
+          <p class="text-slate-300 leading-relaxed mb-4">Finally, remember that expiry-day strategies compound their edge through repetition, not single-session home runs. A consistent iron condor or OTM strangle strategy that collects ₹3,000-5,000 per week in premium — with perhaps one loss of ₹8,000-12,000 every 5-6 weeks — produces a positive expected value over a full year. The goal is not to maximize any single expiry; it's to run a repeatable, size-appropriate process that compounds over 52 expiries.</p>
         `,
       },
     ],

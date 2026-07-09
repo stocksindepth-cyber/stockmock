@@ -92,7 +92,7 @@ export const whatAreOptionsContent = {
               </tr>
               <tr class="border-b border-white/5 bg-white/[0.02] hover:bg-white/[0.05] transition-colors">
                 <td class="p-5 font-medium text-rose-400 border-r border-white/5">The 3-Month Window</td>
-                <td class="p-5 text-slate-300 leading-relaxed"><strong>The Expiry Date:</strong> Every contract dies on a specific date. In India, NIFTY options expire every Thursday. If you don't use your right by 3:30 PM on Thursday, the contract burns to zero.</td>
+                <td class="p-5 text-slate-300 leading-relaxed"><strong>The Expiry Date:</strong> Every contract dies on a specific date. In India, NIFTY weekly options expire every Tuesday. If you don't use your right by 3:30 PM on Tuesday, the contract burns to zero.</td>
               </tr>
               <tr class="hover:bg-white/[0.05] transition-colors">
                 <td class="p-5 font-medium text-amber-400 border-r border-white/5">The ₹2 Lakh Booking Token</td>

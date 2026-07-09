@@ -228,7 +228,7 @@ export const MODULES_BASICS_GREEKS = {
          content: `
            <p class="text-slate-300 mb-6">If Delta is your car's speed, Gamma is the acceleration factor. <strong>Gamma measures how fast your Delta changes.</strong></p>
            
-           <p class="text-slate-300 mb-6">Gamma is strictly highest at the At-The-Money (ATM) strike, and especially explosive close to expiry (0 DTE). This is why ATM options can explode from ₹5 to ₹100 in two hours on Thursday Expiries—Gamma shoots up, increasing Delta rapidly, turning a 0.2 Delta option into a 0.8 Delta option within minutes.</p>
+           <p class="text-slate-300 mb-6">Gamma is strictly highest at the At-The-Money (ATM) strike, and especially explosive close to expiry (0 DTE). This is why ATM options can explode from ₹5 to ₹100 in two hours on Tuesday Expiries—Gamma shoots up, increasing Delta rapidly, turning a 0.2 Delta option into a 0.8 Delta option within minutes.</p>
            
            <div class="bg-[#0B1120] p-6 rounded-xl border border-white/5 text-center mt-6">
              <h4 class="text-white font-bold mb-4 w-full">The Expiry Gamma Risk Profile</h4>
@@ -302,7 +302,7 @@ export const MODULES_BASICS_GREEKS = {
              </div>
              <div class="bg-emerald-900/10 border-t-2 border-emerald-500 p-6">
                <h4 class="text-emerald-400 font-bold mb-3">Option Sellers (Short)</h4>
-               <p class="text-slate-300 text-sm">Theta is POSITIVE. Time is physically depositing money into your account. Sellers dominate the markets on Wednesday and Thursday exclusively to capture the "Waterfall" decay.</p>
+               <p class="text-slate-300 text-sm">Theta is POSITIVE. Time is physically depositing money into your account. Sellers dominate the markets on Monday and Tuesday exclusively to capture the "Waterfall" decay.</p>
              </div>
            </div>
          `

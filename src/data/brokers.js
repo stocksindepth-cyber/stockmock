@@ -502,15 +502,15 @@ export const ARTICLES = [
   },
   {
     slug: "best-broker-nifty-weekly-options",
-    title: "Best Broker for NIFTY Weekly Options 2025 — Thursday Expiry Guide",
-    metaTitle: "Best Broker for NIFTY Weekly Options 2025 [Thursday Expiry]",
+    title: "Best Broker for NIFTY Weekly Options 2025 — Tuesday Expiry Guide",
+    metaTitle: "Best Broker for NIFTY Weekly Options 2025 [Tuesday Expiry]",
     metaDescription: "Best broker for NIFTY weekly options in 2025. Compared on execution speed, option chain quality, brokerage per lot, analytics. Iron Condor and Straddle traders' guide.",
     category: "best-for",
     primaryBroker: "dhan",
     hasDhanReferral: true,
     readTime: 11,
     lastUpdated: "2025-03-20",
-    keywords: ["best broker for nifty weekly options", "best broker thursday expiry", "nifty weekly options broker", "best broker for iron condor nifty"],
+    keywords: ["best broker for nifty weekly options", "best broker tuesday expiry", "nifty weekly options broker", "best broker for iron condor nifty"],
   },
   {
     slug: "best-free-demat-account-india",

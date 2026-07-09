@@ -35,7 +35,7 @@ export const shortStrangleContent = {
                The Core Philosophy
             </h4>
             <p class="text-slate-300 leading-relaxed text-sm">
-               Assuming Nifty is at 22,000, you have just laid a 1,000-point physical trap around the market. If Nifty closes anywhere between 21,500 and 22,500 on Thursday, <strong>both options expire exactly at ₹0.00</strong>. You keep 100% of the ₹80 total premium collected. You have synthetically generated a massive probability of winning (~80%+).
+               Assuming Nifty is at 22,000, you have just laid a 1,000-point physical trap around the market. If Nifty closes anywhere between 21,500 and 22,500 on Tuesday, <strong>both options expire exactly at ₹0.00</strong>. You keep 100% of the ₹80 total premium collected. You have synthetically generated a massive probability of winning (~80%+).
             </p>
          </div>
        `

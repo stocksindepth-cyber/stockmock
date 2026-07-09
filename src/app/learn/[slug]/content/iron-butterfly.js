@@ -101,7 +101,7 @@ export const ironButterflyContent = {
             </div>
             
             <p class="text-slate-300 text-sm max-w-2xl mx-auto leading-relaxed mt-4">
-              Notice the geometry. There is no flat plateau bridging a 400 point gap. To achieve Maximum Profit, Nifty must <strong>"Pin"</strong> perfectly at exactly 22,000 at Thursday 3:30 PM. For every single point Nifty diverges from the apex, you bleed profitability.
+              Notice the geometry. There is no flat plateau bridging a 400 point gap. To achieve Maximum Profit, Nifty must <strong>"Pin"</strong> perfectly at exactly 22,000 at Tuesday 3:30 PM. For every single point Nifty diverges from the apex, you bleed profitability.
             </p>
          </div>
        `
@@ -121,13 +121,13 @@ export const ironButterflyContent = {
             <!-- Vega -->
             <div class="bg-black/60 p-6 rounded-2xl border border-amber-500/20 shadow-lg">
                <h5 class="text-amber-400 font-bold mb-2 text-lg">Extreme IV Crush Harvest</h5>
-               <p class="text-slate-400 text-sm leading-relaxed">Most professional traders only execute Butterflies specifically on Wednesday afternoons before major Thursday morning gap events (like the RBI policy) to exclusively harvest the massive drop in Vega that occurs at 10:00 AM.</p>
+               <p class="text-slate-400 text-sm leading-relaxed">Most professional traders only execute Butterflies specifically on Monday afternoons before major Tuesday morning gap events (like the RBI policy) to exclusively harvest the massive drop in Vega that occurs at 10:00 AM.</p>
             </div>
             
             <!-- Gamma -->
             <div class="bg-black/60 p-6 rounded-2xl border border-rose-500/20 shadow-lg">
                <h5 class="text-rose-400 font-bold mb-2 text-lg">Catastrophic Gamma Exposure</h5>
-               <p class="text-slate-400 text-sm leading-relaxed">This is the cost of the trade. If Nifty aggressively moves 1% in either direction halfway through Thursday, the ATM Delta will rapidly shift from 0.50 to 0.85 (Massive Gamma acceleration). You will slide down the tent extraordinarily fast.</p>
+               <p class="text-slate-400 text-sm leading-relaxed">This is the cost of the trade. If Nifty aggressively moves 1% in either direction halfway through Tuesday, the ATM Delta will rapidly shift from 0.50 to 0.85 (Massive Gamma acceleration). You will slide down the tent extraordinarily fast.</p>
             </div>
          </div>
        `

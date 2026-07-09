@@ -64,7 +64,7 @@ export const moneynessContent = {
 
            <div class="bg-[#0B1120] p-8 rounded-2xl border-l-4 border-amber-500 relative">
               <h4 class="text-amber-400 font-bold text-xl mb-3">2. Extrinsic Value (Time & Hope)</h4>
-              <p class="text-slate-300 leading-relaxed mb-4">This is the "bloat" or "hawa" (air) mixed into the premium. It exists because the market is charging you money for the <em>time</em> remaining until Expiry and the <em>hope</em> that the option might become highly profitable. <strong>Extrinsic Value mathematically evaporates to exactly zero on Expiry Thursday.</strong></p>
+              <p class="text-slate-300 leading-relaxed mb-4">This is the "bloat" or "hawa" (air) mixed into the premium. It exists because the market is charging you money for the <em>time</em> remaining until Expiry and the <em>hope</em> that the option might become highly profitable. <strong>Extrinsic Value mathematically evaporates to exactly zero on Expiry Tuesday.</strong></p>
               <div class="mt-4 bg-black/40 p-4 border border-white/5 rounded-lg text-sm font-mono space-y-2">
                  <div class="flex justify-between text-slate-400">
                    <span>Nifty Spot: 22,000 | Holding: 21,800 Call</span>
@@ -154,7 +154,7 @@ export const moneynessContent = {
             </p>
             
             <p class="text-slate-400 leading-relaxed text-sm">
-               Because they are purely Extrinsic, Time Decay (Theta) instantly attacks them. If Nifty moves sideways for just two days, that ₹1,000 drops to ₹300. Professional algorithmic institutions make billions of dollars consistently <strong>selling</strong> these exact OTM options to hopeful retail traders, simply waiting for the clock to run out on Thursday at 3:30 PM. To survive in options trading, you must heavily restrict buying OTM strikes unless accompanied by a catastrophic volatility event (like a Black Swan).
+               Because they are purely Extrinsic, Time Decay (Theta) instantly attacks them. If Nifty moves sideways for just two days, that ₹1,000 drops to ₹300. Professional algorithmic institutions make billions of dollars consistently <strong>selling</strong> these exact OTM options to hopeful retail traders, simply waiting for the clock to run out on Tuesday at 3:30 PM. To survive in options trading, you must heavily restrict buying OTM strikes unless accompanied by a catastrophic volatility event (like a Black Swan).
             </p>
          </div>
        `

@@ -53,7 +53,7 @@ const STRATEGIES = [
     slug: "short-straddle-banknifty",
     name: "Short Straddle on BANKNIFTY",
     tagline: "Maximum premium collection, higher risk, higher reward",
-    description: "Sell ATM Call and Put simultaneously. Best executed on Monday for Thursday expiry to maximize Theta decay. Requires active management.",
+    description: "Sell ATM Call and Put simultaneously. BANKNIFTY now trades monthly-only contracts (last Tuesday of the month), so deploy early in the monthly cycle to maximize Theta decay. Requires active management.",
     dataPoints: [
       { label: "Win Rate", value: "62.1%", icon: <CheckCircle2 className="w-3.5 h-3.5" /> },
       { label: "Avg Monthly Return", value: "4.1%", icon: <TrendingUp className="w-3.5 h-3.5" /> },
@@ -202,7 +202,7 @@ const STRATEGIES = [
   {
     slug: "nifty-weekly-expiry-guide",
     name: "NIFTY Weekly Expiry Playbook",
-    tagline: "Day-by-day blueprint for every Thursday expiry",
+    tagline: "Day-by-day blueprint for every Tuesday expiry",
     description: "The complete tactical guide to trading NIFTY weekly options — best entry days, Theta acceleration curves, cut-off zones, and dynamic strategies.",
     dataPoints: [
       { label: "Applicability", value: "100%", icon: <CheckCircle2 className="w-3.5 h-3.5" /> },

@@ -116,7 +116,7 @@ export const deltaGammaContent = {
        content: `
          <p class="text-slate-300 mb-6 leading-relaxed">If Delta is your car's speed, Gamma is the acceleration factor. <strong>Gamma measures how fast your Delta changes.</strong></p>
          
-         <p class="text-slate-300 mb-6 leading-relaxed">Gamma is strictly highest perfectly at the At-The-Money (ATM) strike, and it becomes exceptionally explosive and violent the closer you get to Expiry day (0 DTE). This physical phenomenon is why ATM options can explode from ₹5 to ₹150 in two hours on Thursday Afternoons in India—Gamma shoots up exponentially, increasing Delta rapidly, magically turning a sleepy 0.2 Delta option into a highly aggressive 0.8 Delta equity equivalent within minutes.</p>
+         <p class="text-slate-300 mb-6 leading-relaxed">Gamma is strictly highest perfectly at the At-The-Money (ATM) strike, and it becomes exceptionally explosive and violent the closer you get to Expiry day (0 DTE). This physical phenomenon is why ATM options can explode from ₹5 to ₹150 in two hours on Tuesday Afternoons in India—Gamma shoots up exponentially, increasing Delta rapidly, magically turning a sleepy 0.2 Delta option into a highly aggressive 0.8 Delta equity equivalent within minutes.</p>
          
          <div class="bg-[#0B1120] p-8 rounded-2xl border border-white/5 text-center mt-8 shadow-2xl">
            <h4 class="text-white font-bold mb-8 w-full text-2xl tracking-wide">The Expiry Gamma Risk Tsunami</h4>

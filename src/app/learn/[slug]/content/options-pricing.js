@@ -36,7 +36,7 @@ export const optionsPricingContent = {
                     <span class="w-6 h-6 rounded bg-amber-500/20 flex items-center justify-center text-sm">3</span> 
                     Time to Expiry
                  </div>
-                 <p class="text-slate-400 text-sm">Days remaining until Thursday 3:30 PM. (Creates Theta)</p>
+                 <p class="text-slate-400 text-sm">Days remaining until Tuesday 3:30 PM. (Creates Theta)</p>
               </div>
               <div class="bg-black/40 border border-rose-500/20 p-5 rounded-xl backdrop-blur-sm">
                  <div class="text-rose-400 font-bold text-lg mb-1 flex items-center gap-2">
@@ -61,7 +61,7 @@ export const optionsPricingContent = {
       content: `
         <p class="text-slate-300 leading-relaxed mb-6">As established in the Moneyness module, Premium = Intrinsic + Extrinsic. The most violent and guaranteed force in the options universe is the destruction of Extrinsic Value via the passage of time.</p>
         
-        <p class="text-slate-300 leading-relaxed mb-8"><strong>Theta (Θ)</strong> is the Greek that measures this decay. If Theta is -15, the option premium will mathematically drop by ₹15 tomorrow just by the sun rising, assuming Nifty doesn't move. But Theta decay is not linear; it is exponential. It operates like a melting ice cube placed in an oven on Thursday afternoon.</p>
+        <p class="text-slate-300 leading-relaxed mb-8"><strong>Theta (Θ)</strong> is the Greek that measures this decay. If Theta is -15, the option premium will mathematically drop by ₹15 tomorrow just by the sun rising, assuming Nifty doesn't move. But Theta decay is not linear; it is exponential. It operates like a melting ice cube placed in an oven on Tuesday afternoon.</p>
 
         <div class="my-10 p-8 bg-[#0B1120] rounded-2xl border border-rose-500/20 relative overflow-hidden text-center shadow-xl">
            <h4 class="text-white font-bold mb-6 text-xl tracking-wide">The Non-Linear Theta Decay Curve</h4>
@@ -107,7 +107,7 @@ export const optionsPricingContent = {
            </div>
            
            <p class="text-slate-300 text-sm max-w-2xl mx-auto leading-relaxed border-t border-slate-700/50 pt-5">
-             <strong>The Expiry Cliff:</strong> Between Day 30 and Day 14, the option loses only a tiny fraction of its value per day. The slope is gentle. However, in the final 5 days (The Expiry Cliff), the Extrinsic Value plummets aggressively toward zero. This is exactly why Institutions aggressively sell Straddles on Wednesday and Thursday—they are harvesting the steepest part of the waterfall.
+             <strong>The Expiry Cliff:</strong> Between Day 30 and Day 14, the option loses only a tiny fraction of its value per day. The slope is gentle. However, in the final 5 days (The Expiry Cliff), the Extrinsic Value plummets aggressively toward zero. This is exactly why Institutions aggressively sell Straddles on Monday and Tuesday—they are harvesting the steepest part of the waterfall.
            </p>
         </div>
       `

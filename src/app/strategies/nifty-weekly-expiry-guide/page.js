@@ -4,8 +4,8 @@ import DhanReferralBanner from "@/components/DhanReferralBanner";
 
 export const metadata = {
   title: "NIFTY Weekly Expiry Options Strategy Data Guide 2025 | OptionsGyani",
-  description: "The definitive quantitative guide to trading NIFTY weekly expiry options. Backed by 8 years of NSE 1-minute tick data for Monday vs Thursday decay metrics.",
-  keywords: "nifty weekly expiry strategy, nifty thursday expiry options, weekly options india guide, best day to sell nifty options, nifty expiry day strategy, 0dte nifty options",
+  description: "The definitive quantitative guide to trading NIFTY weekly expiry options. Backed by 8 years of NSE 1-minute tick data for entry-day vs expiry-day decay metrics.",
+  keywords: "nifty weekly expiry strategy, nifty tuesday expiry options, weekly options india guide, best day to sell nifty options, nifty expiry day strategy, 0dte nifty options",
   alternates: { canonical: "https://www.optionsgyani.com/strategies/nifty-weekly-expiry-guide" },
   openGraph: {
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — NSE Options Analytics" }],
@@ -18,31 +18,31 @@ export const metadata = {
 
 const WEEKLY_CALENDAR = [
   {
-    day: "Monday",
+    day: "Wednesday",
     color: "border-blue-500/30 bg-blue-500/5",
     badge: "bg-blue-500/20 text-blue-300",
     activity: "Best Entry Day (High Premium)",
-    desc: "4 full days of Theta remaining. Ideal for selling Iron Condors, Straddles, and Strangles. Premium is still fat at the start of the week, absorbing minor moves mathematically.",
-    tips: ["Enter non-directional strategies (IC, Straddle, Strangle)", "Sell strikes 150–200 pts OTM for 80%+ win probability", "Data shows Monday entries win 14% more often than Wednesdays"],
+    desc: "A fresh weekly contract with 4 full days of Theta remaining. Ideal for selling Iron Condors, Straddles, and Strangles. Premium is still fat at the start of the cycle, absorbing minor moves mathematically.",
+    tips: ["Enter non-directional strategies (IC, Straddle, Strangle)", "Sell strikes 150–200 pts OTM for 80%+ win probability", "Data shows early-cycle entries win 14% more often than late-cycle"],
   },
   {
-    day: "Tuesday",
+    day: "Thursday",
     color: "border-indigo-500/30 bg-indigo-500/5",
     badge: "bg-indigo-500/20 text-indigo-300",
     activity: "Decay Initiation",
     desc: "3 days left. Still good for premium selling but lower credit. Focus on tighter ICs if selling, or debit spreads if directional view is convicted.",
-    tips: ["Adjust if Monday trade is at 50% profit (close early)", "Good day for implied volatility crush post-weekend gaps", "Check India VIX — if > 18, reduce position sizes"],
+    tips: ["Adjust if the entry trade is at 50% profit (close early)", "Good day for implied volatility crush post-weekend gaps", "Check India VIX — if > 18, reduce position sizes"],
   },
   {
-    day: "Wednesday",
+    day: "Monday",
     color: "border-amber-500/30 bg-amber-500/5",
     badge: "bg-amber-500/20 text-amber-300",
     activity: "Theta Accelerates (Gamma Builds)",
-    desc: "Theta decay accelerates sharply after Wednesday noon. Existing short positions gain rapidly. New entries face compromised reward/risk ratios due to shrinking premium vs growing Gamma.",
+    desc: "Theta decay accelerates sharply after Monday noon. Existing short positions gain rapidly. New entries face compromised reward/risk ratios due to shrinking premium vs growing Gamma.",
     tips: ["Close winning positions at 70–80% profit systematically", "Avoid entering new short positions (gamma risk outweighs theta)", "Watch for gap-down risk overnight"],
   },
   {
-    day: "Thursday (Expiry)",
+    day: "Tuesday (Expiry)",
     color: "border-rose-500/30 bg-rose-500/5",
     badge: "bg-rose-500/20 text-rose-300",
     activity: "Maximum Gamma Hazard",
@@ -114,7 +114,7 @@ export default function NiftyWeeklyExpiryGuidePage() {
             <span className="bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">Quantitative Playbook</span>
           </h1>
           <p className="text-xl md:text-2xl text-slate-400 leading-relaxed max-w-3xl font-light">
-            52 distinct volatility events every year. Most traders bleed capital by treating every Thursday identically. Master the deterministic Theta curve to systematically extract edge.
+            52 distinct volatility events every year. Most traders bleed capital by treating every expiry identically. Master the deterministic Theta curve to systematically extract edge.
           </p>
         </div>
 
@@ -197,10 +197,10 @@ export default function NiftyWeeklyExpiryGuidePage() {
              </div>
              <svg className="w-full h-40 stroke-none z-10 relative" viewBox="0 0 1000 200" preserveAspectRatio="none">
                {/* Time markers */}
-               <text x="50" y="180" fill="#64748b" fontSize="12" fontWeight="bold">Mon</text>
-               <text x="300" y="180" fill="#64748b" fontSize="12" fontWeight="bold">Tue</text>
-               <text x="550" y="180" fill="#64748b" fontSize="12" fontWeight="bold">Wed</text>
-               <text x="800" y="180" fill="#64748b" fontSize="12" fontWeight="bold">Thu 12PM</text>
+               <text x="50" y="180" fill="#64748b" fontSize="12" fontWeight="bold">Wed</text>
+               <text x="300" y="180" fill="#64748b" fontSize="12" fontWeight="bold">Thu</text>
+               <text x="550" y="180" fill="#64748b" fontSize="12" fontWeight="bold">Mon</text>
+               <text x="800" y="180" fill="#64748b" fontSize="12" fontWeight="bold">Tue 12PM</text>
                <text x="950" y="180" fill="#ef4444" fontSize="12" fontWeight="bold">Expiry</text>
                
                {/* Option Premium Curve */}

@@ -28,6 +28,9 @@ const TOOL_LINKS = [
 
 // ── "More" dropdown — non-transactional / marketing ──────────────────────────
 const MORE_LINKS = [
+  { href: "/nifty-option-chain", label: "NIFTY Option Chain", icon: BarChart2, desc: "Live OI, PCR & Max Pain — free" },
+  { href: "/bank-nifty-option-chain", label: "BANK NIFTY Chain", icon: TrendingUp, desc: "Live OI, PCR & Max Pain — free" },
+  { href: "/ltp-calculator",  label: "LTP Calculator", icon: Target,        desc: "Estimate option LTP at a target"  },
   { href: "/features",   label: "Features",      icon: Sparkles,      desc: "What OptionsGyani offers"      },
   { href: "/pricing",    label: "Pricing",        icon: CreditCard,    desc: "Free & Pro plans"              },
   { href: "/learn",      label: "Learn Options",  icon: BookOpen,      desc: "Guides from basics to Greeks"  },

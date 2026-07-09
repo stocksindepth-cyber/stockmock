@@ -21,7 +21,7 @@ const STATS = [
   { label: "Avg Monthly Return", value: "5.5%", note: "On Margin Deployed (Capital Efficient)" },
   { label: "Defined Risk", value: "Strict Cap", note: "Max loss absolutely defined at entry" },
   { label: "Profit Factor", value: "1.42", note: "Gross Profit / Gross Loss ratio" },
-  { label: "Avg Time in Trade", value: "3 Days", note: "Monday entry → Thursday Expiry / Target" },
+  { label: "Avg Time in Trade", value: "3 Days", note: "Entry → last-Tuesday monthly expiry / Target" },
   { label: "Expectancy / Trade", value: "+₹1,150", note: "Average net P&L including slipage" },
 ];
 

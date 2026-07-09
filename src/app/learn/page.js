@@ -85,7 +85,7 @@ const MODULES = [
       { slug: "when-to-sell-options-india", title: "When to Sell Options — The IVP + Theta Framework", time: "16 min", diff: "Advanced", icon: <TrendingUp/> },
       { slug: "max-pain-options", title: "Max Pain Theory — NSE's Secret Price Magnet", time: "14 min", diff: "Advanced", icon: <Target/> },
       { slug: "banknifty-options-guide", title: "BANKNIFTY Options — Beginner to Advanced Guide", time: "20 min", diff: "Advanced", icon: <Layers/> },
-      { slug: "nifty-expiry-day-strategy", title: "NIFTY Expiry Day — How to Trade Thursday Options", time: "18 min", diff: "Advanced", icon: <Brain/> },
+      { slug: "nifty-expiry-day-strategy", title: "NIFTY Expiry Day — How to Trade Tuesday Options", time: "18 min", diff: "Advanced", icon: <Brain/> },
     ]
   }
 ];

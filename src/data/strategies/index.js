@@ -14,7 +14,7 @@ export const INDEX_META = {
     label: "NIFTY",
     step: 50,
     lot: 75,
-    expiry: "Thursday (weekly)",
+    expiry: "Tuesday (weekly)",
     vix: "12–16",
     note: "India's flagship index — the deepest options liquidity and the tightest bid-ask spreads on the NSE.",
   },
@@ -22,7 +22,7 @@ export const INDEX_META = {
     label: "BANKNIFTY",
     step: 100,
     lot: 30,
-    expiry: "last Thursday (monthly)",
+    expiry: "last Tuesday (monthly)",
     vix: "15–20",
     note: "Higher volatility and larger point swings than NIFTY — premiums are richer, but so is the risk per lot.",
   },
@@ -30,7 +30,7 @@ export const INDEX_META = {
     label: "FINNIFTY",
     step: 50,
     lot: 65,
-    expiry: "last Thursday (monthly)",
+    expiry: "last Tuesday (monthly)",
     vix: "13–18",
     note: "The financial-services index — behaves between NIFTY and BANKNIFTY, with banks and NBFCs driving the moves.",
   },
@@ -266,7 +266,7 @@ export const STRATEGIES = {
       },
       {
         q: "What's the ideal expiry to trade a FINNIFTY Iron Condor?",
-        a: "The monthly expiry (last Thursday) carries the most reliable liquidity. Enter with 8–12 days left so theta is meaningful but gamma risk is still manageable.",
+        a: "The monthly expiry (last Tuesday) carries the most reliable liquidity. Enter with 8–12 days left so theta is meaningful but gamma risk is still manageable.",
       },
     ],
   },
@@ -285,7 +285,7 @@ export const STRATEGIES = {
       "short straddle nifty, nifty straddle strategy, nifty weekly straddle, theta decay nifty, nifty expiry day strategy",
     intro: [
       "A Short Straddle is the most concentrated premium-selling trade there is: you sell the at-the-money call and the at-the-money put on the same NIFTY strike and expiry. You collect both premiums up front, and you win as long as NIFTY stays close to that strike into expiry.",
-      "On NIFTY's weekly expiry, the straddle is a theta machine. The combined ATM premium decays fastest in the final days, so traders often deploy it Monday-for-Thursday or even as an expiry-day intraday trade, capturing the steepest part of the decay curve.",
+      "On NIFTY's weekly expiry, the straddle is a theta machine. The combined ATM premium decays fastest in the final days, so traders often deploy it Monday-for-Tuesday or even as an expiry-day intraday trade, capturing the steepest part of the decay curve.",
       "The trade-off is real: a Short Straddle has undefined risk on both sides. A sharp NIFTY move can produce large losses quickly, which is why position sizing, a hard stop, and active delta management are non-negotiable. This is a strategy for traders who manage, not set-and-forget.",
     ],
     stats: [
@@ -299,7 +299,7 @@ export const STRATEGIES = {
     setup: [
       { label: "Underlying", value: "NIFTY weekly options (50-point strikes)" },
       { label: "Strikes", value: "Sell the ATM call AND ATM put (same strike)" },
-      { label: "Entry Window", value: "Monday for Thursday expiry, or expiry-day intraday" },
+      { label: "Entry Window", value: "Monday for Tuesday expiry, or expiry-day intraday" },
       { label: "Profit Target", value: "25–40% of the combined credit" },
       { label: "Stop Loss", value: "Hard stop at ~1.5–2× the credit (mandatory)" },
       { label: "Delta Hedge", value: "Adjust with futures/options past ±0.25 net delta" },
@@ -339,7 +339,7 @@ export const STRATEGIES = {
       },
       {
         q: "When is the best time to enter a NIFTY Short Straddle?",
-        a: "Two popular windows: Monday morning for the Thursday weekly expiry (to capture the bulk of theta), and an intraday expiry-day straddle for the very steepest decay. Avoid entering right before a known market-moving event.",
+        a: "Two popular windows: Monday morning for the Tuesday weekly expiry (to capture the bulk of theta), and an intraday expiry-day straddle for the very steepest decay. Avoid entering right before a known market-moving event.",
       },
       {
         q: "How do I manage risk on an undefined-risk straddle?",
@@ -1885,7 +1885,7 @@ export const STRATEGIES = {
       },
       {
         q: "How does FINNIFTY's monthly-only cycle affect the calendar spread?",
-        a: "The lack of weekly FINNIFTY options means you must use consecutive monthly expiries, creating a 25–35 day gap between legs. This is a wider time spread than a NIFTY or BANKNIFTY weekly calendar, which means more capital is at risk (higher debit) but also a more extended theta collection window. Plan for a 20–25 day maximum holding period.",
+        a: "The lack of weekly FINNIFTY options means you must use consecutive monthly expiries, creating a 25–35 day gap between legs. This is a wider time spread than a NIFTY weekly calendar, which means more capital is at risk (higher debit) but also a more extended theta collection window. Plan for a 20–25 day maximum holding period.",
       },
     ],
   },

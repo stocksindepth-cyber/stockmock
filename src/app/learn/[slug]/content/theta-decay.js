@@ -7,7 +7,7 @@ export const thetaDecayContent = {
       content: `
         <p class="text-slate-300 leading-relaxed mb-6">If you rent a luxury apartment for 30 days, you pay exactly 1 month of rent upfront. Every morning you wake up, whether you actually step foot inside the apartment or not, one day's worth of your rent is mathematically gone forever. You can never get it back.</p>
         
-        <p class="text-slate-300 leading-relaxed mb-8">This is the exact, literal definition of <strong>Theta (Θ)</strong>. When you buy an Option contract, you are not buying an asset. <strong>You are renting a mathematical probability.</strong> Because you only have until Thursday at 3:30 PM to get the direction right, every passing day destroys your rented time. Theta is the exact numerical value of your daily rent.</p>
+        <p class="text-slate-300 leading-relaxed mb-8">This is the exact, literal definition of <strong>Theta (Θ)</strong>. When you buy an Option contract, you are not buying an asset. <strong>You are renting a mathematical probability.</strong> Because you only have until Tuesday at 3:30 PM to get the direction right, every passing day destroys your rented time. Theta is the exact numerical value of your daily rent.</p>
 
         <div class="bg-gradient-to-r from-rose-900/30 to-black border-l-4 border-rose-500 p-8 rounded-2xl mb-12 shadow-2xl relative overflow-hidden">
            <div class="absolute -right-10 -top-10 opacity-10">

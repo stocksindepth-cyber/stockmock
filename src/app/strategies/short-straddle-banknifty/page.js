@@ -187,7 +187,7 @@ export default function ShortStraddleBankNiftyPage() {
                { title: "Risk of Gap", desc: "Never carry unhedged straddles over weekends. Friday night global events will annihilate margin.", icon: <TrendingUp className="w-5 h-5 text-rose-400" /> },
                { title: "Event Horizon", desc: "Forced exit before RBI Repo announcements or major banking results. Variance exceeds premium.", icon: <Zap className="w-5 h-5 text-amber-400" /> },
                { title: "Delta Blowout", desc: "If BANKNIFTY rips 400pts intraday, convert to Iron Butterfly immediately. Stop hoping.", icon: <BarChart2 className="w-5 h-5 text-blue-400" /> },
-               { title: "Gamma Gamma", desc: "Thursday afternoon generates extreme Gamma. Straddles become radioactive past 1:30 PM.", icon: <Clock className="w-5 h-5 text-purple-400" /> },
+               { title: "Gamma Gamma", desc: "Expiry afternoon generates extreme Gamma. Straddles become radioactive past 1:30 PM.", icon: <Clock className="w-5 h-5 text-purple-400" /> },
             ].map((regime, i) => (
               <div key={i} className="p-5 rounded-2xl border border-rose-500/10 bg-rose-500/5 hover:border-rose-500/30 transition-colors">
                 <div className="mb-3 p-2 bg-slate-900 rounded-lg inline-block">{regime.icon}</div>

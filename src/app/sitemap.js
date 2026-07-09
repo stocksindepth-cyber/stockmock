@@ -5,15 +5,15 @@ export default function sitemap() {
 
   const staticPages = [
     { url: baseUrl,                           lastModified: new Date(), changeFrequency: "daily",   priority: 1.0 },
-    { url: `${baseUrl}/backtest`,             lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
-    { url: `${baseUrl}/chain`,                lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
-    { url: `${baseUrl}/builder`,              lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
-    { url: `${baseUrl}/oi-analysis`,          lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
+    // ── Public SEO landing pages (live data, no login — indexable) ──────────
+    { url: `${baseUrl}/nifty-option-chain`,      lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
+    { url: `${baseUrl}/bank-nifty-option-chain`, lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
+    { url: `${baseUrl}/ltp-calculator`,          lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${baseUrl}/ltp-calculator/nifty`,    lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${baseUrl}/ltp-calculator/bank-nifty`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/nifty-expiry-day-2026`,   lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
     { url: `${baseUrl}/strategies`,           lastModified: new Date(), changeFrequency: "weekly",  priority: 0.9 },
     { url: `${baseUrl}/learn`,                lastModified: new Date(), changeFrequency: "weekly",  priority: 0.9 },
-    { url: `${baseUrl}/screener`,             lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
-    { url: `${baseUrl}/simulator`,            lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
-    { url: `${baseUrl}/paper-trade`,          lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
     { url: `${baseUrl}/pricing`,              lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/features`,             lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
     { url: `${baseUrl}/about`,                lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },

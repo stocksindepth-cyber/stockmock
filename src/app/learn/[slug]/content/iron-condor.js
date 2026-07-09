@@ -146,7 +146,7 @@ export const ironCondorContent = {
          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
             <div class="bg-[#022c22] p-6 border border-emerald-500/20 rounded-xl">
                <h5 class="text-emerald-400 font-bold mb-2">The Win State</h5>
-               <p class="text-slate-300 text-sm">If Nifty closes at 21,900 (or any number between 21,700 and 22,300) on Expiry Thursday. <strong>ALL FOUR</strong> option contracts instantly bleed to ₹0.00. Because you received ₹60 initial credit to open the basket, you keep 100% of it. <span class="bg-black/50 text-emerald-400 font-mono px-2 py-1 rounded ml-1">Profit: ₹3,000/lot</span></p>
+               <p class="text-slate-300 text-sm">If Nifty closes at 21,900 (or any number between 21,700 and 22,300) on Expiry Tuesday. <strong>ALL FOUR</strong> option contracts instantly bleed to ₹0.00. Because you received ₹60 initial credit to open the basket, you keep 100% of it. <span class="bg-black/50 text-emerald-400 font-mono px-2 py-1 rounded ml-1">Profit: ₹3,000/lot</span></p>
             </div>
             
             <div class="bg-[#450a0a] p-6 border border-rose-500/20 rounded-xl">

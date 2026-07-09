@@ -21,7 +21,7 @@ const BACKTESTED_STATS = [
   { label: "Avg Monthly Return", value: "2.8%", note: "On ₹70k margin deployed, pre-brokerage" },
   { label: "Max Drawdown Month", value: "−5.2%", note: "March 2020 (COVID crash), VIX > 40" },
   { label: "Profit Factor", value: "1.45", note: "Gross Profit / Gross Loss ratio" },
-  { label: "Avg Time in Trade", value: "3.8 Days", note: "Monday entry to Thursday/Target exit" },
+  { label: "Avg Time in Trade", value: "3.8 Days", note: "Entry to Tuesday expiry/Target exit" },
   { label: "Expectancy / Trade", value: "+₹850", note: "Average net expected P&L per lot traded" },
 ];
 
@@ -174,7 +174,7 @@ export default function IronCondorNiftyPage() {
                   <Clock className="w-6 h-6 text-emerald-400 flex-shrink-0 mt-1" />
                   <div>
                     <h4 className="font-bold text-slate-200 mb-1">Theta Acceleration</h4>
-                    <p className="text-sm text-slate-400 leading-relaxed">Entering on Monday isolates the steepest part of the Theta decay curve for weekly options. Options lose value logarithmically as Thursday approaches.</p>
+                    <p className="text-sm text-slate-400 leading-relaxed">Entering early in the cycle isolates the steepest part of the Theta decay curve for weekly options. Options lose value logarithmically as Tuesday expiry approaches.</p>
                   </div>
                 </div>
               </div>
@@ -193,7 +193,7 @@ export default function IronCondorNiftyPage() {
               { title: "VIX Spikes", desc: "India VIX > 20. High realized volatility breaks the defined range.", icon: <TrendingUp className="w-5 h-5 text-rose-400" /> },
               { title: "Macro Events", desc: "RBI MPC, Union Budget, Election Results. Binary risk is too high.", icon: <Zap className="w-5 h-5 text-amber-400" /> },
               { title: "Breakout Zones", desc: "NIFTY clearing multi-month highs/lows signals momentum.", icon: <BarChart2 className="w-5 h-5 text-blue-400" /> },
-              { title: "Gamma Traps", desc: "Holding past 1:00 PM on Thursday exposes you to pure Gamma risk.", icon: <Clock className="w-5 h-5 text-purple-400" /> },
+              { title: "Gamma Traps", desc: "Holding past 1:00 PM on Tuesday expiry exposes you to pure Gamma risk.", icon: <Clock className="w-5 h-5 text-purple-400" /> },
             ].map((regime, i) => (
               <div key={i} className="p-5 rounded-2xl border border-rose-500/10 bg-rose-500/5 hover:border-rose-500/30 transition-colors">
                 <div className="mb-3 p-2 bg-slate-900 rounded-lg inline-block">{regime.icon}</div>
