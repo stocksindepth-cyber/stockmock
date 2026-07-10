@@ -606,7 +606,7 @@ export default function PricingPage() {
                         <p className="text-[10px] text-slate-500 leading-snug mt-0.5">₹0 AMC lifetime · Free Demat · ₹20/order</p>
                       </div>
                     </a>
-                    <p className="text-[9px] text-slate-700 mt-2">Referral partnership · we may earn a commission</p>
+                    <p className="text-[9px] text-slate-700 mt-2">Referral link · we may earn a commission</p>
                   </div>
                 )}
               </div>
@@ -684,7 +684,7 @@ export default function PricingPage() {
             <p className="text-sm text-slate-400">
               ₹0 AMC for lifetime · Zero brokerage on investing · ₹20/order on F&O · Fast execution · Solid support
             </p>
-            <p className="text-[10px] text-slate-600 mt-1">Referral partnership — we earn a small commission when you open an account, at no cost to you</p>
+            <p className="text-[10px] text-slate-600 mt-1">Referral link — we earn a small commission when you open an account, at no cost to you</p>
           </div>
           <a
             href={DHAN_REFERRAL_URL}

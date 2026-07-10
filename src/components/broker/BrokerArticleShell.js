@@ -81,7 +81,7 @@ export function DhanReferralBox({ headline, subtext, variant = "default" }) {
             <p className="font-bold text-white text-sm">{headline || "Ready to open a Dhan account?"}</p>
           </div>
           <p className="text-slate-400 text-xs">{subtext || "₹0 AMC lifetime · Free Demat · ₹20/order F&O · Fast execution"}</p>
-          <p className="text-[10px] text-slate-600 mt-1">Referral partnership — we earn a small commission, at no cost to you.</p>
+          <p className="text-[10px] text-slate-600 mt-1">Referral link — we earn a small commission, at no cost to you.</p>
         </div>
         <DhanCTA />
       </div>
