@@ -85,7 +85,7 @@ export default function Footer() {
             Open Free Account <ExternalLink className="w-3 h-3" />
           </a>
         </div>
-        <p className="text-center text-[10px] text-slate-600 mt-1">Referral partnership · We may earn a commission</p>
+        <p className="text-center text-[10px] text-slate-600 mt-1">Referral link · We may earn a commission</p>
       </div>
 
       {/* Main footer grid */}

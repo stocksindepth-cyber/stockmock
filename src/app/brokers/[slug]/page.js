@@ -242,7 +242,7 @@ export default async function BrokerArticlePage({ params }) {
             <p className="text-xl font-bold text-white mb-2">Ready to start trading smarter?</p>
             <p className="text-slate-400 text-sm mb-6">Open your free Dhan account — ₹0 AMC, ₹20/order, built-in analytics. Takes 10 minutes.</p>
             <DhanCTA label="Open Free Dhan Account — ₹0 AMC" />
-            <p className="text-[10px] text-slate-600 mt-3">Referral partnership · we earn a small commission · no cost to you</p>
+            <p className="text-[10px] text-slate-600 mt-3">Referral link · we earn a small commission · no cost to you</p>
           </div>
         )}
 

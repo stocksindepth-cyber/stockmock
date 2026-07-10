@@ -139,7 +139,7 @@ const FAQ = [
   },
   {
     q: "What is the Dhan referral?",
-    a: "We have a referral partnership with Dhan. If you open a Dhan demat account through our link, we earn a small commission at no cost to you. Dhan offers ₹0 AMC for lifetime, free demat, and ₹20/order — genuinely one of the best brokers for options traders.",
+    a: "It's a personal referral link, not a formal partnership. If you open a Dhan demat account through our link, we may earn a small referral commission at no extra cost to you. Dhan offers ₹0 AMC for lifetime, free demat, and ₹20/order — genuinely one of the best brokers for options traders.",
   },
   {
     q: "Is GST included?",

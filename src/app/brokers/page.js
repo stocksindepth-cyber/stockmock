@@ -139,7 +139,7 @@ export default function BrokersHubPage() {
           <div>
             <p className="font-bold text-white mb-1">Our recommended broker for F&O traders: Dhan</p>
             <p className="text-slate-400 text-sm">₹0 AMC lifetime · Free Demat · ₹20/order · Built-in options analytics · TradingView charts</p>
-            <p className="text-[10px] text-slate-600 mt-1">Referral partnership — we earn a commission at no cost to you</p>
+            <p className="text-[10px] text-slate-600 mt-1">Referral link — we earn a commission at no cost to you</p>
           </div>
           <a href={DHAN_REFERRAL} target="_blank" rel="noopener noreferrer sponsored"
             className="flex-shrink-0 flex items-center gap-2 px-6 py-3 rounded-xl bg-orange-500 hover:bg-orange-400 text-white font-bold text-sm transition-colors whitespace-nowrap">

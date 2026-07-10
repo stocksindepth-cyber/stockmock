@@ -94,7 +94,7 @@ export default function DhanReferralBanner({ variant = "banner", context = "gene
         </a>
 
         <p className="text-center text-[10px] text-slate-500 mt-2">
-          Referral partnership · We may earn a commission
+          Referral link · We may earn a commission
         </p>
       </div>
     );
@@ -137,7 +137,7 @@ export default function DhanReferralBanner({ variant = "banner", context = "gene
         >
           {msg.cta} <ExternalLink className="w-3.5 h-3.5" />
         </a>
-        <p className="text-center text-[10px] text-slate-500 mt-2">Referral partnership</p>
+        <p className="text-center text-[10px] text-slate-500 mt-2">Referral link</p>
       </div>
     );
   }
@@ -167,7 +167,7 @@ export default function DhanReferralBanner({ variant = "banner", context = "gene
           </button>
         </div>
       </div>
-      <p className="text-center text-[10px] text-slate-600 mt-1">Referral partnership · We may earn a commission</p>
+      <p className="text-center text-[10px] text-slate-600 mt-1">Referral link · We may earn a commission</p>
     </div>
   );
 }
