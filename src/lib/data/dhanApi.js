@@ -7,6 +7,8 @@
  * The access token never reaches the client.
  */
 
+import { FNO_STOCKS } from "@/data/fnoStocks";
+
 const DHAN_BASE = "https://api.dhan.co/v2";
 
 // ── Token management ─────────────────────────────────────────────────────────
@@ -94,9 +96,20 @@ export const INDEX_EQ_IDS = {
   FINNIFTY: 27,
 };
 
+// Resolve any symbol (index or F&O stock) to its Dhan underlying descriptor.
+// Indices live in UNDERLYING (IDX_I); F&O stocks resolve from the generated
+// FNO_STOCKS map on the NSE_FNO segment.
+export function resolveUnderlying(symbol) {
+  const idx = UNDERLYING[symbol];
+  if (idx) return idx;
+  const stock = FNO_STOCKS[symbol];
+  if (stock) return { secId: stock.secId, seg: "NSE_FNO", lotSize: stock.lot };
+  return null;
+}
+
 // ── 1. Option Chain ──
 export async function fetchOptionChain(symbol, expiry) {
-  const ul = UNDERLYING[symbol];
+  const ul = resolveUnderlying(symbol);
   if (!ul) throw new Error(`Unknown symbol: ${symbol}`);
   return dhanPost("/optionchain", {
     UnderlyingScrip: ul.secId,
@@ -107,7 +120,7 @@ export async function fetchOptionChain(symbol, expiry) {
 
 // ── 2. Expiry List ──
 export async function fetchExpiryList(symbol) {
-  const ul = UNDERLYING[symbol];
+  const ul = resolveUnderlying(symbol);
   if (!ul) throw new Error(`Unknown symbol: ${symbol}`);
   return dhanPost("/optionchain/expirylist", {
     UnderlyingScrip: ul.secId,

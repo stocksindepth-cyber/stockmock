@@ -153,6 +153,10 @@ export default function PublicOptionChain({ symbol = "NIFTY", label = "NIFTY" })
           <tbody>
             {loading && !view.length ? (
               <tr><td colSpan={7} className="text-center py-10 text-slate-500">Loading live chain…</td></tr>
+            ) : !view.length ? (
+              <tr><td colSpan={7} className="text-center py-10 text-slate-500">
+                Live chain is temporarily unavailable. Option-chain data refreshes during market hours (Mon–Fri, 9:15 AM–3:30 PM IST).
+              </td></tr>
             ) : view.map((r, i) => {
               const isATM = spot && Math.abs(r.strike - spot) === Math.min(...view.map((x) => Math.abs(x.strike - spot)));
               return (

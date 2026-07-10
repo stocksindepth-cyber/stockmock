@@ -23,6 +23,7 @@ import {
   baselineSpot,
 } from "./syntheticChain";
 import { LOT_SIZES } from "../nse/constants";
+import { FNO_STOCKS } from "@/data/fnoStocks";
 
 // Re-export UNDERLYING shape so callers (e.g. /api/chain) don't need to know
 // which source is active.
@@ -80,7 +81,7 @@ async function fetchSynthetic(symbol, expiry) {
  * Never throws — worst case returns a synthetic chain.
  */
 export async function getChain(symbol, expiry) {
-  if (!SYMBOL_CONFIG[symbol] && !DHAN_UNDERLYING[symbol]) {
+  if (!SYMBOL_CONFIG[symbol] && !DHAN_UNDERLYING[symbol] && !FNO_STOCKS[symbol]) {
     throw new Error(`Unknown symbol: ${symbol}`);
   }
 
@@ -121,9 +122,29 @@ export async function getChain(symbol, expiry) {
       cache.set(key, { data, source, timestamp: Date.now() });
       return { data, fromCache: false, source, cacheAgeSeconds: 0 };
     } catch (dhanErr) {
+      // Synthetic fallback is ONLY calibrated for the indices (SYMBOL_CONFIG).
+      // F&O stocks have wildly different price levels — synthesizing would
+      // fabricate a misleading spot (e.g. a NIFTY-scale ₹25k for RELIANCE) on a
+      // public, indexed page. For stocks we never synthesize: serve stale cache
+      // if we have it, else surface the error so the page shows an honest
+      // "live data unavailable" state instead of fake numbers.
+      const isIndex = !!SYMBOL_CONFIG[symbol];
+      if (!isIndex) {
+        console.warn(`[chain] Dhan fetch failed for stock ${symbol} (${dhanErr.message}); NOT synthesizing`);
+        const stale = cache.get(key);
+        if (stale) {
+          return {
+            data: stale.data,
+            fromCache: true,
+            source: stale.source + "-stale",
+            cacheAgeSeconds: Math.round((Date.now() - stale.timestamp) / 1000),
+          };
+        }
+        throw dhanErr;
+      }
       console.warn(`[chain] Dhan fetch failed (${dhanErr.message}); falling back to synthetic`);
       try {
-        // Fallback: synthetic engine
+        // Fallback: synthetic engine (indices only)
         const { data, source } = await fetchSynthetic(symbol, expiry);
         cache.set(key, { data, source, timestamp: Date.now() });
         return { data, fromCache: false, source, cacheAgeSeconds: 0 };

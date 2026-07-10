@@ -1,4 +1,5 @@
 import { STRATEGY_SLUGS } from "@/data/strategies";
+import { FNO_STOCKS, FEATURED_STOCKS } from "@/data/fnoStocks";
 
 export default function sitemap() {
   const baseUrl = "https://www.optionsgyani.com";
@@ -12,6 +13,7 @@ export default function sitemap() {
     { url: `${baseUrl}/ltp-calculator/nifty`,    lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
     { url: `${baseUrl}/ltp-calculator/bank-nifty`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/nifty-expiry-day-2026`,   lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${baseUrl}/option-chain`,            lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
     { url: `${baseUrl}/strategies`,           lastModified: new Date(), changeFrequency: "weekly",  priority: 0.9 },
     { url: `${baseUrl}/learn`,                lastModified: new Date(), changeFrequency: "weekly",  priority: 0.9 },
     { url: `${baseUrl}/pricing`,              lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
@@ -103,5 +105,13 @@ export default function sitemap() {
     priority: 0.8,
   }));
 
-  return [...staticPages, ...strategyPages, ...learnPages, brokerHubPage, ...brokerPages];
+  // Per-stock option chain pages (featured liquid names — highest search demand)
+  const stockChainPages = FEATURED_STOCKS.map((sym) => ({
+    url: `${baseUrl}/option-chain/${FNO_STOCKS[sym].slug}`,
+    lastModified: new Date(),
+    changeFrequency: "daily",
+    priority: 0.7,
+  }));
+
+  return [...staticPages, ...strategyPages, ...learnPages, brokerHubPage, ...brokerPages, ...stockChainPages];
 }
