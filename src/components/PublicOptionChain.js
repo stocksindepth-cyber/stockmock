@@ -29,6 +29,7 @@ export default function PublicOptionChain({ symbol = "NIFTY", label = "NIFTY" })
   const [chain, setChain] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatedAt, setUpdatedAt] = useState(null);
+  const [source, setSource] = useState(null);
   const abortRef = useRef(null);
 
   // Load index quote + expiries once
@@ -61,6 +62,7 @@ export default function PublicOptionChain({ symbol = "NIFTY", label = "NIFTY" })
         if (!alive) return;
         if (data?.spot) setSpot(data.spot);
         setChain(Array.isArray(data?.chain) ? data.chain : []);
+        setSource(data?.source || null);
         setUpdatedAt(new Date());
         setLoading(false);
       } catch { if (alive) setLoading(false); }
@@ -133,6 +135,20 @@ export default function PublicOptionChain({ symbol = "NIFTY", label = "NIFTY" })
             <RefreshCw size={11} className={loading ? "animate-spin" : ""} />
             {updatedAt ? updatedAt.toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }) : "…"}
           </span>
+          {source && (
+            <span
+              title={/simulat/i.test(source)
+                ? "Option prices, OI and IV here are modeled (Black-Scholes) from the underlying spot, not live exchange data."
+                : "Live NSE data via broker feed."}
+              className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${
+                /simulat/i.test(source)
+                  ? "text-amber-300 border-amber-500/30 bg-amber-500/10"
+                  : "text-emerald-300 border-emerald-500/30 bg-emerald-500/10"
+              }`}
+            >
+              {/simulat/i.test(source) ? "Modeled data" : "Live NSE"}
+            </span>
+          )}
         </div>
       </div>
 

@@ -35,11 +35,14 @@ const TICK = 0.05;
 //   oiBase       — peak open-interest scale near the OI hump
 //   weekly       — true if the index has weekly expiries, else monthly-only
 //   weeklyDay    — JS weekday of expiry (0=Sun … 4=Thu). SENSEX is Tuesday.
+// weeklyDay: 0=Sun … 2=Tue … 4=Thu. Post-Sept-2025 NSE moved index weeklies to
+// TUESDAY; BANKNIFTY/FINNIFTY/MIDCPNIFTY are monthly-only (last Tuesday). SENSEX
+// (BSE) weekly is Tuesday.
 export const SYMBOL_CONFIG = {
-  NIFTY:      { baselineSpot: 25500, atmIV: 0.12, oiBase: 3_500_000, weekly: true,  weeklyDay: 4 },
-  BANKNIFTY:  { baselineSpot: 57000, atmIV: 0.15, oiBase: 1_200_000, weekly: false, weeklyDay: 4 },
-  FINNIFTY:   { baselineSpot: 25500, atmIV: 0.14, oiBase:   900_000, weekly: false, weeklyDay: 4 },
-  MIDCPNIFTY: { baselineSpot: 13500, atmIV: 0.16, oiBase:   700_000, weekly: false, weeklyDay: 4 },
+  NIFTY:      { baselineSpot: 25500, atmIV: 0.12, oiBase: 3_500_000, weekly: true,  weeklyDay: 2 },
+  BANKNIFTY:  { baselineSpot: 57000, atmIV: 0.15, oiBase: 1_200_000, weekly: false, weeklyDay: 2 },
+  FINNIFTY:   { baselineSpot: 25500, atmIV: 0.14, oiBase:   900_000, weekly: false, weeklyDay: 2 },
+  MIDCPNIFTY: { baselineSpot: 13500, atmIV: 0.16, oiBase:   700_000, weekly: false, weeklyDay: 2 },
   SENSEX:     { baselineSpot: 84000, atmIV: 0.12, oiBase: 1_500_000, weekly: true,  weeklyDay: 2 },
 };
 

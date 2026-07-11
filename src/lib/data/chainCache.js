@@ -193,7 +193,11 @@ export async function getExpiryList(symbol) {
         .sort();
     }
   } catch (err) {
-    console.warn(`[expiries] Dhan expiry list failed (${err.message}); using synthetic calendar`);
+    console.warn(`[expiries] Dhan expiry list failed (${err.message})`);
   }
+  // Synthetic expiry calendar is only meaningful for the indices. F&O stocks are
+  // monthly-only and each has its own calendar — fabricating index-style weekly
+  // dates for them would mislead. Return empty so the caller degrades honestly.
+  if (!SYMBOL_CONFIG[symbol]) return [];
   return generateExpiries(symbol);
 }

@@ -52,6 +52,11 @@ export function AuthProvider({ children }) {
                 name: user.displayName || "",
               }),
             }).catch(() => {/* silent — email failure never blocks login */});
+            // Bind to referrer (from og_ref cookie), then ensure this user's own code exists.
+            import("@/lib/referralClient").then(async (m) => {
+              await m.attachReferral(user);
+              await m.ensureReferralCode(user);
+            }).catch(() => {/* referral is a bonus, never blocks signup */});
           }
         } catch (error) {
           if (error.code !== 'permission-denied') {

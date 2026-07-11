@@ -58,8 +58,11 @@ async function computeDigest() {
     return a && b ? (((a - b) / b) * 100).toFixed(2) + "%" : "";
   };
 
-  // ATM straddle premium (nearest expiry, strike closest to spot) for NIFTY
-  const straddleRows = await runQuery(
+  // ATM straddle premium (nearest expiry, strike closest to spot) for NIFTY.
+  // Only compute when we actually have a spot — otherwise ABS(strike - 0) picks
+  // the lowest strike and we'd email a wrong "ATM" premium.
+  const niftySpotForStraddle = spot("NIFTY");
+  const straddleRows = niftySpotForStraddle ? await runQuery(
     `WITH nearest AS (
        SELECT MIN(expiry_date) AS exp FROM ${T}
        WHERE trade_date = @latest AND underlying = 'NIFTY' AND expiry_date >= @latest
@@ -69,8 +72,8 @@ async function computeDigest() {
      WHERE trade_date = @latest AND underlying = 'NIFTY' AND expiry_date = nearest.exp
      GROUP BY strike HAVING COUNT(DISTINCT option_type) = 2
      ORDER BY ABS(strike - @spot) LIMIT 1`,
-    { latest, spot: spot("NIFTY") || 0 }
-  );
+    { latest, spot: niftySpotForStraddle }
+  ) : [];
   const straddlePremium = straddleRows[0] ? Math.round(straddleRows[0].straddle) : null;
 
   // Max pain: strike with lowest total option writer payout (nearest expiry)
