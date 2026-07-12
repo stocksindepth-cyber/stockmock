@@ -7,7 +7,7 @@ import {
   BarChart2, Layers, History, TrendingUp, Target, Zap,
   Menu, X, User, CreditCard, LogOut, ChevronDown,
   Sparkles, BookOpen, LineChart, Info, Mail, RefreshCcw,
-  LayoutDashboard, Bell, Calculator, Percent,
+  LayoutDashboard, Bell, Calculator, Percent, Database,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
