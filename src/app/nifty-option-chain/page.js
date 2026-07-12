@@ -72,6 +72,9 @@ export default function NiftyOptionChainPage() {
         <div className="flex flex-wrap gap-3">
           {[
             { href: "/bank-nifty-option-chain", t: "BANK NIFTY Option Chain" },
+            { href: "/fii-dii-data", t: "FII/DII Data Today" },
+            { href: "/options-profit-calculator", t: "Options Profit Calculator" },
+            { href: "/margin-calculator", t: "Margin Calculator" },
             { href: "/ltp-calculator/nifty", t: "NIFTY LTP Calculator" },
             { href: "/nifty-expiry-day-2026", t: "NIFTY Expiry Dates 2026" },
             { href: "/learn/how-to-read-option-chain", t: "Guide: Read an Option Chain" },

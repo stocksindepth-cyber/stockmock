@@ -8,15 +8,15 @@ const DHAN_REFERRAL_URL = "https://join.dhan.co/?invite=XDCAS95683";
 
 const LINKS = [
   {
-    heading: "Tools",
+    heading: "Free Tools & Data",
     items: [
-      { label: "Strategy Builder", href: "/builder" },
-      { label: "Option Chain", href: "/chain" },
+      { label: "NIFTY Option Chain", href: "/nifty-option-chain" },
+      { label: "Stock Option Chains", href: "/option-chain" },
+      { label: "FII/DII Data", href: "/fii-dii-data" },
+      { label: "Options Profit Calculator", href: "/options-profit-calculator" },
+      { label: "Margin Calculator", href: "/margin-calculator" },
+      { label: "LTP Calculator", href: "/ltp-calculator" },
       { label: "Backtesting", href: "/backtest" },
-      { label: "OI Analysis", href: "/oi-analysis" },
-      { label: "Screener", href: "/screener" },
-      { label: "Simulator", href: "/simulator" },
-      { label: "Paper Trading", href: "/paper-trade" },
     ],
   },
   {
