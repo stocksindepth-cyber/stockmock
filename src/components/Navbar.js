@@ -7,7 +7,7 @@ import {
   BarChart2, Layers, History, TrendingUp, Target, Zap,
   Menu, X, User, CreditCard, LogOut, ChevronDown,
   Sparkles, BookOpen, LineChart, Info, Mail, RefreshCcw,
-  LayoutDashboard, Bell,
+  LayoutDashboard, Bell, Calculator, Percent,
 } from "lucide-react";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -31,6 +31,8 @@ const MORE_LINKS = [
   { href: "/nifty-option-chain", label: "NIFTY Option Chain", icon: BarChart2, desc: "Live OI, PCR & Max Pain — free" },
   { href: "/bank-nifty-option-chain", label: "BANK NIFTY Chain", icon: TrendingUp, desc: "Live OI, PCR & Max Pain — free" },
   { href: "/option-chain",    label: "Stock Option Chains", icon: BarChart2, desc: "200+ NSE F&O stocks — live OI"   },
+  { href: "/options-profit-calculator", label: "Profit Calculator", icon: Calculator, desc: "Payoff, max P/L & breakeven — free" },
+  { href: "/margin-calculator", label: "Margin Calculator", icon: Percent, desc: "SPAN + Exposure estimate — free" },
   { href: "/ltp-calculator",  label: "LTP Calculator", icon: Target,        desc: "Estimate option LTP at a target"  },
   { href: "/features",   label: "Features",      icon: Sparkles,      desc: "What OptionsGyani offers"      },
   { href: "/pricing",    label: "Pricing",        icon: CreditCard,    desc: "Free & Pro plans"              },

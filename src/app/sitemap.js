@@ -9,6 +9,8 @@ export default function sitemap() {
     // ── Public SEO landing pages (live data, no login — indexable) ──────────
     { url: `${baseUrl}/nifty-option-chain`,      lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
     { url: `${baseUrl}/bank-nifty-option-chain`, lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
+    { url: `${baseUrl}/options-profit-calculator`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
+    { url: `${baseUrl}/margin-calculator`,       lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
     { url: `${baseUrl}/ltp-calculator`,          lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
     { url: `${baseUrl}/ltp-calculator/nifty`,    lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
     { url: `${baseUrl}/ltp-calculator/bank-nifty`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
