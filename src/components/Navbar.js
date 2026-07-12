@@ -31,6 +31,7 @@ const MORE_LINKS = [
   { href: "/nifty-option-chain", label: "NIFTY Option Chain", icon: BarChart2, desc: "Live OI, PCR & Max Pain — free" },
   { href: "/bank-nifty-option-chain", label: "BANK NIFTY Chain", icon: TrendingUp, desc: "Live OI, PCR & Max Pain — free" },
   { href: "/option-chain",    label: "Stock Option Chains", icon: BarChart2, desc: "200+ NSE F&O stocks — live OI"   },
+  { href: "/fii-dii-data",    label: "FII/DII Data", icon: Database,        desc: "Daily institutional cash flows" },
   { href: "/options-profit-calculator", label: "Profit Calculator", icon: Calculator, desc: "Payoff, max P/L & breakeven — free" },
   { href: "/margin-calculator", label: "Margin Calculator", icon: Percent, desc: "SPAN + Exposure estimate — free" },
   { href: "/ltp-calculator",  label: "LTP Calculator", icon: Target,        desc: "Estimate option LTP at a target"  },
