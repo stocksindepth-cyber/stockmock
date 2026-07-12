@@ -138,7 +138,12 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="mt-6 pt-5 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
-          <p>© {new Date().getFullYear()} OptionsGyani Analytics. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} OptionsGyani ·{" "}
+            <a href="https://grahaisystems.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">
+              A GrahAI Systems product
+            </a>
+          </p>
           <div className="flex flex-wrap items-center gap-4">
             <a href="/about" className="hover:text-slate-400 transition-colors">About</a>
             <a href="/contact" className="hover:text-slate-400 transition-colors">Contact</a>
