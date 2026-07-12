@@ -78,6 +78,53 @@ async function sendSequence({ db, users, sequenceKey, emailType, props = {} }) {
   return results;
 }
 
+// Send a one-tap renewal reminder to paid users whose subscription expires
+// within the next 3 days. Idempotent per billing cycle via a renewal_<date> key.
+async function sendRenewalReminders(db) {
+  const results = { sent: 0, skipped: 0, failed: 0 };
+  const now = Date.now();
+  const horizon = now + 3 * 86400000;
+
+  let snap;
+  try {
+    snap = await db.collection("users").where("plan", "in", ["pro", "elite"]).get();
+  } catch {
+    return results; // no paid users / index issue — nothing to do
+  }
+
+  await Promise.allSettled(
+    snap.docs.map(async (doc) => {
+      const user = { id: doc.id, ...doc.data() };
+      if (!user.email || !user.subscriptionExpiry) { results.skipped++; return; }
+
+      const exp = new Date(user.subscriptionExpiry).getTime();
+      if (!Number.isFinite(exp) || exp < now || exp > horizon) { results.skipped++; return; }
+
+      const expiryDate = user.subscriptionExpiry.slice(0, 10);
+      const sequenceKey = `renewal_${expiryDate}`;
+      if ((user.nurtureEmailsSent || []).includes(sequenceKey)) { results.skipped++; return; }
+
+      const daysLeft = Math.max(0, Math.ceil((exp - now) / 86400000));
+      const name = user.displayName || user.email.split("@")[0];
+
+      const result = await sendEmail("renewal", user.email, {
+        name, email: user.email, plan: (user.plan || "pro"), expiryDate, daysLeft,
+      });
+
+      if (result.success) {
+        await db.collection("users").doc(user.id).update({
+          nurtureEmailsSent: [...(user.nurtureEmailsSent || []), sequenceKey],
+        });
+        results.sent++;
+      } else {
+        results.failed++;
+      }
+    })
+  );
+
+  return results;
+}
+
 export async function GET(request) {
   // Vercel Cron passes the secret via Authorization header
   const authHeader = request.headers.get("authorization");
@@ -118,6 +165,12 @@ export async function GET(request) {
       sequenceKey: "day14",
       emailType: "day14",
     });
+
+    // ── Renewal reminder: paid plans expiring within 3 days ───────────────────
+    // Monthly/annual plans are one-time Razorpay orders (no auto-recurring), so
+    // a lapse is silent unless we nudge. Keyed per expiry date so each billing
+    // cycle gets its own reminder.
+    log.renewal = await sendRenewalReminders(db);
 
     console.log("[lifecycle-nurture]", JSON.stringify(log));
 

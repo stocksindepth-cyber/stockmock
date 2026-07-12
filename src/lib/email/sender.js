@@ -21,6 +21,7 @@ const SUBJECTS = {
   day14:             (props) => `${props.name || 'Trader'}, 14 days on free — here's what Pro unlocks for you`,
   flashSale:         (props) => `⚡ ${props.name || 'Trader'}, 30% off OptionsGyani Pro — code OG30 · 48 hrs only`,
   tradingOffer:      (props) => `${props.name || 'Trader'}, most traders lose because they never practice — here's your fix`,
+  renewal:           (props) => `${props.name || 'Trader'}, your OptionsGyani ${(props.plan || 'Pro')} renews ${props.daysLeft === 1 ? 'tomorrow' : `in ${props.daysLeft} days`}`,
   // marketUpdate uses the subject prop passed in directly
 };
 
@@ -37,6 +38,7 @@ const TEMPLATE_LOADERS = {
   day14:             () => import('./templates/Day14Email.jsx'),
   flashSale:         () => import('./templates/FlashSaleEmail.jsx'),
   tradingOffer:      () => import('./templates/TradingOfferEmail.jsx'),
+  renewal:           () => import('./templates/RenewalEmail.jsx'),
 };
 
 /**
