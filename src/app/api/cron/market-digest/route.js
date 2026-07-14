@@ -108,6 +108,40 @@ async function computeDigest() {
   );
   const topOi = oiRows[0] || null;
 
+  // IV Percentile: where today's NIFTY ATM IV sits vs the trailing ~1 year.
+  // ATM IV per day = avg IV of strikes within 100 pts of that day's spot, nearest
+  // expiry. Only report when we have enough history to be meaningful.
+  let ivpNifty;
+  try {
+    const ivpRows = await runQuery(
+      `WITH spots AS (
+         SELECT trade_date, close AS spot FROM ${S}
+         WHERE underlying='NIFTY' AND trade_date >= DATE_SUB(@latest, INTERVAL 400 DAY)
+       ),
+       nearest AS (
+         SELECT trade_date, MIN(expiry_date) AS exp FROM ${T}
+         WHERE underlying='NIFTY' AND expiry_date >= trade_date AND trade_date >= DATE_SUB(@latest, INTERVAL 400 DAY)
+         GROUP BY trade_date
+       ),
+       atm AS (
+         SELECT o.trade_date, AVG(o.iv) AS atm_iv
+         FROM ${T} o
+         JOIN nearest n ON o.trade_date = n.trade_date AND o.expiry_date = n.exp
+         JOIN spots s ON o.trade_date = s.trade_date
+         WHERE o.underlying='NIFTY' AND o.iv > 0 AND ABS(o.strike - s.spot) <= 100
+         GROUP BY o.trade_date
+       ),
+       latest_iv AS (SELECT atm_iv FROM atm ORDER BY trade_date DESC LIMIT 1)
+       SELECT ROUND(100 * COUNTIF(atm_iv <= (SELECT atm_iv FROM latest_iv)) / COUNT(*)) AS ivp,
+              COUNT(*) AS days
+       FROM atm WHERE trade_date >= DATE_SUB((SELECT MAX(trade_date) FROM atm), INTERVAL 365 DAY)`,
+      { latest }
+    );
+    if (ivpRows[0] && Number(ivpRows[0].days) >= 60 && ivpRows[0].ivp != null) {
+      ivpNifty = Number(ivpRows[0].ivp);
+    }
+  } catch { /* IVP is best-effort — never block the digest */ }
+
   const niftySpot = spot("NIFTY");
   const insightParts = [];
   if (maxPain) insightParts.push(`Max pain for the nearest NIFTY expiry sits at ${maxPain.toLocaleString("en-IN")}${niftySpot ? ` (spot ${Math.round(niftySpot).toLocaleString("en-IN")})` : ""}.`);
@@ -120,7 +154,9 @@ async function computeDigest() {
     niftyChange: change("NIFTY"),
     bankNiftySpot: bySpot[`BANKNIFTY|${latest}`] ? Math.round(bySpot[`BANKNIFTY|${latest}`]).toLocaleString("en-IN") : "—",
     bankNiftyChange: change("BANKNIFTY"),
-    straddlePremium: straddlePremium ? `₹${straddlePremium.toLocaleString("en-IN")}` : "—",
+    // Plain number — the email template prepends the ₹ symbol itself.
+    straddlePremium: straddlePremium ? straddlePremium.toLocaleString("en-IN") : undefined,
+    ivpNifty,
     aiInsight: insightParts.join(" "),
     topTrade: maxPain
       ? `Backtest an iron condor around max pain ${maxPain.toLocaleString("en-IN")} — see how it performed over the last 2 years in one click.`
