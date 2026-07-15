@@ -65,7 +65,7 @@ async function computeDigest() {
   const straddleRows = niftySpotForStraddle ? await runQuery(
     `WITH nearest AS (
        SELECT MIN(expiry_date) AS exp FROM ${T}
-       WHERE trade_date = @latest AND underlying = 'NIFTY' AND expiry_date >= @latest
+       WHERE trade_date = @latest AND underlying = 'NIFTY' AND expiry_date > @latest
      )
      SELECT strike, SUM(close) AS straddle
      FROM ${T}, nearest
@@ -80,7 +80,7 @@ async function computeDigest() {
   const mp = await runQuery(
     `WITH nearest AS (
        SELECT MIN(expiry_date) AS exp FROM ${T}
-       WHERE trade_date = @latest AND underlying = 'NIFTY' AND expiry_date >= @latest
+       WHERE trade_date = @latest AND underlying = 'NIFTY' AND expiry_date > @latest
      ),
      chain AS (
        SELECT strike, option_type, oi FROM ${T}, nearest
@@ -99,7 +99,7 @@ async function computeDigest() {
   const oiRows = await runQuery(
     `WITH nearest AS (
        SELECT MIN(expiry_date) AS exp FROM ${T}
-       WHERE trade_date = @latest AND underlying = 'NIFTY' AND expiry_date >= @latest
+       WHERE trade_date = @latest AND underlying = 'NIFTY' AND expiry_date > @latest
      )
      SELECT strike, option_type, oi_change FROM ${T}, nearest
      WHERE trade_date = @latest AND underlying = 'NIFTY' AND expiry_date = nearest.exp
@@ -120,7 +120,7 @@ async function computeDigest() {
        ),
        nearest AS (
          SELECT trade_date, MIN(expiry_date) AS exp FROM ${T}
-         WHERE underlying='NIFTY' AND expiry_date >= trade_date AND trade_date >= DATE_SUB(@latest, INTERVAL 400 DAY)
+         WHERE underlying='NIFTY' AND expiry_date > trade_date AND trade_date >= DATE_SUB(@latest, INTERVAL 400 DAY)
          GROUP BY trade_date
        ),
        atm AS (
