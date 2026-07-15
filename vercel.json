@@ -32,11 +32,11 @@
     },
     {
       "path": "/api/cron/market-digest",
-      "schedule": "15 14 * * 1-5"
+      "schedule": "30 15 * * 1-5"
     },
     {
       "path": "/api/cron/market-digest",
-      "schedule": "45 14 * * 1-5"
+      "schedule": "30 16 * * 1-5"
     }
   ],
   "headers": [

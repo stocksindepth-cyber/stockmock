@@ -82,6 +82,24 @@ jobs:
           echo "Ingesting latest FII/DII cash activity from NSE..."
           python scripts/ingest_fii_dii.py
 
+      - name: Send daily market digest email
+        # Trigger the digest RIGHT AFTER ingestion so it always runs with the
+        # freshest data on the correct trading day (the Vercel timer-cron could
+        # fire before NSE data landed and skip the day). Idempotent per trade
+        # date, so the Vercel fallback later won't double-send. Batches of 50.
+        if: github.event_name == 'schedule'
+        continue-on-error: true
+        env:
+          CRON_SECRET: ${{ secrets.EMAIL_CRON_SECRET }}
+        run: |
+          echo "Triggering market digest send..."
+          for i in $(seq 1 8); do
+            R=$(curl -s "https://www.optionsgyani.com/api/cron/market-digest" -H "Authorization: Bearer $CRON_SECRET")
+            echo "  batch $i: $R"
+            echo "$R" | grep -q '"remaining":0' && break
+            sleep 3
+          done
+
       - name: Run custom ingestion (manual trigger)
         if: github.event_name == 'workflow_dispatch'
         env:
