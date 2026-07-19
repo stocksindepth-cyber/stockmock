@@ -63,6 +63,18 @@ export default function OptionsProfitCalculator({ defaultSymbol = "NIFTY" }) {
   );
   const net = useMemo(() => netPremium(parsedLegs), [parsedLegs]);
 
+  // generatePayoffData only samples ±10% around spot, so its max/min are the
+  // values AT THAT BOUNDARY — not true maxima. For an unlimited-upside position
+  // (e.g. a naked long call) that printed a confident finite "Max Profit" that
+  // was really just the edge of the chart. Detect an open-ended payoff by
+  // checking whether P&L is still moving at the boundary.
+  const unbounded = useMemo(() => {
+    const d = result?.data;
+    if (!d || d.length < 2) return { profit: false, loss: false };
+    const lastSlope = d[d.length - 1].pnl - d[d.length - 2].pnl;
+    return { profit: lastSlope > 0.5, loss: lastSlope < -0.5 };
+  }, [result]);
+
   const update = (id, patch) => setLegs((ls) => ls.map((l) => (l.id === id ? { ...l, ...patch } : l)));
   const addLeg = () => setLegs((ls) => [...ls, newLeg(Math.round(spotNum / step) * step)]);
   const removeLeg = (id) => setLegs((ls) => (ls.length > 1 ? ls.filter((l) => l.id !== id) : ls));
@@ -130,8 +142,8 @@ export default function OptionsProfitCalculator({ defaultSymbol = "NIFTY" }) {
       {result && (
         <div className="px-5 pb-5">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            <Stat label="Max Profit" value={result.maxProfit === Infinity ? "Unlimited" : `₹${fmt(result.maxProfit)}`} tone="up" />
-            <Stat label="Max Loss" value={result.maxLoss === -Infinity ? "Unlimited" : `₹${fmt(Math.abs(result.maxLoss))}`} tone="down" />
+            <Stat label="Max Profit" value={unbounded.profit ? "Unlimited" : `₹${fmt(result.maxProfit)}`} tone="up" />
+            <Stat label="Max Loss" value={unbounded.loss ? "Unlimited" : `₹${fmt(Math.abs(result.maxLoss))}`} tone="down" />
             <Stat label="Breakeven" value={result.breakevens.length ? result.breakevens.map((b) => fmt(b)).join(" / ") : "—"} />
             <Stat label={net >= 0 ? "Net Credit" : "Net Debit"} value={`₹${fmt(Math.abs(net))}`} />
           </div>

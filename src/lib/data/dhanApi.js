@@ -24,13 +24,18 @@ export function invalidateDhanTokenCache() {
 }
 
 async function getToken() {
-  // 1. Env var (local dev / Vercel env)
-  if (process.env.DHAN_ACCESS_TOKEN) return process.env.DHAN_ACCESS_TOKEN;
+  // Firestore is the SOURCE OF TRUTH, checked before the env var.
+  //
+  // Why: the /api/cron/dhan-renew job extends the token every 12h and writes the
+  // new value to admin/dhan — that is what makes the token self-renewing. When a
+  // DHAN_ACCESS_TOKEN env var was checked first it permanently shadowed that
+  // renewed value, so renewals had no effect and the token died every 24h,
+  // forcing a manual paste. Env var is now only a bootstrap/local-dev fallback.
 
-  // 2. In-memory cache
+  // 1. In-memory cache (short TTL)
   if (_tokenCache && Date.now() - _tokenCachedAt < TOKEN_CACHE_TTL) return _tokenCache;
 
-  // 3. Firestore admin/dhan document
+  // 2. Firestore admin/dhan document (renewable source of truth)
   try {
     const { getAdminFirestore } = await import("../firebase/admin.js");
     const db  = getAdminFirestore();
@@ -44,7 +49,14 @@ async function getToken() {
     console.error("[Dhan] Failed to read token from Firestore:", err.message);
   }
 
-  throw new Error("Dhan access token not configured. Set DHAN_ACCESS_TOKEN or update admin/dhan in Firestore.");
+  // 3. Env var — bootstrap / local dev only. Never preferred, because a value
+  //    here cannot be renewed and would mask the self-renewing Firestore token.
+  if (process.env.DHAN_ACCESS_TOKEN) {
+    console.warn("[Dhan] Falling back to DHAN_ACCESS_TOKEN env var — this token cannot auto-renew. Seed admin/dhan via /api/admin/dhan-token instead.");
+    return process.env.DHAN_ACCESS_TOKEN;
+  }
+
+  throw new Error("Dhan access token not configured. Set admin/dhan in Firestore (preferred) or DHAN_ACCESS_TOKEN.");
 }
 
 async function headers() {
