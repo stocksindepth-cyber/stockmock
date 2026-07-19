@@ -10,10 +10,21 @@ service cloud.firestore {
       // Create own profile
       allow create: if request.auth != null && request.auth.uid == userId;
 
-      // Update own profile — client can NEVER elevate plan, limits, or expiry;
-      // those fields are written exclusively by the Admin SDK (server-side).
+      // Update own profile — client can NEVER elevate plan, limits, expiry, or
+      // self-grant credits/referral rewards. Those are Admin-SDK only (the Admin
+      // SDK bypasses rules entirely).
+      //
+      // NOTE: must compare CHANGED keys via diff().affectedKeys(). Using
+      // request.resource.data.keys() is a footgun — on an update that is the
+      // FULL post-write document, which always contains `plan`, so the guard was
+      // always false and silently denied EVERY client write (which fail-opened
+      // the daily backtest limit and killed activity telemetry).
       allow update: if request.auth != null && request.auth.uid == userId
-        && !request.resource.data.keys().hasAny(['plan', 'simulationsLimit', 'subscriptionExpiry']);
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny([
+             'plan', 'simulationsLimit', 'subscriptionExpiry',
+             'backtestCredits', 'referredBy', 'referralRewarded',
+             'referralSignups', 'referralConversions'
+           ]);
 
       // No client-side deletes of the user document
       allow delete: if false;
@@ -37,6 +48,16 @@ service cloud.firestore {
       allow read:          if request.auth != null && request.auth.uid == resource.data.userId;
       allow create:        if request.auth != null && request.resource.data.userId == request.auth.uid;
       allow update, delete: if false; // Admin SDK only
+    }
+
+    // ── Referral code → uid mapping ───────────────────────────────────────────
+    // Written by the client when a user first views their referral link; read
+    // server-side (Admin SDK) to resolve /r/{code}. A user may only create the
+    // mapping that points at themselves.
+    match /referralCodes/{code} {
+      allow read:   if request.auth != null;
+      allow create: if request.auth != null && request.resource.data.uid == request.auth.uid;
+      allow update, delete: if false;
     }
 
     // ── Plans — public read, no client writes ─────────────────────────────────

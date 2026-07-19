@@ -70,24 +70,36 @@ export async function checkAndIncrementSimulationLimit(userId) {
       };
     }
 
+    // Log FIRST and independently of the counter write. These were previously
+    // sequential, so when the counter write failed the telemetry silently died
+    // with it and we lost all usage visibility. logUserActivity has its own
+    // try/catch, so it can never break the flow.
+    await logUserActivity(userId, "SIMULATION_RUN", {
+      dailyRunCount: currentRunCount + 1,
+      planAtExecution: data.plan
+    });
+
     // Increment usage
     await updateDoc(userRef, {
       simulationsRunToday: currentRunCount + 1,
       lastSimulationDate: today
     });
 
-    // Deep logging for CRM / Analytics
-    await logUserActivity(userId, "SIMULATION_RUN", { 
-      dailyRunCount: currentRunCount + 1,
-      planAtExecution: data.plan 
-    });
-
     return { allowed: true, count: currentRunCount + 1, limit };
   } catch (error) {
-    if (error.code !== 'permission-denied') {
+    // permission-denied here is a SECURITY-RULE BUG, not a transient outage — and
+    // because we fail open below, it silently disables the daily limit AND skips
+    // activity logging. It was swallowed here for months. Make it loud.
+    if (error.code === 'permission-denied') {
+      console.error(
+        "[limit] Firestore DENIED the usage write — the daily backtest limit is NOT being enforced " +
+        "and SIMULATION_RUN telemetry is being dropped. Check firestore.rules (users update).",
+        error
+      );
+    } else {
       console.warn("Firestore limit check failed:", error);
     }
-    // Graceful degradation: if Firestore is unreachable/unconfigured, allow the simulation to proceed.
+    // Fail open on purpose: a Firestore outage must not block the core product.
     return { allowed: true };
   }
 }
