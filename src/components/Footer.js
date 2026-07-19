@@ -10,6 +10,7 @@ const LINKS = [
   {
     heading: "Free Tools & Data",
     items: [
+      { label: "Strategy Finder", href: "/strategy-finder" },
       { label: "NIFTY Option Chain", href: "/nifty-option-chain" },
       { label: "Stock Option Chains", href: "/option-chain" },
       { label: "FII/DII Data", href: "/fii-dii-data" },

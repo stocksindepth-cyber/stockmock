@@ -1,0 +1,357 @@
+{
+  "generatedAt": "2026-07-19T19:39:53.060Z",
+  "entryDaysBeforeExpiry": 4,
+  "since": "2018-01-01",
+  "strategies": [
+    {
+      "id": "short-straddle",
+      "name": "Short Straddle",
+      "view": "neutral",
+      "risk": "high",
+      "desc": "Sell the ATM call and put. Profits when the index sits still and premium decays.",
+      "stats": {
+        "NIFTY": {
+          "trades": 402,
+          "winRate": 60.7,
+          "avgPl": 1907,
+          "worst": -83179,
+          "best": 147889,
+          "totalPl": 766571,
+          "avgPremium": 24064,
+          "profitFactor": 1.33,
+          "from": "2018-01-25",
+          "to": "2026-07-14",
+          "lot": 75
+        },
+        "BANKNIFTY": {
+          "trades": 393,
+          "winRate": 56.7,
+          "avgPl": 1739,
+          "worst": -108480,
+          "best": 168035,
+          "totalPl": 683576,
+          "avgPremium": 29271,
+          "profitFactor": 1.27,
+          "from": "2018-01-04",
+          "to": "2026-06-30",
+          "lot": 30
+        }
+      }
+    },
+    {
+      "id": "short-strangle",
+      "name": "Short Strangle",
+      "view": "neutral",
+      "risk": "high",
+      "desc": "Sell an OTM call and an OTM put. Wider breakevens than a straddle, smaller credit.",
+      "stats": {
+        "NIFTY": {
+          "trades": 399,
+          "winRate": 63.7,
+          "avgPl": 1401,
+          "worst": -82144,
+          "best": 59516,
+          "totalPl": 559102,
+          "avgPremium": 16457,
+          "profitFactor": 1.26,
+          "from": "2018-01-25",
+          "to": "2026-07-14",
+          "lot": 75
+        },
+        "BANKNIFTY": {
+          "trades": 383,
+          "winRate": 57.7,
+          "avgPl": 1048,
+          "worst": -108138,
+          "best": 119703,
+          "totalPl": 401250,
+          "avgPremium": 19797,
+          "profitFactor": 1.17,
+          "from": "2018-01-04",
+          "to": "2026-06-30",
+          "lot": 30
+        }
+      }
+    },
+    {
+      "id": "iron-condor",
+      "name": "Iron Condor",
+      "view": "neutral",
+      "risk": "defined",
+      "desc": "Short strangle with protective wings. Defined maximum loss.",
+      "stats": {
+        "NIFTY": {
+          "trades": 399,
+          "winRate": 39.8,
+          "avgPl": -40,
+          "worst": -5145,
+          "best": 6926,
+          "totalPl": -15956,
+          "avgPremium": 4682,
+          "profitFactor": 0.97,
+          "from": "2018-01-25",
+          "to": "2026-07-14",
+          "lot": 75
+        },
+        "BANKNIFTY": {
+          "trades": 383,
+          "winRate": 30.5,
+          "avgPl": 208,
+          "worst": -17126,
+          "best": 87987,
+          "totalPl": 79833,
+          "avgPremium": 4845,
+          "profitFactor": 1.18,
+          "from": "2018-01-04",
+          "to": "2026-06-30",
+          "lot": 30
+        }
+      }
+    },
+    {
+      "id": "iron-butterfly",
+      "name": "Iron Butterfly",
+      "view": "neutral",
+      "risk": "defined",
+      "desc": "Short ATM straddle with wings. Bigger credit than a condor, narrower profit zone.",
+      "stats": {
+        "NIFTY": {
+          "trades": 399,
+          "winRate": 37.1,
+          "avgPl": 66,
+          "worst": -7095,
+          "best": 14558,
+          "totalPl": 26411,
+          "avgPremium": 11175,
+          "profitFactor": 1.03,
+          "from": "2018-01-25",
+          "to": "2026-07-14",
+          "lot": 75
+        },
+        "BANKNIFTY": {
+          "trades": 383,
+          "winRate": 27.9,
+          "avgPl": 210,
+          "worst": -16577,
+          "best": 72552,
+          "totalPl": 80503,
+          "avgPremium": 10130,
+          "profitFactor": 1.13,
+          "from": "2018-01-04",
+          "to": "2026-06-30",
+          "lot": 30
+        }
+      }
+    },
+    {
+      "id": "long-straddle",
+      "name": "Long Straddle",
+      "view": "volatile",
+      "risk": "defined",
+      "desc": "Buy the ATM call and put. Needs a big move either way to pay off.",
+      "stats": {
+        "NIFTY": {
+          "trades": 402,
+          "winRate": 39.3,
+          "avgPl": -1907,
+          "worst": -147889,
+          "best": 83179,
+          "totalPl": -766571,
+          "avgPremium": 24064,
+          "profitFactor": 0.75,
+          "from": "2018-01-25",
+          "to": "2026-07-14",
+          "lot": 75
+        },
+        "BANKNIFTY": {
+          "trades": 393,
+          "winRate": 43.3,
+          "avgPl": -1739,
+          "worst": -168035,
+          "best": 108480,
+          "totalPl": -683576,
+          "avgPremium": 29271,
+          "profitFactor": 0.78,
+          "from": "2018-01-04",
+          "to": "2026-06-30",
+          "lot": 30
+        }
+      }
+    },
+    {
+      "id": "long-strangle",
+      "name": "Long Strangle",
+      "view": "volatile",
+      "risk": "defined",
+      "desc": "Buy an OTM call and put. Cheaper than a straddle, needs a bigger move.",
+      "stats": {
+        "NIFTY": {
+          "trades": 399,
+          "winRate": 36.3,
+          "avgPl": -1401,
+          "worst": -59516,
+          "best": 82144,
+          "totalPl": -559102,
+          "avgPremium": 16457,
+          "profitFactor": 0.8,
+          "from": "2018-01-25",
+          "to": "2026-07-14",
+          "lot": 75
+        },
+        "BANKNIFTY": {
+          "trades": 383,
+          "winRate": 42.3,
+          "avgPl": -1048,
+          "worst": -119703,
+          "best": 108138,
+          "totalPl": -401250,
+          "avgPremium": 19797,
+          "profitFactor": 0.85,
+          "from": "2018-01-04",
+          "to": "2026-06-30",
+          "lot": 30
+        }
+      }
+    },
+    {
+      "id": "bull-call-spread",
+      "name": "Bull Call Spread",
+      "view": "bullish",
+      "risk": "defined",
+      "desc": "Buy an ATM call, sell a higher call. Capped profit, capped loss.",
+      "stats": {
+        "NIFTY": {
+          "trades": 400,
+          "winRate": 41.8,
+          "avgPl": 225,
+          "worst": -14299,
+          "best": 12701,
+          "totalPl": 89974,
+          "avgPremium": 5516,
+          "profitFactor": 1.09,
+          "from": "2018-01-25",
+          "to": "2026-07-14",
+          "lot": 75
+        },
+        "BANKNIFTY": {
+          "trades": 384,
+          "winRate": 45.1,
+          "avgPl": 444,
+          "worst": -49966,
+          "best": 75174,
+          "totalPl": 170387,
+          "avgPremium": 5076,
+          "profitFactor": 1.21,
+          "from": "2018-01-04",
+          "to": "2026-06-30",
+          "lot": 30
+        }
+      }
+    },
+    {
+      "id": "bull-put-spread",
+      "name": "Bull Put Spread",
+      "view": "bullish",
+      "risk": "defined",
+      "desc": "Sell an OTM put, buy a lower put. Collects credit while the index holds up.",
+      "stats": {
+        "NIFTY": {
+          "trades": 399,
+          "winRate": 67.9,
+          "avgPl": 115,
+          "worst": -7155,
+          "best": 6878,
+          "totalPl": 45904,
+          "avgPremium": 2411,
+          "profitFactor": 1.1,
+          "from": "2018-01-25",
+          "to": "2026-07-14",
+          "lot": 75
+        },
+        "BANKNIFTY": {
+          "trades": 384,
+          "winRate": 63.8,
+          "avgPl": 168,
+          "worst": -19535,
+          "best": 59606,
+          "totalPl": 64320,
+          "avgPremium": 2530,
+          "profitFactor": 1.15,
+          "from": "2018-01-04",
+          "to": "2026-06-30",
+          "lot": 30
+        }
+      }
+    },
+    {
+      "id": "bear-put-spread",
+      "name": "Bear Put Spread",
+      "view": "bearish",
+      "risk": "defined",
+      "desc": "Buy an ATM put, sell a lower put. Capped profit, capped loss.",
+      "stats": {
+        "NIFTY": {
+          "trades": 399,
+          "winRate": 39.6,
+          "avgPl": -301,
+          "worst": -14370,
+          "best": 13811,
+          "totalPl": -120131,
+          "avgPremium": 5695,
+          "profitFactor": 0.89,
+          "from": "2018-01-25",
+          "to": "2026-07-14",
+          "lot": 75
+        },
+        "BANKNIFTY": {
+          "trades": 384,
+          "winRate": 39.1,
+          "avgPl": -653,
+          "worst": -147726,
+          "best": 50037,
+          "totalPl": -250820,
+          "avgPremium": 5735,
+          "profitFactor": 0.77,
+          "from": "2018-01-04",
+          "to": "2026-06-30",
+          "lot": 30
+        }
+      }
+    },
+    {
+      "id": "bear-call-spread",
+      "name": "Bear Call Spread",
+      "view": "bearish",
+      "risk": "defined",
+      "desc": "Sell an OTM call, buy a higher call. Collects credit while the index stays capped.",
+      "stats": {
+        "NIFTY": {
+          "trades": 400,
+          "winRate": 66.5,
+          "avgPl": -155,
+          "worst": -6769,
+          "best": 7717,
+          "totalPl": -61804,
+          "avgPremium": 2286,
+          "profitFactor": 0.89,
+          "from": "2018-01-25",
+          "to": "2026-07-14",
+          "lot": 75
+        },
+        "BANKNIFTY": {
+          "trades": 384,
+          "winRate": 60.2,
+          "avgPl": 55,
+          "worst": -5883,
+          "best": 90851,
+          "totalPl": 21066,
+          "avgPremium": 2401,
+          "profitFactor": 1.04,
+          "from": "2018-01-04",
+          "to": "2026-06-30",
+          "lot": 30
+        }
+      }
+    }
+  ]
+}

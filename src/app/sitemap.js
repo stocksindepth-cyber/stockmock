@@ -10,6 +10,11 @@ export default function sitemap() {
     // ── Public SEO landing pages (live data, no login — indexable) ──────────
     { url: `${baseUrl}/nifty-option-chain`,      lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
     { url: `${baseUrl}/bank-nifty-option-chain`, lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
+    { url: `${baseUrl}/strategy-finder`,         lastModified: new Date(), changeFrequency: "weekly",  priority: 0.9 },
+    { url: `${baseUrl}/strategy-finder/neutral`, lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${baseUrl}/strategy-finder/bullish`, lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${baseUrl}/strategy-finder/bearish`, lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
+    { url: `${baseUrl}/strategy-finder/volatile`,lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
     { url: `${baseUrl}/fii-dii-data`,            lastModified: new Date(), changeFrequency: "daily",   priority: 0.9 },
     { url: `${baseUrl}/options-profit-calculator`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/margin-calculator`,       lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
