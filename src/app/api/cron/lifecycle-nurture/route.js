@@ -16,6 +16,7 @@ export const runtime = "nodejs";
 export const maxDuration = 300;
 
 import { NextResponse } from "next/server";
+import admin from "firebase-admin";
 import { getAdminFirestore } from "@/lib/firebase/admin";
 import { sendEmail } from "@/lib/email/sender";
 
@@ -65,7 +66,9 @@ async function sendSequence({ db, users, sequenceKey, emailType, props = {} }) {
     if (result.success) {
       // Mark as sent so we never re-send
       await db.collection("users").doc(user.id).update({
-        nurtureEmailsSent: [...(user.nurtureEmailsSent || []), sequenceKey],
+        // atomic — a read-modify-write here let concurrent sequence writes
+          // clobber each other, which would resend an already-sent email
+          nurtureEmailsSent: admin.firestore.FieldValue.arrayUnion(sequenceKey),
       });
       results.sent++;
     } else {
@@ -113,7 +116,9 @@ async function sendRenewalReminders(db) {
 
       if (result.success) {
         await db.collection("users").doc(user.id).update({
-          nurtureEmailsSent: [...(user.nurtureEmailsSent || []), sequenceKey],
+          // atomic — a read-modify-write here let concurrent sequence writes
+          // clobber each other, which would resend an already-sent email
+          nurtureEmailsSent: admin.firestore.FieldValue.arrayUnion(sequenceKey),
         });
         results.sent++;
       } else {
@@ -126,9 +131,16 @@ async function sendRenewalReminders(db) {
 }
 
 export async function GET(request) {
-  // Vercel Cron passes the secret via Authorization header
+  // Vercel Cron passes the secret via Authorization header.
+  // Fail CLOSED: previously this was `if (CRON_SECRET && ...)`, so a missing or
+  // misspelled secret in any environment skipped the check entirely and left the
+  // endpoint (which sends mail to every user) publicly callable.
   const authHeader = request.headers.get("authorization");
-  if (CRON_SECRET && authHeader !== `Bearer ${CRON_SECRET}`) {
+  if (!CRON_SECRET) {
+    console.error("[lifecycle-nurture] EMAIL_CRON_SECRET is not set — refusing to run.");
+    return NextResponse.json({ error: "Server misconfigured" }, { status: 500 });
+  }
+  if (authHeader !== `Bearer ${CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

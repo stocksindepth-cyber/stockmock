@@ -10,6 +10,7 @@
 export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
+import admin from "firebase-admin";
 import { getAdminFirestore } from "@/lib/firebase/admin";
 import { sendEmail } from "@/lib/email/sender";
 
@@ -70,7 +71,7 @@ export async function POST(request) {
       if (result.success) {
         // Mark as sent so we never re-blast
         await db.collection("users").doc(doc.id).update({
-          nurtureEmailsSent: [...(user.nurtureEmailsSent || []), BLAST_TAG],
+          nurtureEmailsSent: admin.firestore.FieldValue.arrayUnion(BLAST_TAG),
         });
         results.sent.push({ email, name });
       } else {

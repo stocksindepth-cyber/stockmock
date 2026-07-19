@@ -40,15 +40,20 @@ function formatSpot(spot) {
   return isNaN(num) ? String(spot) : num.toLocaleString("en-IN");
 }
 
+// NOTE: never coerce a missing IVP to 50 — that printed a confident
+// "NEUTRAL — normal range" verdict next to a blank "—" value, i.e. an
+// authoritative-sounding reading derived from no data at all.
 function getIVPColor(ivp) {
-  const val = parseFloat(String(ivp || "50"));
+  const val = parseFloat(ivp);
+  if (!Number.isFinite(val)) return "#64748b"; // unknown → neutral grey
   if (val >= 75) return "#ef4444";
   if (val <= 25) return "#22c55e";
   return "#f59e0b";
 }
 
 function getIVPLabel(ivp) {
-  const val = parseFloat(String(ivp || "50"));
+  const val = parseFloat(ivp);
+  if (!Number.isFinite(val)) return "Not enough history yet";
   if (val >= 75) return "HIGH — elevated premium";
   if (val <= 25) return "LOW — cheap options";
   return "NEUTRAL — normal range";
