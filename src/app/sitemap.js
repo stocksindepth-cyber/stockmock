@@ -1,5 +1,6 @@
 import { STRATEGY_SLUGS } from "@/data/strategies";
-import { FNO_STOCKS, FEATURED_STOCKS } from "@/data/fnoStocks";
+// (FNO_STOCKS / FEATURED_STOCKS intentionally not imported — per-stock chain
+//  pages are excluded from the sitemap; see the note at the bottom of this file.)
 
 export default function sitemap() {
   const baseUrl = "https://www.optionsgyani.com";
@@ -108,13 +109,20 @@ export default function sitemap() {
     priority: 0.8,
   }));
 
-  // Per-stock option chain pages (featured liquid names — highest search demand)
-  const stockChainPages = FEATURED_STOCKS.map((sym) => ({
-    url: `${baseUrl}/option-chain/${FNO_STOCKS[sym].slug}`,
-    lastModified: new Date(),
-    changeFrequency: "daily",
-    priority: 0.7,
-  }));
+  // ── Per-stock option chain pages are DELIBERATELY EXCLUDED from the sitemap ──
+  //
+  // GSC (2026-07-19): 21 indexed vs 124 "Discovered – currently not indexed".
+  // Measured cause: two stock pages share 519 words and differ by only 59 once
+  // the ticker is removed — ~90% duplicate. Their one differentiator (the live
+  // option chain) is client-rendered, so a crawler sees near-identical HTML.
+  // Asking Google to index 52 clones burned crawl budget that the ~98 genuinely
+  // unique pages (strategies, learn, brokers, calculators, FII/DII) needed.
+  //
+  // The pages stay live and internally linked (hub + footer + contextual), so
+  // they remain discoverable — they just stop competing for crawl budget.
+  // Re-add them once each carries real per-stock data. That needs stock options
+  // (FinInstrmTp "STO") in BigQuery; the bhavcopy ingest currently keeps index
+  // options ("IDO") only, so there is nothing unique to render yet.
 
-  return [...staticPages, ...strategyPages, ...learnPages, brokerHubPage, ...brokerPages, ...stockChainPages];
+  return [...staticPages, ...strategyPages, ...learnPages, brokerHubPage, ...brokerPages];
 }
