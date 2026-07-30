@@ -5,12 +5,12 @@ import DhanReferralBanner from "@/components/DhanReferralBanner";
 
 export const metadata = {
   title: "NIFTY Option Chain Live — OI, IV, PCR & Max Pain (Free) | OptionsGyani",
-  description: "Live NIFTY option chain with real-time Open Interest, IV, LTP, PCR and Max Pain by strike. Free NSE options data, weekly Tuesday expiry. Backtest any strike on 8+ years of data.",
+  description: "NIFTY option chain with strike-wise Open Interest, IV, LTP, PCR and Max Pain. Free NSE options data, weekly Tuesday expiry. Backtest any strike on 8+ years of data.",
   keywords: "nifty option chain, nifty option chain live, nifty oi, nifty pcr, nifty max pain, nse option chain nifty, nifty options data",
   alternates: { canonical: "https://www.optionsgyani.com/nifty-option-chain" },
   openGraph: {
     title: "NIFTY Option Chain Live — OI, IV, PCR & Max Pain | OptionsGyani",
-    description: "Real-time NIFTY option chain, PCR and Max Pain. Free NSE data. Weekly Tuesday expiry.",
+    description: "NIFTY option chain, PCR and Max Pain. Free NSE data. Weekly Tuesday expiry.",
     url: "https://www.optionsgyani.com/nifty-option-chain",
     images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "NIFTY Option Chain — OptionsGyani" }],
     type: "website",
@@ -19,9 +19,9 @@ export const metadata = {
 
 const FAQ = [
   { q: "When does NIFTY option expire?", a: "NIFTY weekly options expire every Tuesday. Since 1 September 2025, NSE moved the NIFTY weekly expiry from Thursday to Tuesday. If Tuesday is a trading holiday, the expiry shifts to the previous trading day." },
-  { q: "What is PCR in the NIFTY option chain?", a: "PCR (Put-Call Ratio) is total Put OI divided by total Call OI. A PCR above 1 means puts are being written more heavily (often read as bullish/support-building), while below 1 means calls dominate (often read as resistance/bearish). We compute it live from the full chain above." },
-  { q: "What is Max Pain in NIFTY?", a: "Max Pain is the strike price at which option buyers, in aggregate, lose the most — and therefore where option writers would prefer NIFTY to expire. It is calculated from open interest across all strikes and updated live above." },
-  { q: "Is this NIFTY option chain data free?", a: "Yes. Viewing the live NIFTY option chain, OI, IV, PCR and Max Pain is completely free with no login. A free account lets you backtest any strategy on this chain across 8+ years of real NSE data." },
+  { q: "What is PCR in the NIFTY option chain?", a: "PCR (Put-Call Ratio) is total Put OI divided by total Call OI. A PCR above 1 means puts are being written more heavily (often read as bullish/support-building), while below 1 means calls dominate (often read as resistance/bearish). It's computed from the full chain above." },
+  { q: "What is Max Pain in NIFTY?", a: "Max Pain is the strike price at which option buyers, in aggregate, lose the most — and therefore where option writers would prefer NIFTY to expire. It is calculated from open interest across all strikes shown above." },
+  { q: "Is this NIFTY option chain data free?", a: "Yes. Viewing the NIFTY option chain, OI, IV, PCR and Max Pain is completely free with no login. A free account lets you backtest any strategy on this chain across 8+ years of real NSE data." },
 ];
 
 export default function NiftyOptionChainPage() {
@@ -35,11 +35,11 @@ export default function NiftyOptionChainPage() {
 
       <section className="max-w-6xl mx-auto px-4 pt-28 pb-8">
         <div className="flex items-center gap-2 text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-3">
-          <Activity size={14} /> Live NSE Data · Weekly Tuesday Expiry
+          <Activity size={14} /> NSE Option Chain · Weekly Tuesday Expiry
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">NIFTY Option Chain — Live OI, IV, PCR &amp; Max Pain</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">NIFTY Option Chain — OI, IV, PCR &amp; Max Pain</h1>
         <p className="text-slate-400 max-w-3xl mb-8">
-          Real-time NIFTY 50 option chain with strike-wise Open Interest, Implied Volatility, LTP, live Put-Call Ratio and Max Pain — free, no login. NIFTY weekly options expire every <strong className="text-slate-200">Tuesday</strong>. Pick an expiry, read the OI walls, then backtest any strike on 8+ years of real NSE data.
+          NIFTY 50 option chain with strike-wise Open Interest, Implied Volatility, LTP, Put-Call Ratio and Max Pain — free, no login. NIFTY weekly options expire every <strong className="text-slate-200">Tuesday</strong>. Pick an expiry, read the OI walls, then backtest any strike on 8+ years of real NSE data.
         </p>
 
         <PublicOptionChain symbol="NIFTY" label="NIFTY" />

@@ -23,12 +23,12 @@ export async function generateMetadata({ params }) {
   const url = `https://www.optionsgyani.com/option-chain/${stock}`;
   return {
     title: `${symbol} Option Chain Live — OI, IV, PCR & Max Pain (Free) | OptionsGyani`,
-    description: `Live ${symbol} option chain with real-time Open Interest, IV, LTP, PCR and Max Pain by strike. Free NSE stock options data. Monthly expiry (last Tuesday). No login.`,
+    description: `${symbol} option chain with strike-wise Open Interest, IV, LTP, PCR and Max Pain. Free NSE stock options data. Monthly expiry (last Tuesday). No login.`,
     keywords: `${symbol} option chain, ${symbol} option chain live, ${symbol} oi, ${symbol} pcr, ${symbol} options, nse ${symbol} option chain`,
     alternates: { canonical: url },
     openGraph: {
       title: `${symbol} Option Chain Live — OI, IV, PCR & Max Pain | OptionsGyani`,
-      description: `Real-time ${symbol} option chain, PCR and Max Pain. Free NSE data. Monthly (last-Tuesday) expiry.`,
+      description: `${symbol} option chain, PCR and Max Pain. Free NSE data. Monthly (last-Tuesday) expiry.`,
       url,
       images: [{ url: "/og-image.png", width: 1200, height: 630, alt: `${symbol} Option Chain — OptionsGyani` }],
       type: "website",
@@ -44,10 +44,10 @@ export default async function StockOptionChainPage({ params }) {
   const lot = FNO_STOCKS[symbol]?.lot;
   const FAQ = [
     { q: `When do ${symbol} options expire?`, a: `${symbol} stock options are monthly-only, expiring on the last Tuesday of each month. If that Tuesday is a trading holiday, expiry shifts to the previous trading day. Stock options in India do not have weekly expiries.` },
-    { q: `What is PCR in the ${symbol} option chain?`, a: `PCR (Put-Call Ratio) is total Put OI divided by total Call OI. Above 1 leans bullish (heavier put writing/support), below 1 leans bearish (heavier call writing/resistance). It is computed live from the full chain above.` },
-    { q: `What is Max Pain for ${symbol}?`, a: `Max Pain is the strike at which option buyers collectively lose the most, and where writers would prefer ${symbol} to settle at expiry. It is derived live from open interest across all strikes above.` },
+    { q: `What is PCR in the ${symbol} option chain?`, a: `PCR (Put-Call Ratio) is total Put OI divided by total Call OI. Above 1 leans bullish (heavier put writing/support), below 1 leans bearish (heavier call writing/resistance). It is computed from the full chain above.` },
+    { q: `What is Max Pain for ${symbol}?`, a: `Max Pain is the strike at which option buyers collectively lose the most, and where writers would prefer ${symbol} to settle at expiry. It is derived from open interest across all strikes above.` },
     { q: `What is the ${symbol} options lot size?`, a: lot ? `${symbol} options have a lot size of ${lot.toLocaleString("en-IN")} shares per contract, as set by NSE. One lot controls ${lot.toLocaleString("en-IN")} shares of the underlying.` : `${symbol} options trade in NSE-defined lot sizes. See the live chain above for current contract details.` },
-    { q: `Is this ${symbol} option chain free?`, a: `Yes. Live ${symbol} OI, IV, LTP, PCR and Max Pain are free to view with no login. A free account unlocks strategy backtesting on 8+ years of real NSE data.` },
+    { q: `Is this ${symbol} option chain free?`, a: `Yes. ${symbol} OI, IV, LTP, PCR and Max Pain are free to view with no login. A free account unlocks strategy backtesting on 8+ years of real NSE data.` },
   ];
 
   return (
@@ -60,11 +60,11 @@ export default async function StockOptionChainPage({ params }) {
 
       <section className="max-w-6xl mx-auto px-4 pt-28 pb-8">
         <div className="flex items-center gap-2 text-xs text-indigo-400 font-semibold uppercase tracking-wider mb-3">
-          <Activity size={14} /> Live NSE Data · Monthly Expiry (Last Tuesday)
+          <Activity size={14} /> NSE Option Chain · Monthly Expiry (Last Tuesday)
         </div>
-        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">{symbol} Option Chain — Live OI, IV, PCR &amp; Max Pain</h1>
+        <h1 className="text-3xl sm:text-4xl font-bold text-white mb-3">{symbol} Option Chain — OI, IV, PCR &amp; Max Pain</h1>
         <p className="text-slate-400 max-w-3xl mb-5">
-          Real-time {symbol} option chain with strike-wise Open Interest, Implied Volatility, LTP, live Put-Call Ratio and Max Pain — free, no login. {symbol} stock options expire <strong className="text-slate-200">monthly, on the last Tuesday</strong>. Read the OI walls, then backtest any strike on years of real NSE data.
+          {symbol} option chain with strike-wise Open Interest, Implied Volatility, LTP, Put-Call Ratio and Max Pain — free, no login. {symbol} stock options expire <strong className="text-slate-200">monthly, on the last Tuesday</strong>. Read the OI walls, then backtest any strike on years of real NSE data.
         </p>
         <div className="flex items-start gap-2 rounded-lg border border-white/10 bg-slate-900/40 px-4 py-3 mb-8 max-w-3xl">
           <Info size={16} className="text-indigo-400 mt-0.5 shrink-0" />

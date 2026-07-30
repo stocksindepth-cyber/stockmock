@@ -44,8 +44,15 @@ export default function PublicOptionChain({ symbol = "NIFTY", label = "NIFTY" })
         if (!alive) return;
         const me = idx?.indices?.find((i) => i.key === symbol);
         if (me) { setSpot(me.price); setChange(me.change); setChangePct(me.changePercent); }
-        if (exp?.expiries?.length) { setExpiries(exp.expiries); setExpiry(exp.expiries[0]); }
-      } catch { /* silent */ }
+        if (exp?.expiries?.length) {
+          setExpiries(exp.expiries); setExpiry(exp.expiries[0]);
+        } else {
+          // No expiries resolved (e.g. stock options with no Data API plan) — the
+          // chain effect will never run, so stop "loading" here or the table
+          // would spin forever. This surfaces the honest unavailable state.
+          setLoading(false);
+        }
+      } catch { setLoading(false); }
     })();
     return () => { alive = false; };
   }, [symbol]);
@@ -104,8 +111,25 @@ export default function PublicOptionChain({ symbol = "NIFTY", label = "NIFTY" })
 
   const up = (change ?? 0) >= 0;
 
+  // A chain that comes back empty genuinely can't be shown (e.g. stock options,
+  // which need the paid Data API). An index chain that renders with source
+  // "simulated" is the PRODUCT'S NORMAL DESIGN — live spot + Black-Scholes greeks
+  // — and must NOT be flagged as broken (the small "Modeled" chip discloses it).
+  const unavailable = !loading && !view.length;
+
   return (
     <div className="rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur overflow-hidden">
+      {unavailable && (
+        <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-2.5 bg-amber-500/10 border-b border-amber-500/25 text-[12px]">
+          <span className="text-amber-200/90">
+            Live {label} chain isn&apos;t available right now — but you can still backtest {label} strategies on 8+ years of real NSE data.
+          </span>
+          <Link href="/backtest" className="font-semibold text-amber-200 hover:text-white whitespace-nowrap">
+            Open the backtester →
+          </Link>
+        </div>
+      )}
+
       {/* Header: spot + stats */}
       <div className="flex flex-wrap items-center gap-x-8 gap-y-3 px-5 py-4 border-b border-white/10">
         <div>
@@ -168,10 +192,10 @@ export default function PublicOptionChain({ symbol = "NIFTY", label = "NIFTY" })
           </thead>
           <tbody>
             {loading && !view.length ? (
-              <tr><td colSpan={7} className="text-center py-10 text-slate-500">Loading live chain…</td></tr>
+              <tr><td colSpan={7} className="text-center py-10 text-slate-500">Loading chain…</td></tr>
             ) : !view.length ? (
               <tr><td colSpan={7} className="text-center py-10 text-slate-500">
-                Live chain is temporarily unavailable. Option-chain data refreshes during market hours (Mon–Fri, 9:15 AM–3:30 PM IST).
+                Live chain paused — the exchange feed is temporarily unavailable. The backtester and historical tools are unaffected.
               </td></tr>
             ) : view.map((r, i) => {
               const isATM = spot && Math.abs(r.strike - spot) === Math.min(...view.map((x) => Math.abs(x.strike - spot)));
