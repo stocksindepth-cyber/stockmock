@@ -50,6 +50,8 @@ const PLANS = [
     monthlyPrice: 499,
     annualPrice: 333,
     annualTotal: 3999,
+    listMonthly: 999,   // founding price 499; regular price after launch
+    founding: true,
     dbPlan: "pro",
     durationDays: 30,
     badge: "Most Popular",
@@ -77,6 +79,8 @@ const PLANS = [
     monthlyPrice: 1499,
     annualPrice: 833,
     annualTotal: 9999,
+    listMonthly: 2999,
+    founding: true,
     dbPlan: "elite",
     durationDays: 30,
     badge: null,
@@ -492,6 +496,19 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {/* ── Trust strip: substance-based social proof (real, non-stale facts) ── */}
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mb-8 text-center">
+          {[
+            { icon: Database,   t: "11.5M+ real NSE data points" },
+            { icon: TrendingUp, t: "Every expiry since 2016" },
+            { icon: Shield,     t: "Cancel anytime · Secure Razorpay" },
+          ].map((x) => (
+            <span key={x.t} className="inline-flex items-center gap-1.5 text-xs text-slate-400">
+              <x.icon className="w-3.5 h-3.5 text-indigo-400" /> {x.t}
+            </span>
+          ))}
+        </div>
+
         {/* ── Pricing cards ── */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           {PLANS.map((plan) => {
@@ -529,12 +546,21 @@ export default function PricingPage() {
                       <>
                         <span className="text-5xl font-extrabold text-white">₹{displayPrice}</span>
                         <span className="text-slate-500 mb-2 text-sm">/mo</span>
+                        {/* Founding anchor: ₹999 is the real post-launch list price, not a fake was-price */}
+                        {plan.founding && !annual && couponState !== "valid" && (
+                          <span className="text-slate-500 line-through text-lg mb-2 ml-1">₹{plan.listMonthly}</span>
+                        )}
                         {couponState === "valid" && basePrice !== displayPrice && (
                           <span className="text-slate-500 line-through text-lg mb-2 ml-1">₹{basePrice}</span>
                         )}
                       </>
                     )}
                   </div>
+                  {plan.founding && displayPrice > 0 && couponState !== "valid" && (
+                    <p className="text-xs text-amber-400 font-semibold mb-0.5">
+                      🔒 Founding price — locked in for early members{annual ? "" : `; regular ₹${plan.listMonthly}/mo after launch`}
+                    </p>
+                  )}
                   {couponState === "valid" && basePrice !== displayPrice && (
                     <p className="text-xs text-emerald-400 font-semibold mb-0.5">
                       You save ₹{basePrice - displayPrice}/mo with OG30

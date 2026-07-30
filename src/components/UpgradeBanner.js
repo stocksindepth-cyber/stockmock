@@ -58,14 +58,19 @@ export default function UpgradeBanner({ isOpen, onClose, message }) {
           ))}
         </div>
 
-        {/* Price anchored against the tools they're already comparing us to */}
+        {/* Founding price + competitor anchor. ₹999 is the real post-launch list
+            price, not a fabricated was-price. */}
         <div className="rounded-xl bg-slate-900/60 border border-white/10 px-4 py-3 mb-5">
           <div className="flex items-baseline gap-2">
             <span className="text-2xl font-bold text-white">₹499</span>
             <span className="text-slate-400 text-sm">/month</span>
+            <span className="text-slate-500 line-through text-base ml-1">₹999</span>
+            <span className="text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/25 rounded px-1.5 py-0.5 ml-1">
+              🔒 FOUNDING PRICE
+            </span>
           </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            Sensibull Pro ₹800/mo · Opstra PRO ₹1,000/mo · Quantsapp Pro ₹2,950/mo
+          <p className="text-[11px] text-slate-500 mt-1.5">
+            Locked in for early members. Sensibull ₹800/mo · Opstra ₹1,000/mo · Quantsapp ₹2,950/mo.
           </p>
         </div>
 
