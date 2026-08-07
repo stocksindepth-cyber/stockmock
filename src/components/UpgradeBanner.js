@@ -43,7 +43,7 @@ export default function UpgradeBanner({ isOpen, onClose, message }) {
         </button>
 
         <h2 className="text-2xl font-bold text-white mb-1.5 pr-8">
-          That&apos;s your 3 free backtests for today
+          That&apos;s your 2 free backtests for today
         </h2>
         <p className="text-slate-400 text-sm mb-5 leading-relaxed">
           {message || "Pro removes the cap so you can keep testing while the idea is still fresh."}
@@ -100,7 +100,7 @@ export default function UpgradeBanner({ isOpen, onClose, message }) {
           {/* Honest exit: the free tier genuinely resets, so say so. */}
           <button onClick={onClose} className="w-full py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-colors text-xs flex items-center justify-center gap-1.5">
             <Clock className="w-3.5 h-3.5" />
-            No thanks — my 3 free backtests reset tomorrow
+            No thanks — my 2 free backtests reset tomorrow
           </button>
         </div>
 

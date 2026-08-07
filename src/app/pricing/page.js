@@ -31,7 +31,7 @@ const PLANS = [
     ctaVariant: "ghost",
     highlight: false,
     features: {
-      backtests: "3 backtests / day",
+      backtests: "2 backtests / day",
       data: "Last 1 year of NSE data",
       strategies: "All strategy templates",
       optionChain: "Live Option Chain + Greeks",
@@ -106,7 +106,7 @@ const PLANS = [
 
 // ─── Feature comparison rows ───────────────────────────────────────────────────
 const COMPARISON = [
-  { label: "Daily Backtests",         free: "3 / day",         pro: "Unlimited",                elite: "Unlimited" },
+  { label: "Daily Backtests",         free: "2 / day",         pro: "Unlimited",                elite: "Unlimited" },
   { label: "Historical Data",         free: "Last 1 year",     pro: "2016 – today (8+ yrs)",    elite: "2016 – today (8+ yrs)" },
   { label: "Strategy Templates",      free: "All templates",   pro: "All templates",            elite: "All templates" },
   { label: "Option Chain + Greeks",   free: "✓ Live",          pro: "✓ Live",                   elite: "✓ Live" },
@@ -127,7 +127,7 @@ const COMPARISON = [
 const FAQ = [
   {
     q: "Is the free plan really free forever?",
-    a: "Yes. No credit card, no trial expiry. The free plan is permanently free with 3 backtests/day and the last 1 year of NSE data. You can use OptionsGyani to learn, paper trade, and explore — for free, forever.",
+    a: "Yes. No credit card, no trial expiry. The free plan is permanently free with 2 backtests/day and the last 1 year of NSE data. You can use OptionsGyani to learn, paper trade, and explore — for free, forever.",
   },
   {
     q: "What NSE data do paid plans cover?",

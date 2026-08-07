@@ -440,7 +440,6 @@ function BacktestContent() {
   const [streamError, setStreamError] = useState(null);
   const [mounted,     setMounted]     = useState(false);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
-  const [showNudge,   setShowNudge]   = useState(false);
   const [expandedTrade, setExpandedTrade] = useState(null);
   const [showTradeLog,  setShowTradeLog]  = useState(false);
   const [tradeLogView,  setTradeLogView]  = useState("list"); // "list" | "month"
@@ -554,8 +553,6 @@ function BacktestContent() {
 
     const limitCheck = await checkAndIncrementSimulationLimit(currentUser?.uid);
     if (!limitCheck.allowed) { setUpgradeOpen(true); return; }
-    const isFree = !userProfile?.plan || userProfile.plan === "free";
-    if (isFree && limitCheck.count >= 3) setShowNudge(true);
 
     // Referral: a referred user just ran a backtest → grant the one-time reward
     // to them and their referrer (server-side, idempotent, non-blocking).
@@ -713,31 +710,49 @@ function BacktestContent() {
           </p>
         </div>
 
-        {/* Soft upgrade nudge — shown after 3rd free backtest */}
-        {showNudge && (
-          <div className="mb-6 flex items-center justify-between gap-4 px-5 py-3.5 rounded-xl bg-amber-500/10 border border-amber-500/25">
-            <div className="flex items-center gap-3 min-w-0">
-              <span className="text-amber-400 text-lg shrink-0">⚡</span>
-              <p className="text-sm text-amber-200 font-medium leading-snug">
-                You have {Math.max(0, (userProfile?.simulationsLimit || 3) - (userProfile?.simulationsRunToday || 0))} free backtests left today.{" "}
-                <span className="text-slate-400">Pro unlocks unlimited runs + 8 years of NSE data.</span>
-              </p>
+        {/* Persistent free-tier usage meter — always visible to free users so the
+            upgrade path is present during use, and escalates as runs deplete. */}
+        {isFreePlan && (() => {
+          const FREE = 2;
+          const used = Math.min(userProfile?.simulationsRunToday || 0, FREE);
+          const left = Math.max(0, FREE - used);
+          const empty = left === 0;
+          return (
+            <div className={`mb-6 flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 rounded-xl border ${
+              empty ? "bg-red-500/10 border-red-500/30" : "bg-amber-500/10 border-amber-500/25"}`}>
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-1 shrink-0">
+                  {Array.from({ length: FREE }).map((_, i) => (
+                    <span key={i} className={`w-2.5 h-2.5 rounded-full ${i < left ? (empty ? "bg-red-400" : "bg-amber-400") : "bg-white/15"}`} />
+                  ))}
+                </div>
+                <p className={`text-sm font-medium leading-snug ${empty ? "text-red-200" : "text-amber-200"}`}>
+                  {empty
+                    ? <>You&apos;ve used your <strong>2 free backtests</strong> for today. <span className="text-slate-400">Pro removes the cap + unlocks 8 years of data, full trade log, A/B compare & export.</span></>
+                    : <><strong>{left} of {FREE}</strong> free backtests left today. <span className="text-slate-400">Pro = unlimited runs + 8 years of NSE data.</span></>}
+                </p>
+              </div>
+              <button
+                onClick={() => setUpgradeOpen(true)}
+                className={`text-xs font-bold px-4 py-2 rounded-lg transition-colors whitespace-nowrap shrink-0 ${
+                  empty ? "bg-red-500 hover:bg-red-400 text-white" : "text-amber-300 hover:text-white border border-amber-500/40"}`}
+              >
+                {empty ? "Upgrade — ₹499/mo →" : "Go Pro →"}
+              </button>
             </div>
-            <div className="flex items-center gap-2 shrink-0">
-              <a href="/pricing" className="text-xs font-bold text-amber-400 hover:text-amber-300 border border-amber-500/40 px-3 py-1.5 rounded-lg transition-colors whitespace-nowrap">
-                Go Pro →
-              </a>
-              <button onClick={() => setShowNudge(false)} className="text-slate-600 hover:text-slate-400 transition-colors text-xs px-1">✕</button>
-            </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* Controls */}
         <div className="glass-card rounded-2xl p-6 mb-8">
           <h3 className="text-white font-semibold mb-4">Configuration</h3>
           <div className="flex items-center gap-2 mb-4">
             <button
-              onClick={() => { setCompareMode(v => !v); setTradesB([]); setSummaryB(null); }}
+              onClick={() => {
+                // A/B Compare is a Pro feature — free users get the upgrade prompt.
+                if (isFreePlan) { setUpgradeOpen(true); return; }
+                setCompareMode(v => !v); setTradesB([]); setSummaryB(null);
+              }}
               className={`flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
                 compareMode
                   ? "bg-violet-500/20 text-violet-300 border border-violet-500/30"
@@ -745,6 +760,7 @@ function BacktestContent() {
               }`}
             >
               <span>{compareMode ? "✓" : "+"}</span> A/B Compare
+              {isFreePlan && <span className="text-[9px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/30 rounded px-1 ml-0.5">PRO</span>}
             </button>
             {compareMode && (
               <span className="text-xs text-slate-500">Compare two strategies on the same data</span>

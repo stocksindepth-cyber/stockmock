@@ -39,7 +39,7 @@ export async function checkAndIncrementSimulationLimit(userId) {
     
     let currentRunCount = data.simulationsRunToday || 0;
     // Free users are always capped at 3 — ignore any legacy higher value stored in Firestore
-    const FREE_LIMIT = 3;
+    const FREE_LIMIT = 2;
     const limit = data.plan === "free" ? FREE_LIMIT : (data.simulationsLimit || FREE_LIMIT);
 
     // Reset counter if it's a new day
@@ -66,7 +66,7 @@ export async function checkAndIncrementSimulationLimit(userId) {
       }
       return {
         allowed: false,
-        message: `You have reached your daily limit of ${limit} simulations. Upgrade to Pro for unlimited backtesting, or grab a ₹299 credit pack (50 backtests) on the pricing page.`
+        message: `You've used all ${limit} free backtests for today. Upgrade to Pro for unlimited backtesting on 8 years of NSE data — founding price ₹499/mo (regular ₹999). Or grab a ₹299 credit pack (50 backtests).`
       };
     }
 
