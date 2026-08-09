@@ -728,17 +728,17 @@ function BacktestContent() {
                 </div>
                 <p className={`text-sm font-medium leading-snug ${empty ? "text-red-200" : "text-amber-200"}`}>
                   {empty
-                    ? <>You&apos;ve used your <strong>2 free backtests</strong> for today. <span className="text-slate-400">Pro removes the cap + unlocks 8 years of data, full trade log, A/B compare & export.</span></>
-                    : <><strong>{left} of {FREE}</strong> free backtests left today. <span className="text-slate-400">Pro = unlimited runs + 8 years of NSE data.</span></>}
+                    ? <>You&apos;ve used your <strong>2 free backtests</strong> for today. <span className="text-slate-400">Get unlimited free — just open a Dhan account through us.</span></>
+                    : <><strong>{left} of {FREE}</strong> free backtests left today. <span className="text-slate-400">Unlock unlimited free by opening a Dhan account.</span></>}
                 </p>
               </div>
-              <button
-                onClick={() => setUpgradeOpen(true)}
+              <a
+                href="/unlock"
                 className={`text-xs font-bold px-4 py-2 rounded-lg transition-colors whitespace-nowrap shrink-0 ${
-                  empty ? "bg-red-500 hover:bg-red-400 text-white" : "text-amber-300 hover:text-white border border-amber-500/40"}`}
+                  empty ? "bg-emerald-500 hover:bg-emerald-400 text-white" : "text-emerald-300 hover:text-white border border-emerald-500/40"}`}
               >
-                {empty ? "Upgrade — ₹499/mo →" : "Go Pro →"}
-              </button>
+                🎁 Unlock Pro free →
+              </a>
             </div>
           );
         })()}

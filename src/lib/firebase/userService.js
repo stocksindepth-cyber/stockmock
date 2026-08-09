@@ -36,19 +36,17 @@ export async function checkAndIncrementSimulationLimit(userId) {
 
     const data = snap.data();
     const today = new Date().toISOString().split("T")[0];
-    
+
     let currentRunCount = data.simulationsRunToday || 0;
-    // Free users are always capped at 3 — ignore any legacy higher value stored in Firestore
+    // Free daily cap — the incentive that drives the Dhan referral unlock.
+    // Users unlock unlimited (plan !== "free") for FREE by opening a Dhan account
+    // through our link (see /unlock), or via a paid plan. Cap stays for the rest.
     const FREE_LIMIT = 2;
     const limit = data.plan === "free" ? FREE_LIMIT : (data.simulationsLimit || FREE_LIMIT);
 
-    // Reset counter if it's a new day
-    if (data.lastSimulationDate !== today) {
-      currentRunCount = 0;
-    }
+    if (data.lastSimulationDate !== today) currentRunCount = 0;
 
     if (currentRunCount >= limit && data.plan === "free") {
-      // Paid credit packs let free users continue past the daily limit
       const credits = data.backtestCredits || 0;
       if (credits > 0) {
         await updateDoc(userRef, {
@@ -56,33 +54,20 @@ export async function checkAndIncrementSimulationLimit(userId) {
           simulationsRunToday: currentRunCount + 1,
           lastSimulationDate: today,
         });
-        await logUserActivity(userId, "SIMULATION_RUN", {
-          dailyRunCount: currentRunCount + 1,
-          planAtExecution: data.plan,
-          usedCredit: true,
-          creditsLeft: credits - 1,
-        });
+        await logUserActivity(userId, "SIMULATION_RUN", { dailyRunCount: currentRunCount + 1, planAtExecution: data.plan, usedCredit: true });
         return { allowed: true, count: currentRunCount + 1, limit, creditsLeft: credits - 1 };
       }
-      return {
-        allowed: false,
-        message: `You've used all ${limit} free backtests for today. Upgrade to Pro for unlimited backtesting on 8 years of NSE data — founding price ₹499/mo (regular ₹999). Or grab a ₹299 credit pack (50 backtests).`
-      };
+      return { allowed: false, count: currentRunCount, limit, message: `You've used your ${limit} free backtests for today.` };
     }
 
-    // Log FIRST and independently of the counter write. These were previously
-    // sequential, so when the counter write failed the telemetry silently died
-    // with it and we lost all usage visibility. logUserActivity has its own
-    // try/catch, so it can never break the flow.
     await logUserActivity(userId, "SIMULATION_RUN", {
       dailyRunCount: currentRunCount + 1,
-      planAtExecution: data.plan
+      planAtExecution: data.plan || "free",
     });
 
-    // Increment usage
     await updateDoc(userRef, {
       simulationsRunToday: currentRunCount + 1,
-      lastSimulationDate: today
+      lastSimulationDate: today,
     });
 
     return { allowed: true, count: currentRunCount + 1, limit };

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Zap, X, Check, Loader2, Clock } from "lucide-react";
+import { X, Check, Loader2, Clock, Gift } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { startCheckout } from "@/lib/checkout";
 
@@ -46,7 +46,7 @@ export default function UpgradeBanner({ isOpen, onClose, message }) {
           That&apos;s your 2 free backtests for today
         </h2>
         <p className="text-slate-400 text-sm mb-5 leading-relaxed">
-          {message || "Pro removes the cap so you can keep testing while the idea is still fresh."}
+          {message || "Get unlimited backtests — free. Just open a Dhan account through us, and Pro is yours for life. No payment needed."}
         </p>
 
         <div className="space-y-2 mb-5">
@@ -58,56 +58,36 @@ export default function UpgradeBanner({ isOpen, onClose, message }) {
           ))}
         </div>
 
-        {/* Founding price + competitor anchor. ₹999 is the real post-launch list
-            price, not a fabricated was-price. */}
-        <div className="rounded-xl bg-slate-900/60 border border-white/10 px-4 py-3 mb-5">
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold text-white">₹499</span>
-            <span className="text-slate-400 text-sm">/month</span>
-            <span className="text-slate-500 line-through text-base ml-1">₹999</span>
-            <span className="text-[10px] font-bold text-amber-300 bg-amber-500/10 border border-amber-500/25 rounded px-1.5 py-0.5 ml-1">
-              🔒 FOUNDING PRICE
-            </span>
-          </div>
-          <p className="text-[11px] text-slate-500 mt-1.5">
-            Locked in for early members. Sensibull ₹800/mo · Opstra ₹1,000/mo · Quantsapp ₹2,950/mo.
-          </p>
-        </div>
-
         {err && (
           <p className="text-xs text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2 mb-3">{err}</p>
         )}
 
         <div className="space-y-2.5">
+          {/* PRIMARY: unlock Pro free by opening a Dhan account via our referral. */}
+          <Link
+            href="/unlock"
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold hover:from-emerald-500 hover:to-teal-500 transition-all shadow-[0_10px_20px_rgba(16,185,129,0.3)]"
+          >
+            <Gift className="w-5 h-5" /> Unlock Pro FREE — open a Dhan account
+          </Link>
+          <p className="text-center text-[11px] text-slate-500">
+            Open a free Dhan account through us → Pro free for life. No payment.
+          </p>
+
+          {/* SECONDARY: just pay, for people who don't want a new broker account. */}
           <button
             onClick={() => buy("pro", "monthly")}
             disabled={busy !== null}
-            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gradient-to-r from-indigo-600 to-blue-600 text-white font-bold hover:from-indigo-500 hover:to-blue-500 transition-all shadow-[0_10px_20px_rgba(79,70,229,0.3)] disabled:opacity-60"
-          >
-            {busy === "pro" ? <Loader2 className="w-5 h-5 animate-spin" /> : <Zap className="w-5 h-5" />}
-            {busy === "pro" ? "Opening checkout…" : "Upgrade to Pro — ₹499/mo"}
-          </button>
-
-          {/* Lower-commitment option for people who won't take a subscription */}
-          <button
-            onClick={() => buy("credits50", "onetime")}
-            disabled={busy !== null}
             className="w-full py-2.5 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-slate-200 text-sm font-semibold transition-colors disabled:opacity-60"
           >
-            {busy === "credits50" ? "Opening checkout…" : "Or just 50 more backtests — ₹299 one-time"}
+            {busy === "pro" ? "Opening checkout…" : "Or just pay ₹499/mo"}
           </button>
 
-          {/* Honest exit: the free tier genuinely resets, so say so. */}
           <button onClick={onClose} className="w-full py-2 rounded-xl text-slate-500 hover:text-slate-300 transition-colors text-xs flex items-center justify-center gap-1.5">
             <Clock className="w-3.5 h-3.5" />
             No thanks — my 2 free backtests reset tomorrow
           </button>
         </div>
-
-        <p className="text-center text-[10px] text-slate-600 mt-3">
-          Secure checkout via Razorpay · Cancel anytime ·{" "}
-          <Link href="/pricing" className="underline hover:text-slate-400">see full plans</Link>
-        </p>
       </div>
     </div>
   );
