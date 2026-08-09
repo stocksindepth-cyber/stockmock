@@ -156,7 +156,7 @@ function BillingContent() {
           </div>
           {!isPro && (
             <Link href="/pricing" className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-semibold whitespace-nowrap">
-              Upgrade
+              Unlock Pro Free
             </Link>
           )}
         </div>

@@ -34,7 +34,7 @@ const jsonLd = {
 const tableRows = [
   { feature: "Price", sensibull: "₹800/month (Pro) · free for Zerodha users", og: "Free — Pro unlocks via a Dhan account" },
   { feature: "Annual cost", sensibull: "₹29,988", og: "₹5,988" },
-  { feature: "Free tier", sensibull: "No", og: "Yes (3 backtests/day)", ogGood: true },
+  { feature: "Free tier", sensibull: "No", og: "Yes (2 backtests/day)", ogGood: true },
   { feature: "Options strategies", sensibull: "18+ pre-built", og: "Build custom" },
   { feature: "Backtesting", sensibull: "None", og: "8+ years NSE data", ogGood: true, sensibullBad: true },
   { feature: "Paper Trading", sensibull: "None", og: "Live NSE prices", ogGood: true, sensibullBad: true },
@@ -169,7 +169,7 @@ export default function SensibullVsOptionsGyaniPage() {
                 "₹800/month cheaper: OptionsGyani Pro is free (unlocked via a Dhan account), and the free plan never expires.",
                 "Broker-agnostic — works with Zerodha, Dhan, Upstox, or any broker.",
                 "IVP displayed directly on the option chain for faster screening.",
-                "Free tier available — 3 backtests per day, no credit card required.",
+                "Free tier available — 2 backtests per day, no credit card required.",
               ].map((item, i) => (
                 <li key={i} className="flex items-start gap-3">
                   <span className="text-emerald-400 mt-0.5 shrink-0 font-bold">✓</span>
@@ -235,7 +235,7 @@ export default function SensibullVsOptionsGyaniPage() {
           {/* CTA */}
           <div className="glass-card rounded-2xl p-8 text-center border border-blue-500/20">
             <h2 className="text-2xl font-bold text-white mb-3">Try OptionsGyani free</h2>
-            <p className="text-slate-400 mb-2">3 free backtests per day. No credit card required.</p>
+            <p className="text-slate-400 mb-2">2 free backtests per day. No credit card required.</p>
             <p className="text-slate-500 text-sm mb-6">Unlock unlimited backtests free by opening a Dhan account through us.</p>
             <Link
               href="/signup"

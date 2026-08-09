@@ -39,7 +39,7 @@ const TESTIMONIALS = [
     avatar: "KN",
     color: "from-rose-600 to-pink-700",
     stars: 5,
-    text: "As a beginner the Options Academy was invaluable — free, detailed, India-specific. Then I upgraded to Pro for the full data range. The paper trading feature helped me practice strategies risk-free before going live.",
+    text: "As a beginner the Options Academy was invaluable — free, detailed, India-specific. Then I unlocked Pro for the full data range. The paper trading feature helped me practice strategies risk-free before going live.",
   },
 ];
 
@@ -175,7 +175,7 @@ export default function Home() {
             <div className="text-center sm:text-left flex-1">
               <p className="text-white text-sm font-semibold">Built by a trader, not a marketer</p>
               <p className="text-slate-400 text-xs mt-0.5">
-                Rahul Dubey — 5 years trading NIFTY &amp; BANKNIFTY F&amp;O · ex-Morgan Stanley · Engineering Manager at Intuit, WalmartLabs, IBM Labs
+                Rahul Dubey — 5 years trading NIFTY &amp; BANKNIFTY F&amp;O · ex-Morgan Stanley · Engineering Leader at Intuit, WalmartLabs, IBM Labs
               </p>
             </div>
             <span className="text-xs text-slate-500 group-hover:text-slate-300 transition-colors whitespace-nowrap shrink-0">
@@ -315,8 +315,8 @@ export default function Home() {
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-blue-600 flex items-center justify-center mx-auto mb-6 shadow-lg shadow-emerald-500/30">
               <Zap className="w-7 h-7 text-white" />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Start free. Upgrade when you&apos;re ready.</h2>
-            <p className="text-slate-400 text-lg mb-8">No credit card. No trial expiry. 5 free backtests every day, live option chain, full Options Academy — forever free.</p>
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Start free. Unlock Pro free when you&apos;re ready.</h2>
+            <p className="text-slate-400 text-lg mb-8">No credit card. No trial expiry. 2 free backtests every day, live option chain, full Options Academy — forever free.</p>
             {/* Client island: tracked final CTAs */}
             <FinalCTAs />
             <p className="text-slate-600 text-xs mt-6">No paid plans — Pro unlocks free via Dhan · Sensibull charges ₹800/mo for less</p>

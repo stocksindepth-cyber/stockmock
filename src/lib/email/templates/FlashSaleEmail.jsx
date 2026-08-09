@@ -3,15 +3,16 @@ import {
   Img, Text, Button, Link, Hr, Preview,
 } from "@react-email/components";
 
+// Formerly a coupon flash-sale email. OptionsGyani no longer sells paid plans —
+// this template now announces the free-for-life Pro unlock via the Dhan referral.
 export function FlashSaleEmail({ name }) {
   const fontStack = "-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif";
   const displayName = name || "trader";
-  const expiryLabel = "7 July 2026, midnight";
 
   return (
     <Html lang="en">
       <Head />
-      <Preview>⚡ 30% off OptionsGyani Pro — coupon OG30 · expires {expiryLabel}</Preview>
+      <Preview>Pro is now free for life — no coupon, no payment, ever</Preview>
       <Body style={{ backgroundColor: "#09090b", margin: "0", padding: "32px 0", fontFamily: fontStack }}>
         <Container style={{ maxWidth: "600px", margin: "0 auto", backgroundColor: "#0f0f0f", borderRadius: "16px", border: "1px solid #1c1c1e", overflow: "hidden" }}>
 
@@ -21,61 +22,41 @@ export function FlashSaleEmail({ name }) {
             <Text style={{ display: "inline-block", verticalAlign: "middle", color: "#f4f4f5", fontSize: "15px", fontWeight: "600", margin: "0 0 0 9px", fontFamily: fontStack }}>OptionsGyani</Text>
           </Section>
 
-          {/* FOMO hero — dark amber/gold */}
+          {/* Hero */}
           <Section style={{ background: "linear-gradient(135deg, #1a0f00 0%, #2d1900 50%, #1a0f00 100%)", padding: "48px 40px 40px", borderBottom: "1px solid #2d1c00" }}>
             <Text style={{ color: "#f59e0b", fontSize: "11px", fontWeight: "800", textTransform: "uppercase", letterSpacing: "0.2em", margin: "0 0 16px", fontFamily: fontStack }}>
-              ⚡ 48-hour flash sale — ends {expiryLabel}
+              Big change — nothing is for sale anymore
             </Text>
             <Text style={{ color: "#f4f4f5", fontSize: "32px", fontWeight: "800", letterSpacing: "-0.5px", lineHeight: "1.2", margin: "0 0 16px", fontFamily: fontStack }}>
-              {displayName}, here's 30% off Pro — just for you.
+              {displayName}, Pro is now free. For life.
             </Text>
             <Text style={{ color: "#a16207", fontSize: "15px", lineHeight: "1.7", margin: "0", fontFamily: fontStack }}>
-              You signed up. You explored. But you haven't gone Pro yet.
-              We want to make it a no-brainer — so we're cutting the price by 30% for the next 48 hours.
+              I&apos;ve removed all paid plans from OptionsGyani. No coupons, no subscriptions, no checkout.
+              Pro unlocks free when you open a Dhan account through my referral link — that referral
+              commission is what keeps the platform running.
             </Text>
           </Section>
 
-          {/* Coupon code block — the hero element */}
+          {/* How it works */}
           <Section style={{ padding: "36px 40px 0" }}>
             <Section style={{ backgroundColor: "#161618", border: "2px dashed #f59e0b", borderRadius: "14px", padding: "28px", textAlign: "center" }}>
               <Text style={{ color: "#78716c", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.15em", margin: "0 0 10px", fontFamily: fontStack }}>
-                Your exclusive coupon code
+                How to unlock Pro free
               </Text>
-              <Text style={{ color: "#f59e0b", fontSize: "42px", fontWeight: "900", letterSpacing: "0.12em", margin: "0 0 10px", fontFamily: "'Courier New', monospace" }}>
-                OG30
+              <Text style={{ color: "#f59e0b", fontSize: "20px", fontWeight: "800", margin: "0 0 10px", fontFamily: fontStack }}>
+                Open a free Dhan account → share your first-trade snapshot → Pro forever
               </Text>
               <Text style={{ color: "#a16207", fontSize: "13px", margin: "0", fontFamily: fontStack }}>
-                30% off Pro or Elite · applies at checkout
+                ₹0 AMC lifetime · ₹20/order · the broker I personally trade with
               </Text>
             </Section>
-          </Section>
-
-          {/* Price comparison */}
-          <Section style={{ padding: "28px 40px 0" }}>
-            <Row>
-              <Column style={{ width: "50%", paddingRight: "8px" }}>
-                <Section style={{ backgroundColor: "#0d0d0d", border: "1px solid #1c1c1e", borderRadius: "10px", padding: "18px", textAlign: "center" }}>
-                  <Text style={{ color: "#52525b", fontSize: "10px", fontWeight: "600", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 6px", fontFamily: fontStack }}>Normal price</Text>
-                  <Text style={{ color: "#52525b", fontSize: "28px", fontWeight: "700", textDecoration: "line-through", margin: "0", fontFamily: fontStack }}>₹499<Text style={{ fontSize: "13px", fontFamily: fontStack }}>/mo</Text></Text>
-                </Section>
-              </Column>
-              <Column style={{ width: "50%", paddingLeft: "8px" }}>
-                <Section style={{ backgroundColor: "rgba(245,158,11,0.08)", border: "1px solid rgba(245,158,11,0.4)", borderRadius: "10px", padding: "18px", textAlign: "center" }}>
-                  <Text style={{ color: "#f59e0b", fontSize: "10px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 6px", fontFamily: fontStack }}>With OG30</Text>
-                  <Text style={{ color: "#fbbf24", fontSize: "28px", fontWeight: "800", margin: "0", fontFamily: fontStack }}>₹349<Text style={{ fontSize: "13px", fontFamily: fontStack }}>/mo</Text></Text>
-                </Section>
-              </Column>
-            </Row>
-            <Text style={{ color: "#52525b", fontSize: "11px", textAlign: "center", margin: "12px 0 0", fontFamily: fontStack }}>
-              You save ₹150 every month · ₹1,800/year
-            </Text>
           </Section>
 
           {/* What you unlock */}
           <Section style={{ padding: "28px 40px 0" }}>
             <Text style={{ color: "#f4f4f5", fontSize: "14px", fontWeight: "600", margin: "0 0 14px", fontFamily: fontStack }}>What unlocks with Pro:</Text>
             {[
-              ["∞", "Unlimited backtests", "No 5/day cap — ever"],
+              ["∞", "Unlimited backtests", "No daily cap — ever"],
               ["📊", "8+ years of NSE data", "NIFTY, BANKNIFTY, FINNIFTY from 2016"],
               ["💾", "Save strategies", "Build a library of tested setups"],
               ["🔔", "20 IV alerts", "Email alerts when IVP crosses your level"],
@@ -92,33 +73,27 @@ export function FlashSaleEmail({ name }) {
             ))}
           </Section>
 
-          {/* FOMO social proof */}
+          {/* Honesty note */}
           <Section style={{ padding: "24px 40px 0" }}>
             <Section style={{ backgroundColor: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.2)", borderRadius: "10px", padding: "16px 20px" }}>
               <Text style={{ color: "#818cf8", fontSize: "13px", margin: "0", lineHeight: "1.6", fontFamily: fontStack }}>
-                <strong style={{ color: "#a5b4fc" }}>23 traders joined OptionsGyani this week</strong> — all without a single ad.
-                Word is spreading. The traders who lock in Pro now get the edge before the price goes back up.
+                <strong style={{ color: "#a5b4fc" }}>Full transparency:</strong> the Dhan link is a referral link and
+                I earn a commission when you open an account. That commission funds the free tools — that&apos;s the
+                entire business model. You never have to open an account to keep using the free tier.
               </Text>
             </Section>
           </Section>
 
-          {/* Urgency line */}
-          <Section style={{ padding: "20px 40px 0", textAlign: "center" }}>
-            <Text style={{ color: "#ef4444", fontSize: "13px", fontWeight: "700", margin: "0", fontFamily: fontStack }}>
-              ⏰ This offer expires {expiryLabel}. No extensions.
-            </Text>
-          </Section>
-
           {/* CTA */}
-          <Section style={{ padding: "24px 40px 40px", textAlign: "center" }}>
+          <Section style={{ padding: "28px 40px 40px", textAlign: "center" }}>
             <Button
-              href="https://www.optionsgyani.com/pricing"
+              href="https://www.optionsgyani.com/unlock"
               style={{ backgroundColor: "#f59e0b", color: "#000000", borderRadius: "10px", padding: "16px 40px", fontSize: "15px", fontWeight: "800", textDecoration: "none", display: "inline-block", letterSpacing: "0.01em", fontFamily: fontStack }}
             >
-              Claim 30% Off → Use Code OG30
+              Unlock Pro Free →
             </Button>
             <Text style={{ color: "#52525b", fontSize: "11px", margin: "12px 0 0", fontFamily: fontStack }}>
-              Cancel anytime · Secure checkout via Razorpay · +18% GST at checkout
+              No payment ever · Referral link — commission funds the free tools
             </Text>
           </Section>
 

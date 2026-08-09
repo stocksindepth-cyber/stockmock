@@ -1481,7 +1481,7 @@ function PaperTradeContent() {
         <UpgradeBanner
           isOpen={upgradeOpen}
           onClose={() => setUpgradeOpen(false)}
-          message="Free accounts can hold up to 2 open positions at a time. Upgrade to Pro for unlimited paper trading and full P&L analytics."
+          message="Free accounts can hold up to 2 open positions at a time. Unlock Pro free (via Dhan) for unlimited paper trading and full P&L analytics."
         />
 
         {/* ══════════════════ RESET CONFIRM MODAL ══════════════════ */}

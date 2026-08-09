@@ -54,9 +54,9 @@ const LINKS = [
     ],
   },
   {
-    heading: "Company",
+    heading: "About & Legal",
     items: [
-      { label: "About Us", href: "/about" },
+      { label: "About the Founder", href: "/about" },
       { label: "Go Pro Free", href: "/pricing" },
       { label: "Contact Us", href: "/contact" },
       { label: "Terms of Service", href: "/terms" },
@@ -143,7 +143,15 @@ export default function Footer() {
             © {new Date().getFullYear()} OptionsGyani · Built by{" "}
             <a href="/about" className="hover:text-slate-400 transition-colors underline">
               Rahul Dubey
-            </a>{" "}— engineer &amp; options trader
+            </a>{" "}— Engineering Leader &amp; Options Trader ·{" "}
+            <a
+              href="https://www.linkedin.com/in/rahuldubeyui/"
+              target="_blank"
+              rel="me noopener noreferrer"
+              className="hover:text-slate-400 transition-colors underline"
+            >
+              LinkedIn
+            </a>
           </p>
           <div className="flex flex-wrap items-center gap-4">
             <a href="/about" className="hover:text-slate-400 transition-colors">About</a>

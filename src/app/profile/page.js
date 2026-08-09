@@ -160,7 +160,7 @@ function ProfileContent() {
                 </div>
               ) : (
                 <p className="text-slate-400 text-sm leading-relaxed">
-                  You are currently on the Free tier. Upgrade to access historical simulation prior to 2021, unlocked API calls, and automated Strategy backtesting.
+                  You are currently on the Free tier. Unlock Pro free (via Dhan) to access historical simulation prior to 2021, unlocked API calls, and automated Strategy backtesting.
                 </p>
               )}
             </div>

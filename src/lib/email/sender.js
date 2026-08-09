@@ -18,9 +18,9 @@ const SUBJECTS = {
   nudge:             (props) => `You missed something on OptionsGyani, ${props.name || 'trader'}`,
   alert:             (props) => `🔔 ${props.symbol || 'NIFTY'} ${(props.metric || 'IVP').toUpperCase()} Alert — ${props.condition === 'above' ? 'crossed above' : 'dropped below'} ${props.threshold}`,
   day3:              (props) => `${props.name || 'Hey'}, your free backtests are waiting — takes 60 seconds`,
-  day14:             (props) => `${props.name || 'Trader'}, 14 days on free — here's what Pro unlocks for you`,
-  flashSale:         (props) => `⚡ ${props.name || 'Trader'}, 30% off OptionsGyani Pro — code OG30 · 48 hrs only`,
-  tradingOffer:      (props) => `${props.name || 'Trader'}, most traders lose because they never practice — here's your fix`,
+  day14:             (props) => `${props.name || 'Trader'}, 14 days in — here's how Pro unlocks free for life`,
+  flashSale:         (props) => `⚡ ${props.name || 'Trader'}, Pro is now FREE for life — no paid plans anymore`,
+  tradingOffer:      (props) => `${props.name || 'Trader'}, most traders lose because they never practice — here's your free fix`,
   renewal:           (props) => `${props.name || 'Trader'}, your OptionsGyani ${(props.plan || 'Pro')} renews ${props.daysLeft === 1 ? 'tomorrow' : `in ${props.daysLeft} days`}`,
   // marketUpdate uses the subject prop passed in directly
 };

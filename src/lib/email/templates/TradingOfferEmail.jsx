@@ -1,9 +1,9 @@
 /**
- * Trading-focused offer email for OptionsGyani
- * Theme: Practice on past data → paper trade → analyse OI → convert to Pro
- * FOMO: limited-time offer + social proof
+ * Trading-focused email for OptionsGyani
+ * Theme: Practice on past data → paper trade → analyse OI → unlock Pro FREE via Dhan
+ * No paid plans exist anymore; coupon/discount props are accepted but ignored (legacy callers).
  */
-export default function TradingOfferEmail({ name = "Trader", coupon = "OG30", expiry = "7 July 2026", discountPct = 30 }) {
+export default function TradingOfferEmail({ name = "Trader", coupon, expiry, discountPct } = {}) {
   const firstName = name.split(" ")[0] || "Trader";
 
   return (
@@ -22,7 +22,7 @@ export default function TradingOfferEmail({ name = "Trader", coupon = "OG30", ex
       {/* ── Hero banner ── */}
       <div style={{ background: "linear-gradient(135deg, #1a2744 0%, #0d1829 50%, #161f38 100%)", padding: "40px 32px", textAlign: "center", borderBottom: "1px solid #1e3358" }}>
         <div style={{ display: "inline-block", background: "rgba(245,158,11,0.12)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: 50, padding: "6px 18px", marginBottom: 20 }}>
-          <span style={{ color: "#f59e0b", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>⚡ Limited Time — Expires {expiry}</span>
+          <span style={{ color: "#f59e0b", fontSize: 12, fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase" }}>⚡ Pro is free — no paid plans</span>
         </div>
 
         <h1 style={{ color: "#ffffff", fontSize: 32, fontWeight: 900, margin: "0 0 12px", lineHeight: 1.2, letterSpacing: "-0.5px" }}>
@@ -31,23 +31,23 @@ export default function TradingOfferEmail({ name = "Trader", coupon = "OG30", ex
         </h1>
 
         <p style={{ color: "#94a3b8", fontSize: 16, lineHeight: 1.7, margin: "0 auto 28px", maxWidth: 520 }}>
-          OptionsGyani exists for one reason — to give Indian traders the same tools professional desks use, at a price anyone can afford.
+          OptionsGyani exists for one reason — to give Indian traders the same tools professional desks use, completely free.
         </p>
 
-        {/* Coupon box */}
+        {/* Free unlock box */}
         <div style={{ background: "rgba(245,158,11,0.08)", border: "2px dashed rgba(245,158,11,0.4)", borderRadius: 16, padding: "24px 32px", display: "inline-block", marginBottom: 28 }}>
-          <p style={{ color: "#94a3b8", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, margin: "0 0 8px" }}>Your exclusive offer code</p>
-          <div style={{ color: "#f59e0b", fontSize: 44, fontWeight: 900, fontFamily: "monospace", letterSpacing: "0.12em", margin: "0 0 8px" }}>{coupon}</div>
-          <p style={{ color: "#fbbf24", fontSize: 14, fontWeight: 700, margin: 0 }}>{discountPct}% OFF Pro Plan · Use at checkout</p>
+          <p style={{ color: "#94a3b8", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 600, margin: "0 0 8px" }}>How Pro unlocks — no payment ever</p>
+          <div style={{ color: "#f59e0b", fontSize: 26, fontWeight: 900, margin: "0 0 8px" }}>Open a free Dhan account → Pro for life</div>
+          <p style={{ color: "#fbbf24", fontSize: 14, fontWeight: 700, margin: 0 }}>₹0 AMC lifetime · the broker I personally trade with</p>
         </div>
 
         <div style={{ marginBottom: 8 }}>
-          <a href={`https://www.optionsgyani.com/pricing?coupon=${coupon}`}
+          <a href="https://www.optionsgyani.com/unlock"
             style={{ display: "inline-block", background: "linear-gradient(90deg, #f59e0b, #d97706)", color: "#000000", fontSize: 16, fontWeight: 800, textDecoration: "none", padding: "16px 40px", borderRadius: 50, letterSpacing: "-0.2px" }}>
-            Claim {discountPct}% Off → Use Code {coupon}
+            Unlock Pro Free →
           </a>
         </div>
-        <p style={{ color: "#64748b", fontSize: 12, margin: "12px 0 0" }}>⏰ Offer expires {expiry} midnight. No extensions.</p>
+        <p style={{ color: "#64748b", fontSize: 12, margin: "12px 0 0" }}>Referral link — the commission funds the free tools.</p>
       </div>
 
       {/* ── 3 reasons to practice ── */}
@@ -115,38 +115,30 @@ export default function TradingOfferEmail({ name = "Trader", coupon = "OG30", ex
       {/* ── Social proof + FOMO ── */}
       <div style={{ background: "linear-gradient(135deg, #0f1e35 0%, #0a1525 100%)", padding: "32px", borderTop: "1px solid #1e3358", borderBottom: "1px solid #1e3358" }}>
         <h2 style={{ color: "#e2e8f0", fontSize: 18, fontWeight: 800, textAlign: "center", margin: "0 0 20px" }}>
-          Traders who upgraded this week are saying:
+          What Pro users are saying:
         </h2>
 
         <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, border: "1px solid #1e2d45", padding: "18px 20px", marginBottom: 12 }}>
           <p style={{ color: "#cbd5e1", fontSize: 14, lineHeight: 1.6, margin: "0 0 8px", fontStyle: "italic" }}>
             "Ran 15 backtests in one evening. Found that my Short Straddle had a 63% win rate on BANKNIFTY weekly. Never knew that without OptionsGyani."
           </p>
-          <p style={{ color: "#475569", fontSize: 12, margin: 0, fontWeight: 600 }}>— Arun M., Pro subscriber</p>
+          <p style={{ color: "#475569", fontSize: 12, margin: 0, fontWeight: 600 }}>— Arun M., Pro user</p>
         </div>
 
         <div style={{ background: "rgba(255,255,255,0.03)", borderRadius: 12, border: "1px solid #1e2d45", padding: "18px 20px" }}>
           <p style={{ color: "#cbd5e1", fontSize: 14, lineHeight: 1.6, margin: "0 0 8px", fontStyle: "italic" }}>
             "The OI analysis alone is worth it. I can see exactly where the market makers are positioned before I enter. Complete game-changer."
           </p>
-          <p style={{ color: "#475569", fontSize: 12, margin: 0, fontWeight: 600 }}>— Priya S., Pro subscriber</p>
+          <p style={{ color: "#475569", fontSize: 12, margin: 0, fontWeight: 600 }}>— Priya S., Pro user</p>
         </div>
 
-        {/* Urgency */}
-        <div style={{ textAlign: "center", marginTop: 28 }}>
-          <div style={{ display: "inline-block", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 8, padding: "10px 20px", marginBottom: 20 }}>
-            <span style={{ color: "#f87171", fontSize: 13, fontWeight: 700 }}>
-              ⏰ This offer ends {expiry}, midnight — no reminders, no extensions
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* ── Price comparison ── */}
       <div style={{ padding: "32px", backgroundColor: "#080c16", textAlign: "center" }}>
         <h2 style={{ color: "#e2e8f0", fontSize: 18, fontWeight: 800, margin: "0 0 8px" }}>What you get with Pro</h2>
         <p style={{ color: "#64748b", fontSize: 14, margin: "0 0 24px" }}>
-          Sensibull charges ₹2,499/mo for less. You get more for ₹{discountPct > 0 ? Math.round(499 * (1 - discountPct/100)) : 499}/mo with code <strong style={{ color: "#f59e0b" }}>{coupon}</strong>
+          Sensibull charges ₹2,499/mo for less. On OptionsGyani, Pro is <strong style={{ color: "#10b981" }}>free for life</strong> via the Dhan unlock.
         </p>
 
         <div style={{ display: "flex", justifyContent: "center", gap: 32, marginBottom: 28, flexWrap: "wrap" }}>
@@ -164,19 +156,18 @@ export default function TradingOfferEmail({ name = "Trader", coupon = "OG30", ex
           ))}
         </div>
 
-        {/* Price strike */}
+        {/* Free callout */}
         <div style={{ marginBottom: 24 }}>
-          <span style={{ color: "#475569", fontSize: 18, textDecoration: "line-through", marginRight: 12 }}>₹499/mo</span>
-          <span style={{ color: "#10b981", fontSize: 32, fontWeight: 900 }}>₹{Math.round(499 * (1 - discountPct/100))}/mo</span>
-          <span style={{ color: "#64748b", fontSize: 14, marginLeft: 6 }}>with code {coupon}</span>
+          <span style={{ color: "#10b981", fontSize: 32, fontWeight: 900 }}>₹0</span>
+          <span style={{ color: "#64748b", fontSize: 14, marginLeft: 6 }}>— unlocks free for life via a Dhan account</span>
         </div>
 
-        <a href={`https://www.optionsgyani.com/pricing?coupon=${coupon}`}
+        <a href="https://www.optionsgyani.com/unlock"
           style={{ display: "inline-block", background: "linear-gradient(90deg, #3b82f6, #6366f1)", color: "#ffffff", fontSize: 16, fontWeight: 800, textDecoration: "none", padding: "16px 48px", borderRadius: 50, marginBottom: 12 }}>
-          Upgrade to Pro — {discountPct}% Off →
+          Unlock Pro Free →
         </a>
 
-        <p style={{ color: "#475569", fontSize: 12, margin: "8px 0 0" }}>Cancel anytime · No hidden fees · Instant access</p>
+        <p style={{ color: "#475569", fontSize: 12, margin: "8px 0 0" }}>No payment ever · Referral link — commission funds the free tools</p>
       </div>
 
       {/* ── Footer ── */}

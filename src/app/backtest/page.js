@@ -922,7 +922,7 @@ function BacktestContent() {
               {rangeClamped && (
                 <span className="text-[10px] text-amber-400 block mt-1">
                   Free plan covers the last 1 year of data — range adjusted.{" "}
-                  <Link href="/pricing" className="underline">Upgrade to Pro</Link> for the full 2016–today history.
+                  <Link href="/pricing" className="underline">Unlock Pro free</Link> for the full 2016–today history.
                 </span>
               )}
             </div>
@@ -1410,7 +1410,7 @@ function BacktestContent() {
                                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                   </div>
                                   <p className="text-white font-semibold text-sm mb-1">{lockedCount} more trades locked</p>
-                                  <p className="text-slate-400 text-xs mb-4">Upgrade to Pro to see the full trade history across all {trades.length} cycles</p>
+                                  <p className="text-slate-400 text-xs mb-4">Unlock Pro free (via Dhan) to see the full trade history across all {trades.length} cycles</p>
                                   <a href="/pricing" className="inline-flex items-center gap-1.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-xs font-bold px-4 py-2 rounded-xl hover:from-blue-500 hover:to-indigo-500 transition-all">
                                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                                     Unlock Full History

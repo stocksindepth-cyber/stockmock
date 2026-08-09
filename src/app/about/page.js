@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata = {
   alternates: { canonical: "https://www.optionsgyani.com/about" },
   title: "About OptionsGyani — Built by a Trader, Engineered for Scale",
-  description: "OptionsGyani was built by a 5-year F&O trader and Engineering Manager with experience at Morgan Stanley, Intuit, WalmartLabs, and IBM Labs. Real data, serious tools, no fluff.",
+  description: "OptionsGyani was built by Rahul Dubey — a 5-year F&O trader and Engineering Leader with experience at Morgan Stanley, Intuit, WalmartLabs, and IBM Labs. Real data, serious tools, nothing for sale.",
 };
 
 const VALUES = [
@@ -71,7 +71,15 @@ export default function AboutPage() {
                 </span>
               </div>
               <p className="text-slate-400 text-sm mb-4">
-                Engineering Manager · 5-Year F&amp;O Trader · ex-Morgan Stanley, Intuit, WalmartLabs, IBM Labs, SAP Labs
+                Engineering Leader · 5-Year F&amp;O Trader · ex-Morgan Stanley, Intuit, WalmartLabs, IBM Labs, SAP Labs ·{" "}
+                <a
+                  href="https://www.linkedin.com/in/rahuldubeyui/"
+                  target="_blank"
+                  rel="me noopener"
+                  className="text-indigo-400 hover:text-indigo-300 underline"
+                >
+                  LinkedIn
+                </a>
               </p>
               <p className="text-slate-300 text-sm leading-relaxed mb-3">
                 I spent 5 years actively trading NIFTY and BANKNIFTY options — Iron Condors, Short Straddles, spreads — and hit the same wall every serious retail trader eventually hits: the data is expensive, the tools are mediocre, and the good infrastructure is locked inside institutions.
@@ -113,7 +121,7 @@ export default function AboutPage() {
             <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white/[0.03] border border-white/[0.06]">
               <Code2 className="w-4 h-4 text-blue-400 shrink-0" />
               <div>
-                <p className="text-white text-xs font-semibold">Engineering Manager</p>
+                <p className="text-white text-xs font-semibold">Engineering Leader</p>
                 <p className="text-slate-500 text-[11px]">Fintech &amp; enterprise scale</p>
               </div>
             </div>
@@ -141,7 +149,34 @@ export default function AboutPage() {
             so you can backtest any options strategy on real historical prices within seconds.
           </p>
           <p className="text-slate-300 leading-relaxed">
-            The core platform is free. Always. We believe the best way to build a business is to be genuinely useful first.
+            The core platform is free. Always. I believe the best way to build something people trust is to be genuinely useful first.
+          </p>
+        </div>
+
+        {/* How this stays free */}
+        <div className="bg-emerald-500/5 border border-emerald-500/15 rounded-2xl p-6 mb-10">
+          <h2 className="text-lg font-bold text-emerald-200/90 mb-3">How This Stays Free — The Honest Version</h2>
+          <p className="text-slate-300 text-sm leading-relaxed mb-3">
+            There are no paid plans on OptionsGyani. Nothing here is for sale. The platform is funded by a single
+            broker referral: if you open a{" "}
+            <a
+              href="https://join.dhan.co/?invite=XDCAS95683"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-emerald-400 hover:underline"
+            >
+              Dhan account through my referral link
+            </a>
+            , Dhan pays a commission — and that commission pays for the servers and data pipelines.
+          </p>
+          <p className="text-slate-300 text-sm leading-relaxed mb-3">
+            Dhan is the broker I personally trade with. It&apos;s a referral link and I earn from it — that&apos;s the
+            entire business model, stated plainly. Opening an account also unlocks Pro features free for life; if you
+            actively trade on Dhan, Elite is free too.
+          </p>
+          <p className="text-slate-400 text-xs leading-relaxed">
+            You never have to open an account to use the free tools, and I will never pressure you to trade more.
+            This platform is education and analytics — nothing else.
           </p>
         </div>
 
@@ -192,7 +227,7 @@ export default function AboutPage() {
             href="/pricing"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-semibold transition-colors mr-3"
           >
-            View Pricing
+            How Pro Unlocks Free
           </Link>
           <Link
             href="/contact"

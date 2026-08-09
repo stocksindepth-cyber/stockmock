@@ -93,9 +93,15 @@ export default function RootLayout({ children }) {
               "applicationCategory": "FinanceApplication",
               "operatingSystem": "Web",
               "offers": [
-                { "@type": "Offer", "name": "Free Plan", "price": "0", "priceCurrency": "INR" },
-                { "@type": "Offer", "name": "Pro Plan", "price": "499", "priceCurrency": "INR", "billingPeriod": "P1M" }
+                { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "INR" }
               ],
+              "creator": {
+                "@type": "Person",
+                "name": "Rahul Dubey",
+                "jobTitle": "Engineering Leader & Options Trader",
+                "url": "https://www.optionsgyani.com/about",
+                "sameAs": ["https://www.linkedin.com/in/rahuldubeyui/"]
+              },
               "featureList": [
                 "Options backtesting on NSE historical data",
                 "Live NIFTY BANKNIFTY option chain",
@@ -114,10 +120,15 @@ export default function RootLayout({ children }) {
               "inLanguage": "en-IN",
               "provider": {
                 "@type": "Organization",
-                "name": "OptionsGyani Analytics",
+                "name": "OptionsGyani",
                 "url": "https://www.optionsgyani.com",
                 "email": "support@optionsgyani.com",
-                "sameAs": ["https://www.optionsgyani.com"]
+                "founder": {
+                  "@type": "Person",
+                  "name": "Rahul Dubey",
+                  "sameAs": ["https://www.linkedin.com/in/rahuldubeyui/"]
+                },
+                "sameAs": ["https://www.optionsgyani.com/about"]
               }
             })
           }}

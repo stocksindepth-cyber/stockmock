@@ -221,7 +221,7 @@ function AlertsContent() {
       setFormError(
         isPro
           ? `You've reached the Pro limit of ${PRO_LIMIT} alerts.`
-          : `Free plan limit of ${FREE_LIMIT} alerts reached. Upgrade to Pro for up to ${PRO_LIMIT} alerts.`
+          : `Free plan limit of ${FREE_LIMIT} alerts reached. Unlock Pro free (via Dhan) for up to ${PRO_LIMIT} alerts.`
       );
       return;
     }
@@ -249,7 +249,7 @@ function AlertsContent() {
         setFormError(
           isPro
             ? `Pro plan limit of ${PRO_LIMIT} alerts reached.`
-            : `Free plan: up to ${FREE_LIMIT} alerts. Upgrade to Pro for ${PRO_LIMIT} alerts.`
+            : `Free plan: up to ${FREE_LIMIT} alerts. Unlock Pro free for ${PRO_LIMIT} alerts.`
         );
         return;
       }
@@ -350,7 +350,7 @@ function AlertsContent() {
               <p className="text-sm text-amber-200/80">
                 Free plan: up to {FREE_LIMIT} alerts.{" "}
                 <a href="/pricing" className="text-amber-300 font-medium hover:underline">
-                  Upgrade to Pro
+                  Unlock Pro free
                 </a>{" "}
                 for {PRO_LIMIT} alerts.
               </p>

@@ -2,8 +2,8 @@ import { Mail, MessageSquare, Clock, MapPin } from "lucide-react";
 
 export const metadata = {
   alternates: { canonical: "https://www.optionsgyani.com/contact" },
-  title: "Contact Us | OptionsGyani",
-  description: "Get in touch with the OptionsGyani team for support, feedback, or partnership enquiries.",
+  title: "Contact | OptionsGyani",
+  description: "OptionsGyani is run by one person — Rahul Dubey. Email him directly for support, feedback, or collaborations.",
 };
 
 export default function ContactPage() {
@@ -13,8 +13,11 @@ export default function ContactPage() {
 
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-extrabold text-white mb-3 tracking-tight">Contact Us</h1>
-          <p className="text-slate-400 text-lg">We're a small team and we read every message. Usually reply within 24 hours on business days.</p>
+          <h1 className="text-4xl font-extrabold text-white mb-3 tracking-tight">Contact</h1>
+          <p className="text-slate-400 text-lg">
+            OptionsGyani is built and run by one person — Rahul Dubey. There&apos;s no support department:
+            when you email, he&apos;s the one who reads it and replies, usually within 24 hours on business days.
+          </p>
         </div>
 
         {/* Contact cards */}
@@ -23,8 +26,8 @@ export default function ContactPage() {
             <div className="w-10 h-10 rounded-xl bg-indigo-500/15 border border-indigo-500/25 flex items-center justify-center mb-4">
               <Mail className="w-5 h-5 text-indigo-400" />
             </div>
-            <h3 className="text-white font-semibold mb-1">Email Support</h3>
-            <p className="text-slate-500 text-sm mb-3">For account issues, billing queries, and technical support.</p>
+            <h3 className="text-white font-semibold mb-1">Email the Founder</h3>
+            <p className="text-slate-500 text-sm mb-3">For account issues, Pro unlock questions, bugs, and anything technical.</p>
             <a
               href="mailto:support@optionsgyani.com"
               className="text-indigo-400 font-medium text-sm hover:text-indigo-300 transition-colors"
@@ -38,12 +41,21 @@ export default function ContactPage() {
               <MessageSquare className="w-5 h-5 text-indigo-400" />
             </div>
             <h3 className="text-white font-semibold mb-1">Business & Partnerships</h3>
-            <p className="text-slate-500 text-sm mb-3">For partnership, collaboration, or press enquiries.</p>
+            <p className="text-slate-500 text-sm mb-3">For collaborations, press, or anything else — email me directly, or find me on LinkedIn.</p>
             <a
               href="mailto:hello@optionsgyani.com"
               className="text-indigo-400 font-medium text-sm hover:text-indigo-300 transition-colors"
             >
               hello@optionsgyani.com
+            </a>
+            <br />
+            <a
+              href="https://www.linkedin.com/in/rahuldubeyui/"
+              target="_blank"
+              rel="me noopener"
+              className="text-indigo-400 font-medium text-sm hover:text-indigo-300 transition-colors"
+            >
+              linkedin.com/in/rahuldubeyui
             </a>
           </div>
 
@@ -71,17 +83,17 @@ export default function ContactPage() {
 
         {/* Note */}
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 text-sm text-slate-400 leading-relaxed">
-          <p className="font-semibold text-slate-300 mb-1">Before emailing support, please check:</p>
+          <p className="font-semibold text-slate-300 mb-1">To help me reply faster, please include:</p>
           <ul className="list-disc list-outside ml-4 space-y-1 mt-2">
-            <li>For billing or payment issues, include your registered email address and Razorpay payment ID (if available).</li>
-            <li>For plan activation delays, please allow up to 20 minutes after payment before contacting us.</li>
-            <li>For data or backtest queries, mention the underlying (NIFTY / BANKNIFTY etc.) and date range.</li>
+            <li>For Pro unlock (Dhan referral) queries, your registered email and Dhan Client ID.</li>
+            <li>For a legacy payment made before paid plans were removed, your registered email and Razorpay payment ID (if available).</li>
+            <li>For data or backtest queries, the underlying (NIFTY / BANKNIFTY etc.) and date range.</li>
           </ul>
         </div>
 
         {/* Disclaimer */}
         <p className="text-center text-xs text-slate-700 mt-8">
-          OptionsGyani is not SEBI registered. We do not provide investment advice. Please consult a SEBI-registered advisor for financial decisions.
+          OptionsGyani is educational analytics, operated by an individual. Not SEBI registered — no investment advice, tips, or signals. Please consult a SEBI-registered advisor for financial decisions.
         </p>
 
       </div>

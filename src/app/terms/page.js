@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Shield } from "lucide-react";
 
 export default function TermsPage() {
-  const lastUpdated = "March 21, 2025";
+  const lastUpdated = "August 10, 2026";
   return (
     <div className="min-h-screen bg-[#080C16]">
       <div className="max-w-4xl mx-auto px-6 pt-32 pb-24">
@@ -18,7 +18,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">1. Acceptance of Terms</h2>
-            <p>By accessing or using OptionsGyani ("Service", "Platform"), you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access the Service. OptionsGyani is operated as a sole proprietorship business in India.</p>
+            <p>By accessing or using OptionsGyani ("Service", "Platform"), you agree to be bound by these Terms of Service. If you disagree with any part of these terms, you may not access the Service. OptionsGyani is built and operated by <strong className="text-white">Rahul Dubey, an individual based in India</strong> ("the operator") — it is not a company and has no employees. The Service is provided free of charge, funded by broker referral commissions, and may be modified or discontinued at the operator&apos;s discretion.</p>
           </section>
 
           <section>
@@ -33,12 +33,11 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">3. Subscription & Payments</h2>
+            <h2 className="text-xl font-semibold text-white mb-3">3. Plans & Payments</h2>
             <ul className="list-disc list-inside space-y-2 text-slate-400 ml-4">
-              <li>Payments are processed securely via Razorpay. All prices are in Indian Rupees (INR) and are inclusive of applicable GST.</li>
-              <li>Subscriptions are <strong className="text-white">non-refundable</strong> once activated. Please use the free tier to evaluate the platform before subscribing.</li>
-              <li>Plans activate within minutes of successful payment. In rare cases, activation may take up to 24 hours.</li>
-              <li>OptionsGyani reserves the right to modify pricing with 30 days notice to existing subscribers.</li>
+              <li><strong className="text-white">OptionsGyani currently has no paid plans.</strong> All tiers are free; Pro and Elite unlock at no cost through our Dhan broker referral program. Nothing on the platform requires payment.</li>
+              <li>The Dhan referral link is disclosed wherever it appears; OptionsGyani may earn a commission when you open a Dhan account through it.</li>
+              <li>For legacy subscriptions purchased before paid plans were removed: payments were processed via Razorpay in INR inclusive of GST, are non-refundable once activated except as described in the Refund Policy, and remain valid for their paid term.</li>
             </ul>
           </section>
 
@@ -48,7 +47,7 @@ export default function TermsPage() {
               <li>You must provide accurate information when creating an account.</li>
               <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
               <li>One account per person. Sharing accounts or credentials is not permitted.</li>
-              <li>We reserve the right to suspend accounts that violate these terms.</li>
+              <li>The operator reserves the right to suspend accounts that violate these terms.</li>
             </ul>
           </section>
 
@@ -70,7 +69,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">7. Limitation of Liability</h2>
-            <p>OptionsGyani and its operators shall not be liable for any trading losses, financial damages, or indirect losses arising from the use of this platform. Your use of OptionsGyani is entirely at your own risk.</p>
+            <p>Neither OptionsGyani nor its individual operator shall be liable for any trading losses, financial damages, or indirect losses arising from the use of this platform. The Service is provided &quot;as is&quot;, without warranty of availability or fitness for any particular purpose. Your use of OptionsGyani is entirely at your own risk.</p>
           </section>
 
           <section>
@@ -80,7 +79,7 @@ export default function TermsPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">9. Contact</h2>
-            <p>For any queries, write to us at <a href="mailto:support@optionsgyani.com" className="text-blue-400 hover:underline">support@optionsgyani.com</a></p>
+            <p>For any queries, write directly to the operator at <a href="mailto:support@optionsgyani.com" className="text-blue-400 hover:underline">support@optionsgyani.com</a></p>
           </section>
 
         </div>

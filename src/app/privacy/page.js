@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Lock } from "lucide-react";
 
 export default function PrivacyPage() {
-  const lastUpdated = "March 21, 2025";
+  const lastUpdated = "August 10, 2026";
   return (
     <div className="min-h-screen bg-[#080C16]">
       <div className="max-w-4xl mx-auto px-6 pt-32 pb-24">
@@ -17,12 +17,12 @@ export default function PrivacyPage() {
         <div className="space-y-10 text-slate-300 leading-relaxed">
 
           <section>
-            <h2 className="text-xl font-semibold text-white mb-3">1. Information We Collect</h2>
-            <p className="mb-3">When you use OptionsGyani, we collect the following information:</p>
+            <h2 className="text-xl font-semibold text-white mb-3">1. Who Operates This & What Is Collected</h2>
+            <p className="mb-3">OptionsGyani is operated by <strong className="text-white">Rahul Dubey, an individual based in India</strong> — he is the data controller for the information described below. There is no company, no sales team, and no data-sharing business behind this platform. When you use OptionsGyani, the following information is collected:</p>
             <ul className="list-disc list-inside space-y-2 text-slate-400 ml-4">
-              <li><strong className="text-slate-300">Account Info:</strong> Name, email address, profile picture (via Google Sign-In)</li>
-              <li><strong className="text-slate-300">Usage Data:</strong> Pages visited, features used, number of backtests run, timestamps of sessions</li>
-              <li><strong className="text-slate-300">Subscription Data:</strong> Plan type, payment history (stored by Razorpay, not us)</li>
+              <li><strong className="text-slate-300">Account Info:</strong> Name, email address, profile picture (via Google Sign-In / Firebase Authentication)</li>
+              <li><strong className="text-slate-300">Usage Data:</strong> Pages visited, features used, number of backtests run, timestamps of sessions (stored in Firestore)</li>
+              <li><strong className="text-slate-300">Plan Tier:</strong> Which free tier you are on (Free / Pro / Elite — all free). Legacy payment history from before paid plans were removed is stored by Razorpay, not here.</li>
               <li><strong className="text-slate-300">Device Info:</strong> Browser type, operating system, IP address for security purposes</li>
             </ul>
           </section>
@@ -31,11 +31,13 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold text-white mb-3">2. How We Use Your Information</h2>
             <ul className="list-disc list-inside space-y-2 text-slate-400 ml-4">
               <li>To provide and improve the OptionsGyani service</li>
-              <li>To manage your account and subscription plan</li>
+              <li>To manage your account and plan tier (all tiers are free)</li>
               <li>To enforce free-tier daily usage limits</li>
               <li>To send important service updates (not marketing spam)</li>
-              <li>To prevent fraud and secure our platform</li>
+              <li>To send transactional and occasional product emails (every one has an unsubscribe path — email support@optionsgyani.com or use your profile settings)</li>
+              <li>To prevent fraud and keep the platform secure</li>
             </ul>
+            <p className="mt-3">Your data is never sold, and there are no ads on this platform.</p>
           </section>
 
           <section>
@@ -51,13 +53,15 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">4. Third-Party Services</h2>
-            <p className="mb-3">We use the following trusted third-party services:</p>
+            <p className="mb-3">The platform relies on the following third-party services:</p>
             <ul className="list-disc list-inside space-y-2 text-slate-400 ml-4">
-              <li><strong className="text-slate-300">Google Firebase:</strong> Authentication and database</li>
-              <li><strong className="text-slate-300">Razorpay:</strong> Payment processing (subject to Razorpay's Privacy Policy)</li>
-              <li><strong className="text-slate-300">Google Analytics:</strong> Anonymized usage analytics</li>
+              <li><strong className="text-slate-300">Google Firebase:</strong> Authentication and database (Firestore)</li>
+              <li><strong className="text-slate-300">Vercel:</strong> Website hosting</li>
+              <li><strong className="text-slate-300">Resend:</strong> Transactional email delivery (welcome emails, alerts, service updates)</li>
+              <li><strong className="text-slate-300">Google Analytics &amp; Microsoft Clarity:</strong> Anonymized usage analytics and session insights, used to improve the product</li>
+              <li><strong className="text-slate-300">Razorpay:</strong> Processed payments for legacy paid plans only (there are no paid plans today); subject to Razorpay&apos;s Privacy Policy</li>
             </ul>
-            <p className="mt-3">We do not sell your personal data to any third parties.</p>
+            <p className="mt-3">Your personal data is never sold to any third party.</p>
           </section>
 
           <section>
@@ -69,7 +73,7 @@ export default function PrivacyPage() {
             <h2 className="text-xl font-semibold text-white mb-3">6. Your Rights</h2>
             <p className="mb-3">You have the right to:</p>
             <ul className="list-disc list-inside space-y-2 text-slate-400 ml-4">
-              <li><strong className="text-slate-300">Access:</strong> Request a copy of the personal data we hold about you</li>
+              <li><strong className="text-slate-300">Access:</strong> Request a copy of the personal data held about you</li>
               <li><strong className="text-slate-300">Deletion:</strong> Request deletion of your account and associated data</li>
               <li><strong className="text-slate-300">Correction:</strong> Update your profile information at any time</li>
             </ul>
@@ -88,7 +92,7 @@ export default function PrivacyPage() {
 
           <section>
             <h2 className="text-xl font-semibold text-white mb-3">9. Contact Us</h2>
-            <p>For privacy-related concerns or data requests, contact <a href="mailto:support@optionsgyani.com" className="text-blue-400 hover:underline">support@optionsgyani.com</a></p>
+            <p>For privacy-related concerns or data requests, email the operator directly at <a href="mailto:support@optionsgyani.com" className="text-blue-400 hover:underline">support@optionsgyani.com</a> — messages are read and answered personally.</p>
           </section>
 
         </div>

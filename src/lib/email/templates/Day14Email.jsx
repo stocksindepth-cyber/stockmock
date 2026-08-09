@@ -8,7 +8,7 @@ export function Day14Email({ name }) {
   const displayName = name || "trader";
 
   const proFeatures = [
-    { icon: "∞", label: "Unlimited backtests", sub: "No 5/day cap — run as many as you need" },
+    { icon: "∞", label: "Unlimited backtests", sub: "No daily cap — run as many as you need" },
     { icon: "💾", label: "Save strategies", sub: "Build a portfolio of tested setups" },
     { icon: "🔔", label: "IV Alerts", sub: "Get notified when IVP crosses your threshold" },
     { icon: "📊", label: "OI Analysis", sub: "See where big money is positioned" },
@@ -35,10 +35,10 @@ export function Day14Email({ name }) {
               14 days free · time to level up
             </Text>
             <Text style={{ color: "#f4f4f5", fontSize: "30px", fontWeight: "700", letterSpacing: "-0.5px", lineHeight: "1.25", margin: "0 0 14px", fontFamily: fontStack }}>
-              You've spent 14 days testing strategies, {displayName}. Pro traders don't hit 5/day limits.
+              You've spent 14 days testing strategies, {displayName}. You don't have to hit daily limits.
             </Text>
             <Text style={{ color: "#a1a1aa", fontSize: "15px", lineHeight: "1.7", margin: "0", fontFamily: fontStack }}>
-              Every time you hit the daily cap, a backtest you wanted to run didn't happen. That's a blind spot in your strategy.
+              Every time you hit the daily cap, a backtest you wanted to run didn't happen. Pro removes that cap — and it unlocks free, no payment ever.
             </Text>
           </Section>
 
@@ -60,32 +60,30 @@ export function Day14Email({ name }) {
             ))}
           </Section>
 
-          {/* Price anchor */}
+          {/* Free unlock box */}
           <Section style={{ padding: "16px 40px 32px" }}>
             <Section style={{ backgroundColor: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.25)", borderRadius: "12px", padding: "24px" }}>
               <Text style={{ color: "#f59e0b", fontSize: "11px", fontWeight: "700", textTransform: "uppercase", letterSpacing: "0.12em", margin: "0 0 10px", fontFamily: fontStack }}>
-                Pro Plan Pricing
+                Pro costs nothing — here&apos;s how
               </Text>
-              <Row>
-                <Column style={{ verticalAlign: "middle" }}>
-                  <Text style={{ color: "#f4f4f5", fontSize: "28px", fontWeight: "700", margin: "0 0 4px", fontFamily: fontStack }}>₹499<Text style={{ color: "#71717a", fontSize: "14px", fontWeight: "400", fontFamily: fontStack }}>/month</Text></Text>
-                  <Text style={{ color: "#71717a", fontSize: "13px", margin: "0", fontFamily: fontStack }}>or ₹3,999/year — save ₹2,000</Text>
-                </Column>
-                <Column style={{ textAlign: "right", verticalAlign: "middle" }}>
-                  <Text style={{ color: "#52525b", fontSize: "12px", margin: "0 0 4px", fontFamily: fontStack }}>Less than</Text>
-                  <Text style={{ color: "#a1a1aa", fontSize: "14px", fontWeight: "600", margin: "0", fontFamily: fontStack }}>₹17/day</Text>
-                </Column>
-              </Row>
+              <Text style={{ color: "#f4f4f5", fontSize: "20px", fontWeight: "700", margin: "0 0 8px", fontFamily: fontStack }}>
+                Free for life via Dhan
+              </Text>
+              <Text style={{ color: "#a1a1aa", fontSize: "13px", lineHeight: "1.7", margin: "0", fontFamily: fontStack }}>
+                There are no paid plans on OptionsGyani. Open a free Dhan account through my referral link
+                (₹0 AMC, the broker I personally trade with), share your first-trade snapshot, and Pro unlocks
+                permanently. The referral commission is what funds these free tools.
+              </Text>
             </Section>
           </Section>
 
           {/* CTA */}
           <Section style={{ padding: "0 40px 40px", textAlign: "center" }}>
-            <Button href="https://www.optionsgyani.com/pricing" style={{ backgroundColor: "#f59e0b", color: "#000000", borderRadius: "8px", padding: "14px 36px", fontSize: "14px", fontWeight: "700", textDecoration: "none", display: "inline-block", fontFamily: fontStack }}>
-              Upgrade to Pro →
+            <Button href="https://www.optionsgyani.com/unlock" style={{ backgroundColor: "#f59e0b", color: "#000000", borderRadius: "8px", padding: "14px 36px", fontSize: "14px", fontWeight: "700", textDecoration: "none", display: "inline-block", fontFamily: fontStack }}>
+              Unlock Pro Free →
             </Button>
             <Text style={{ color: "#52525b", fontSize: "12px", margin: "14px 0 0", fontFamily: fontStack }}>
-              Cancel anytime · Instant access · Secure checkout via Razorpay
+              No payment ever · Referral link — commission funds the free tools
             </Text>
           </Section>
 

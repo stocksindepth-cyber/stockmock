@@ -322,6 +322,73 @@ export function WelcomeEmail({ name, email }) {
             </Button>
           </Section>
 
+          {/* Founder note */}
+          <Section
+            style={{
+              padding: "28px 40px",
+              borderTop: "1px solid #1c1c1e",
+              backgroundColor: "#0c0f14",
+            }}
+          >
+            <Text
+              style={{
+                color: "#22d3ee",
+                fontSize: "11px",
+                fontWeight: "700",
+                textTransform: "uppercase",
+                letterSpacing: "0.12em",
+                margin: "0 0 10px",
+                fontFamily: fontStack,
+              }}
+            >
+              A note from the founder
+            </Text>
+            <Text
+              style={{
+                color: "#a1a1aa",
+                fontSize: "14px",
+                lineHeight: "1.7",
+                margin: "0 0 12px",
+                fontFamily: fontStack,
+              }}
+            >
+              Hi, I&apos;m Rahul Dubey — Engineering Leader (ex-Morgan Stanley, Intuit, WalmartLabs, IBM Labs) and an
+              active NIFTY &amp; BANKNIFTY options trader. I built OptionsGyani because the tools I needed as a trader
+              were either overpriced or built on synthetic data.
+            </Text>
+            <Text
+              style={{
+                color: "#a1a1aa",
+                fontSize: "14px",
+                lineHeight: "1.7",
+                margin: "0 0 12px",
+                fontFamily: fontStack,
+              }}
+            >
+              There are no paid plans here — nothing is for sale. The platform is funded by a Dhan broker referral:
+              open a free Dhan account through my link and Pro unlocks free for life. Dhan is the broker I personally
+              trade with, and the referral commission is what pays for the servers.
+            </Text>
+            <Text
+              style={{
+                color: "#71717a",
+                fontSize: "13px",
+                lineHeight: "1.6",
+                margin: "0",
+                fontFamily: fontStack,
+              }}
+            >
+              Want unlimited backtests?{" "}
+              <Link
+                href="https://www.optionsgyani.com/unlock"
+                style={{ color: "#22d3ee", textDecoration: "underline" }}
+              >
+                See how Pro unlocks free
+              </Link>
+              {" "}&middot; Referral link — commission funds the free tools.
+            </Text>
+          </Section>
+
           {/* Footer */}
           <Hr style={{ border: "none", borderTop: "1px solid #1c1c1e", margin: "0" }} />
           <Section style={{ padding: "24px 40px", textAlign: "center" }}>

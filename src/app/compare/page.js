@@ -161,7 +161,7 @@ export default function ComparePage() {
           {/* CTA */}
           <div className="glass-card rounded-2xl p-8 text-center border border-blue-500/20">
             <h2 className="text-2xl font-bold text-white mb-3">See for yourself</h2>
-            <p className="text-slate-400 mb-6">3 free backtests per day. No credit card required.</p>
+            <p className="text-slate-400 mb-6">2 free backtests per day. No credit card required.</p>
             <Link
               href="/signup"
               className="inline-block px-8 py-3 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-500 transition-colors shadow-[0_0_20px_rgba(37,99,235,0.4)]"

@@ -344,7 +344,7 @@ function DashboardContent() {
               <div>
                 <p className="text-sm font-bold text-white mb-0.5">You're on the Free plan</p>
                 <p className="text-xs text-slate-400 leading-relaxed">
-                  Upgrade to Pro for <span className="text-slate-200">unlimited backtests</span>, <span className="text-slate-200">8+ years of NSE data</span>, and <span className="text-slate-200">saved strategy portfolios</span>.
+                  Unlock Pro free — no payment, via Dhan — for <span className="text-slate-200">unlimited backtests</span>, <span className="text-slate-200">8+ years of NSE data</span>, and <span className="text-slate-200">saved strategy portfolios</span>.
                 </p>
               </div>
             </div>
@@ -352,7 +352,7 @@ function DashboardContent() {
               href="/pricing"
               className="shrink-0 inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-bold transition-all shadow-lg shadow-blue-900/30 whitespace-nowrap"
             >
-              <Zap className="w-4 h-4" /> Upgrade to Pro
+              <Zap className="w-4 h-4" /> Unlock Pro Free
             </Link>
           </div>
         )}

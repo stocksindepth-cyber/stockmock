@@ -42,7 +42,7 @@ export function AuthorBox() {
       <div>
         <p className="text-white font-semibold text-sm">Rahul Dubey <span className="text-slate-500 font-normal">· Founder, OptionsGyani</span></p>
         <p className="text-slate-400 text-xs leading-relaxed mt-1">
-          5-year active F&amp;O trader (NIFTY &amp; BANKNIFTY) · Engineering Manager · ex-Morgan Stanley, Intuit, WalmartLabs, IBM Labs. Every broker in this guide has been personally evaluated — real accounts, real trades, real API testing. Our Dhan link is a personal referral link, not a formal partnership; all opinions are our own.{" "}
+          5-year active F&amp;O trader (NIFTY &amp; BANKNIFTY) · Engineering Leader · ex-Morgan Stanley, Intuit, WalmartLabs, IBM Labs. Every broker in this guide has been personally evaluated — real accounts, real trades, real API testing. Our Dhan link is a personal referral link, not a formal partnership; all opinions are our own.{" "}
           <Link href="/about" className="text-indigo-400 hover:text-indigo-300">About the founder →</Link>
         </p>
       </div>
