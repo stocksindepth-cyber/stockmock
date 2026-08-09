@@ -30,7 +30,10 @@ export async function GET(request) {
 
 export async function POST(request) {
   if (!authed(request)) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { uid, action } = await request.json().catch(() => ({}));
+  const { uid, action, plan = "pro" } = await request.json().catch(() => ({}));
+  if (!["pro", "elite"].includes(plan)) {
+    return NextResponse.json({ error: "plan must be pro or elite" }, { status: 400 });
+  }
   if (!uid || !["approve", "reject"].includes(action)) {
     return NextResponse.json({ error: "Provide uid and action (approve|reject)." }, { status: 400 });
   }
@@ -45,9 +48,9 @@ export async function POST(request) {
     return NextResponse.json({ ok: true, status: "rejected" });
   }
 
-  // Approve → grant Pro free for life.
+  // Approve → grant the tier free for life. Elite = active Dhan trader.
   await db.doc(`users/${uid}`).set({
-    plan: "pro",
+    plan,
     simulationsLimit: 999999,
     subscriptionExpiry: null,        // lifetime
     unlockedVia: "dhan_referral",
@@ -58,5 +61,5 @@ export async function POST(request) {
     reviewedAt: new Date().toISOString(),
   }, { merge: true });
 
-  return NextResponse.json({ ok: true, status: "approved", uid });
+  return NextResponse.json({ ok: true, status: "approved", uid, plan });
 }

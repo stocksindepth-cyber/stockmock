@@ -1,779 +1,183 @@
-"use client";
-
-import { useState } from "react";
-import { Check, X, Zap, Target, Loader2, Shield, ExternalLink, Star, TrendingUp, Database, BarChart2, Users, Tag, CheckCircle2 } from "lucide-react";
-import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
-import { upgradeUserPlan } from "@/lib/firebase/userService";
 import Link from "next/link";
-import AppModal from "@/components/AppModal";
-import {
-  trackPlanClick, trackBillingToggle,
-  trackPaymentInitiated, trackPaymentSuccess,
-  trackPaymentFailed, trackPaymentCancelled,
-  trackPricingFAQOpen, trackDhanReferralClick,
-} from "@/lib/analytics";
+import { Check, Gift, TrendingUp, Database, Shield, ArrowRight, Zap } from "lucide-react";
+import DhanReferralBanner from "@/components/DhanReferralBanner";
 
-const DHAN_REFERRAL_URL = "https://join.dhan.co/?invite=XDCAS95683";
+// ─── No pricing. The business model is broker referral. ──────────────────────
+// Every plan is unlocked free through Dhan: Pro = open an account via our link
+// + share your first trade snapshot; Elite = keep trading actively on Dhan.
+// The /pricing URL is kept for SEO/backlinks; the content is the unlock path.
 
-// ─── Pricing data ─────────────────────────────────────────────────────────────
-const PLANS = [
+export const metadata = {
+  title: "Go Pro Free — No Subscription, Ever | OptionsGyani",
+  description: "OptionsGyani has no paid plans. Unlock Pro free by opening a Dhan account through us and placing your first trade. Elite unlocks free for active Dhan traders. That's the whole model.",
+  keywords: "optionsgyani free pro, optionsgyani pricing, free options backtesting india, dhan referral free pro, sensibull free alternative",
+  alternates: { canonical: "https://www.optionsgyani.com/pricing" },
+  openGraph: {
+    title: "Go Pro Free — No Subscription, Ever | OptionsGyani",
+    description: "No paid plans. Unlock Pro free via a Dhan account + your first trade. Elite free for active traders.",
+    url: "https://www.optionsgyani.com/pricing",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "OptionsGyani — Free Pro via Dhan" }],
+    type: "website",
+  },
+};
+
+const TIERS = [
   {
-    id: "free",
     name: "Free",
-    monthlyPrice: 0,
-    annualPrice: 0,
-    dbPlan: "free",
-    durationDays: null,
-    badge: null,
-    description: "Start learning. No credit card ever.",
-    cta: "Start Free",
-    ctaVariant: "ghost",
+    badge: "EVERYONE",
+    how: "Just sign up — free forever, no card.",
+    features: [
+      "2 backtests / day",
+      "Last 1 year of NSE data",
+      "All strategy templates",
+      "Live Option Chain + Greeks",
+      "Full Options Academy",
+      "Paper trading included",
+      "5 IV alerts",
+    ],
+    cta: { label: "Start Free", href: "/signup" },
     highlight: false,
-    features: {
-      backtests: "2 backtests / day",
-      data: "Last 1 year of NSE data",
-      strategies: "All strategy templates",
-      optionChain: "Live Option Chain + Greeks",
-      learn: "Full Options Academy",
-      simulator: "Paper trading included",
-      builder: "Full payoff builder",
-      alerts: "5 IV alerts",
-      export: false,
-      support: "Email support",
-      dhan: true,
-    },
   },
   {
-    id: "pro_monthly",
     name: "Pro",
-    monthlyPrice: 499,
-    annualPrice: 333,
-    annualTotal: 3999,
-    listMonthly: 999,   // founding price 499; regular price after launch
-    founding: true,
-    dbPlan: "pro",
-    durationDays: 30,
-    badge: "Most Popular",
-    description: "Serious traders who want an edge.",
-    cta: "Start Pro",
-    ctaVariant: "primary",
+    badge: "FREE VIA DHAN",
+    how: "Open a Dhan account through our link + share your first trade snapshot. Pro unlocks for life.",
+    features: [
+      "Unlimited backtests",
+      "8+ years of NSE data (2016–today)",
+      "Full trade log — every trade",
+      "A/B strategy comparison",
+      "SL/TP controls",
+      "20 IV alerts",
+      "CSV export of backtest results",
+    ],
+    cta: { label: "Unlock Pro Free", href: "/unlock" },
     highlight: true,
-    features: {
-      backtests: "Unlimited backtests",
-      data: "8+ years of NSE data (2016–today)",
-      strategies: "All strategies incl. Iron Condor, A/B comparison",
-      optionChain: "Live Option Chain + Greeks",
-      learn: "Full Options Academy",
-      simulator: "Unlimited paper trading",
-      builder: "Full payoff builder + SL/TP controls",
-      alerts: "20 IV alerts",
-      export: "CSV export of backtest results",
-      support: "Priority email support",
-      dhan: true,
-    },
   },
   {
-    id: "elite_monthly",
     name: "Elite",
-    monthlyPrice: 1499,
-    annualPrice: 833,
-    annualTotal: 9999,
-    listMonthly: 2999,
-    founding: true,
-    dbPlan: "elite",
-    durationDays: 30,
-    badge: null,
-    description: "Power users, algos, and prop desks.",
-    cta: "Go Elite",
-    ctaVariant: "ghost",
+    badge: "FOR ACTIVE DHAN TRADERS",
+    how: "Keep trading on Dhan and stay active — Elite unlocks free while you do.",
+    features: [
+      "Everything in Pro",
+      "Unlimited IV alerts",
+      "CSV + JSON export",
+      "OI heatmap on chains",
+      "Paper trading P&L stats",
+      "Priority support + early access",
+    ],
+    cta: { label: "How Elite works", href: "/unlock" },
     highlight: false,
-    features: {
-      backtests: "Unlimited backtests",
-      data: "8+ years of NSE data (2016–today)",
-      strategies: "All strategies incl. Iron Condor, A/B comparison",
-      optionChain: "Live Option Chain + Greeks + OI heatmap",
-      learn: "Full Options Academy",
-      simulator: "Unlimited paper trading + P&L stats",
-      builder: "Full payoff builder + SL/TP controls",
-      alerts: "Unlimited IV alerts",
-      export: "CSV + JSON export of backtest results",
-      support: "Priority support + early access to new features",
-      dhan: true,
-    },
   },
-];
-
-// ─── Feature comparison rows ───────────────────────────────────────────────────
-const COMPARISON = [
-  { label: "Daily Backtests",         free: "2 / day",         pro: "Unlimited",                elite: "Unlimited" },
-  { label: "Historical Data",         free: "Last 1 year",     pro: "2016 – today (8+ yrs)",    elite: "2016 – today (8+ yrs)" },
-  { label: "Strategy Templates",      free: "All templates",   pro: "All templates",            elite: "All templates" },
-  { label: "Option Chain + Greeks",   free: "✓ Live",          pro: "✓ Live",                   elite: "✓ Live" },
-  { label: "OI Analysis + Max Pain",  free: "✓",               pro: "✓",                        elite: "✓" },
-  { label: "IVP / IVR Analytics",     free: "✓",               pro: "✓",                        elite: "✓" },
-  { label: "ATM Straddle Tracker",    free: "✓",               pro: "✓",                        elite: "✓" },
-  { label: "A/B Strategy Comparison", free: "✗",               pro: "✓",                        elite: "✓" },
-  { label: "SL / TP Controls",        free: "✗",               pro: "✓",                        elite: "✓" },
-  { label: "Full Trade Log",          free: "First 10 trades", pro: "✓ All trades",             elite: "✓ All trades" },
-  { label: "IV Alerts (Email)",       free: "5 alerts",        pro: "20 alerts",                elite: "Unlimited alerts" },
-  { label: "Paper Trading",           free: "✓",               pro: "✓ Unlimited",              elite: "✓ Unlimited" },
-  { label: "Payoff Builder",          free: "✓ Full",          pro: "✓ Full",                   elite: "✓ Full" },
-  { label: "Options Academy",         free: "✓ Full",          pro: "✓ Full",                   elite: "✓ Full" },
-  { label: "Export Results",          free: "✗",               pro: "CSV",                      elite: "CSV + JSON" },
-  { label: "Support",                 free: "Email",           pro: "Priority email",           elite: "Priority + early access" },
 ];
 
 const FAQ = [
-  {
-    q: "Is the free plan really free forever?",
-    a: "Yes. No credit card, no trial expiry. The free plan is permanently free with 2 backtests/day and the last 1 year of NSE data. You can use OptionsGyani to learn, paper trade, and explore — for free, forever.",
-  },
-  {
-    q: "What NSE data do paid plans cover?",
-    a: "Pro and Elite plans cover NIFTY, BANKNIFTY, FINNIFTY, MIDCPNIFTY, SENSEX, and BANKEX options data from January 2016 to today. Our daily GitHub Actions pipeline ingests new NSE Bhavcopy data every evening at 6:30 PM IST on trading days.",
-  },
-  {
-    q: "Can I cancel anytime?",
-    a: "Yes. Plans are subscription-based and you can cancel before the next billing cycle. There are no refunds for current billing periods — please test the free tier before upgrading.",
-  },
-  {
-    q: "How is this different from Sensibull or Opstra?",
-    a: "Sensibull Pro is ₹800/month (₹640/mo billed annually), Opstra PRO is ₹1,000/month, and Quantsapp Pro is ₹2,950/month. OptionsGyani Pro gives you 8+ years of real NSE Bhavcopy data, unlimited backtests, and a simpler UX at ₹499/month — and unlike most, our free plan never expires.",
-  },
-  {
-    q: "What is the Dhan referral?",
-    a: "It's a personal referral link, not a formal partnership. If you open a Dhan demat account through our link, we may earn a small referral commission at no extra cost to you. Dhan offers ₹0 AMC for lifetime, free demat, and ₹20/order — genuinely one of the best brokers for options traders.",
-  },
-  {
-    q: "Is GST included?",
-    a: "Prices shown are exclusive of GST. 18% GST is applicable and will be added at checkout.",
-  },
+  { q: "Wait — OptionsGyani has no paid plans at all?", a: "Correct. There is nothing to buy on this site. Every feature is unlocked free. We earn a referral commission when you open a Dhan account through our link — that single commission is what funds the servers, the data pipeline, and development. You never pay us anything." },
+  { q: "How do I unlock Pro?", a: "Two steps: open a free Dhan account through our referral link, place your first trade, and share a snapshot of it with your Dhan Client ID on the unlock page. We verify it and switch on Pro for life — unlimited backtests, 8+ years of data, full trade logs, exports." },
+  { q: "How does Elite work?", a: "Elite is for traders who actually use their Dhan account. Stay an active trader — keep trading and share a recent trade snapshot when asked — and Elite stays unlocked: unlimited alerts, JSON export, OI heatmaps, priority support. If you go dormant for months, you simply drop back to Pro, never below." },
+  { q: "Why Dhan?", a: "We genuinely rate it for options: ₹0 AMC for life, free demat, ₹20 per order, fast execution, and a solid API. The founder trades on it personally. It's a personal referral link, not a formal partnership — and it costs you nothing extra." },
+  { q: "I already have a Dhan account — can I still unlock Pro?", a: "The referral only pays if the account is opened through our link, which is what funds your free Pro. If you already trade on Dhan, you can open a fresh account for a family member through the link, or just keep using the free tier — it never expires." },
+  { q: "What's the catch?", a: "None hidden: the free tier is capped at 2 backtests a day, and removing that cap requires opening a broker account we earn a commission on. If that trade-off isn't for you, the free tier works forever and the public tools (option chains, calculators, FII/DII data, Strategy Finder) don't even need an account." },
 ];
 
-// ─── Component ────────────────────────────────────────────────────────────────
-export default function PricingPage() {
-  const { currentUser } = useAuth();
-  const router = useRouter();
-  const [annual, setAnnual] = useState(false);
-  const [processingId, setProcessingId] = useState(null);
-  const [openFaq, setOpenFaq] = useState(null);
-  const [modal, setModal] = useState(null);
-  const [couponInput, setCouponInput] = useState("");
-  const [couponState, setCouponState] = useState("idle"); // idle | checking | valid | invalid
-  const [couponData, setCouponData] = useState(null); // { discountPct, expiresAt, message }
-
-  const handleApplyCoupon = async () => {
-    if (!couponInput.trim()) return;
-    setCouponState("checking");
-    try {
-      const res = await fetch("/api/coupon/validate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: couponInput.trim() }),
-      });
-      const data = await res.json();
-      if (data.valid) {
-        setCouponState("valid");
-        setCouponData(data);
-      } else {
-        setCouponState("invalid");
-        setCouponData({ message: data.message });
-      }
-    } catch {
-      setCouponState("invalid");
-      setCouponData({ message: "Could not validate coupon. Try again." });
-    }
-  };
-
-  const discountedPrice = (base) =>
-    couponState === "valid" && couponData?.discountPct
-      ? Math.round(base * (1 - couponData.discountPct / 100))
-      : base;
-
-  const handleBuyCredits = async () => {
-    trackPlanClick("credits50", "onetime");
-    if (!currentUser) {
-      router.push("/login?redirect=/pricing");
-      return;
-    }
-    setProcessingId("credits50");
-    try {
-      const orderRes = await fetch("/api/razorpay/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planId: "credits50",
-          billing: "onetime",
-          planName: "50 Backtest Credits",
-          userId: currentUser.uid,
-        }),
-      });
-      const order = await orderRes.json();
-      if (order.error) throw new Error(order.error);
-
-      trackPaymentInitiated("credits50", 299, "onetime");
-
-      await new Promise((resolve, reject) => {
-        if (window.Razorpay) return resolve();
-        const script = document.createElement("script");
-        script.src = "https://checkout.razorpay.com/v1/checkout.js";
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-
-      const rzp = new window.Razorpay({
-        key: order.keyId,
-        amount: order.amount,
-        currency: "INR",
-        order_id: order.orderId,
-        name: "OptionsGyani",
-        description: "50 Backtest Credits — one-time",
-        image: "/favicon.ico",
-        prefill: { email: currentUser.email, name: currentUser.displayName || "" },
-        theme: { color: "#F59E0B" },
-        handler: async (response) => {
-          try {
-            const verifyRes = await fetch("/api/razorpay/verify", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                userId: currentUser.uid,
-                planId: "credits50",
-                billing: "onetime",
-              }),
-            });
-            const verifyData = await verifyRes.json();
-            if (!verifyRes.ok || !verifyData.success) throw new Error(verifyData.error || "Verification failed");
-            trackPaymentSuccess("credits50", 299, "onetime", response.razorpay_payment_id);
-            window.location.href = "/backtest?credits=50";
-          } catch {
-            setModal({
-              type: "warning",
-              title: "Payment Received — Credits Pending",
-              message: "Your payment succeeded but credit activation failed. Contact support with your Payment ID.",
-              details: [
-                { label: "Payment ID", value: response.razorpay_payment_id, highlight: "text-amber-400 font-mono text-xs break-all" },
-                { label: "Support", value: "support@optionsgyani.com", highlight: "text-blue-400" },
-              ],
-              actions: [{ label: "OK", onClick: () => setModal(null), variant: "primary" }],
-            });
-          }
-        },
-        modal: { ondismiss: () => { trackPaymentCancelled("credits50"); setProcessingId(null); } },
-      });
-      rzp.open();
-    } catch (err) {
-      console.error("Credit pack purchase failed:", err);
-      setProcessingId(null);
-    }
-  };
-
-  const handleSubscribe = async (plan) => {
-    const billing = annual ? "annual" : "monthly";
-    trackPlanClick(plan.dbPlan || plan.id, billing);
-
-    if (plan.id === "free") {
-      router.push(currentUser ? "/backtest" : "/signup");
-      return;
-    }
-    if (!currentUser) {
-      router.push("/login?redirect=/pricing");
-      return;
-    }
-
-    setProcessingId(plan.id);
-    const basePrice = annual ? plan.annualTotal : plan.monthlyPrice;
-    const durationDays = annual ? 365 : plan.durationDays;
-
-    try {
-      const orderRes = await fetch("/api/razorpay/order", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          planId: plan.dbPlan,
-          billing: annual ? "annual" : "monthly",
-          planName: plan.name,
-          userId: currentUser.uid,
-          couponCode: couponState === "valid" ? couponInput.trim().toUpperCase() : undefined,
-        }),
-      });
-      const price = discountedPrice(basePrice);
-      const order = await orderRes.json();
-
-      if (order.mock) {
-        await upgradeUserPlan(currentUser.uid, plan.dbPlan, durationDays);
-        trackPaymentSuccess(plan.dbPlan, price, billing, "mock");
-        window.location.href = "/profile?success=true";
-        return;
-      }
-
-      trackPaymentInitiated(plan.dbPlan, price, billing);
-
-      await new Promise((resolve, reject) => {
-        if (window.Razorpay) return resolve();
-        const script = document.createElement("script");
-        script.src = "https://checkout.razorpay.com/v1/checkout.js";
-        script.onload = resolve;
-        script.onerror = reject;
-        document.head.appendChild(script);
-      });
-
-      await new Promise((resolve, reject) => {
-        const rzp = new window.Razorpay({
-          key: order.keyId,
-          amount: order.amount,
-          currency: "INR",
-          order_id: order.orderId,
-          name: "OptionsGyani",
-          description: `${plan.name} Plan — ${annual ? "Annual" : "Monthly"}`,
-          image: "/favicon.ico",
-          prefill: { email: currentUser.email, name: currentUser.displayName || "" },
-          theme: { color: "#6366F1" },
-          handler: async (response) => {
-            try {
-              // Server-side signature verification + plan activation
-              const verifyRes = await fetch("/api/razorpay/verify", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  razorpay_order_id: response.razorpay_order_id,
-                  razorpay_payment_id: response.razorpay_payment_id,
-                  razorpay_signature: response.razorpay_signature,
-                  userId: currentUser.uid,
-                  planId: plan.dbPlan,
-                  billing: annual ? "annual" : "monthly",
-                  durationDays,
-                }),
-              });
-              const verifyData = await verifyRes.json();
-              if (!verifyRes.ok || !verifyData.success) {
-                throw new Error(verifyData.error || "Verification failed");
-              }
-              trackPaymentSuccess(plan.dbPlan, price, billing, response.razorpay_payment_id);
-              window.location.href = "/profile?success=true&plan=" + plan.dbPlan;
-              resolve();
-            } catch (err) {
-              setModal({
-                type: "warning",
-                title: "Payment Received — Activation Pending",
-                message: "Your payment was successful but plan activation failed. Please contact support and quote your Payment ID.",
-                details: [
-                  { label: "Payment ID", value: response.razorpay_payment_id, highlight: "text-amber-400 font-mono text-xs break-all" },
-                  { label: "Support",    value: "support@optionsgyani.com",   highlight: "text-blue-400" },
-                ],
-                actions: [
-                  {
-                    label: "Copy Payment ID",
-                    onClick: () => { navigator.clipboard?.writeText(response.razorpay_payment_id); },
-                    variant: "ghost",
-                  },
-                  { label: "OK", onClick: () => setModal(null), variant: "primary" },
-                ],
-              });
-              reject(err);
-            }
-          },
-          modal: {
-            ondismiss: () => {
-              trackPaymentCancelled(plan.dbPlan);
-              setProcessingId(null);
-              reject(new Error("Payment cancelled"));
-            },
-          },
-        });
-        rzp.open();
-      });
-    } catch (error) {
-      if (error?.message !== "Payment cancelled") {
-        console.error("Payment error:", error);
-        trackPaymentFailed(plan.dbPlan);
-        setModal({
-          type: "error",
-          title: "Payment Failed",
-          message: "Your payment could not be completed. No amount has been charged. Please try again or use a different payment method.",
-          actions: [{ label: "Try Again", onClick: () => setModal(null), variant: "primary" }],
-        });
-      }
-      setProcessingId(null);
-    }
-  };
-
+export default function GoProFreePage() {
   return (
-    <div className="min-h-screen bg-[#080C16] pt-16 pb-12 md:pt-24 md:pb-20 relative overflow-hidden">
-      {/* Ambient glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-indigo-500/8 blur-[140px] rounded-full pointer-events-none" />
-      <div className="absolute top-60 left-10 w-[400px] h-[400px] bg-blue-500/5 blur-[120px] rounded-full pointer-events-none" />
+    <main className="min-h-screen bg-[#0B0F19] text-slate-100">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org", "@type": "FAQPage",
+        "mainEntity": FAQ.map((f) => ({ "@type": "Question", "name": f.q, "acceptedAnswer": { "@type": "Answer", "text": f.a } })),
+      }) }} />
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-
-        {/* ── Header ── */}
-        <div className="text-center max-w-3xl mx-auto mb-6">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-semibold mb-4">
-            <Database className="w-3 h-3" /> 8+ Years Real NSE Data · No Synthetic Prices
-          </div>
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold text-white mb-4 tracking-tight">
-            Start Free. Upgrade When<br className="hidden md:block" />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-violet-400"> You're Ready.</span>
-          </h1>
-          <p className="text-lg text-slate-400">
-            OptionsGyani is free to learn and explore. Upgrade for unlimited backtesting on real Bhavcopy data — at a fraction of what Sensibull charges.
-          </p>
+      <section className="max-w-5xl mx-auto px-4 pt-28 pb-10 text-center">
+        <div className="inline-flex items-center gap-2 text-xs text-emerald-400 font-semibold uppercase tracking-wider mb-4 px-3 py-1.5 rounded-full border border-emerald-500/25 bg-emerald-500/10">
+          <Gift size={14} /> No paid plans · Nothing to buy
         </div>
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-4">
+          Everything unlocks <span className="text-emerald-400">free</span>.
+        </h1>
+        <p className="text-slate-400 max-w-2xl mx-auto mb-3">
+          OptionsGyani doesn&apos;t sell subscriptions. Open a <strong className="text-slate-200">free Dhan account</strong> through
+          us, place your first trade, and <strong className="text-slate-200">Pro is yours for life</strong>. Stay an active trader
+          and Elite unlocks too. The broker&apos;s referral commission is our entire business model — you never pay us.
+        </p>
+        <p className="text-xs text-slate-600 mb-10">
+          Built and run by <Link href="/about" className="underline hover:text-slate-400">Rahul Dubey</Link> — engineer &amp; options trader.
+        </p>
 
-        {/* ── Competitor callout ── */}
-        <div className="flex justify-center mb-8">
-          <div className="inline-flex flex-col sm:flex-row items-center gap-2 sm:gap-3 px-4 py-2 rounded-2xl sm:rounded-full bg-emerald-500/10 border border-emerald-500/20 text-sm text-emerald-400 text-center">
-            <TrendingUp className="w-4 h-4 hidden sm:block" />
-            <span className="text-xs sm:text-sm">Sensibull Pro: ₹800/mo · Opstra: ₹1,000/mo · Quantsapp: ₹2,950/mo</span>
-            <span className="text-xs sm:text-sm font-bold">OptionsGyani Pro: ₹499/mo</span>
-          </div>
-        </div>
-
-        {/* ── Annual / Monthly toggle ── */}
-        <div className="flex justify-center mb-10">
-          <div className="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-full px-2 py-1">
-            <button
-              onClick={() => { setAnnual(false); trackBillingToggle("monthly"); }}
-              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all ${!annual ? "bg-slate-700 text-white" : "text-slate-400 hover:text-white"}`}
-            >
-              Monthly
-            </button>
-            <button
-              onClick={() => { setAnnual(true); trackBillingToggle("annual"); }}
-              className={`px-5 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${annual ? "bg-slate-700 text-white" : "text-slate-400 hover:text-white"}`}
-            >
-              Annual
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-                SAVE 20%
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* ── Coupon input ── */}
-        <div className="flex justify-center mb-8">
-          <div className="w-full max-w-sm">
-            {couponState === "valid" ? (
-              <div className="flex items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
-                <div className="flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span className="text-sm font-bold text-emerald-400">{couponInput.toUpperCase()}</span>
-                  <span className="text-xs text-emerald-500">{couponData.discountPct}% off applied</span>
-                </div>
-                <button onClick={() => { setCouponState("idle"); setCouponData(null); setCouponInput(""); }}
-                  className="text-xs text-slate-500 hover:text-slate-300 transition-colors">Remove</button>
-              </div>
-            ) : (
-              <div className="flex gap-2">
-                <div className="relative flex-1">
-                  <Tag className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-500" />
-                  <input
-                    type="text"
-                    value={couponInput}
-                    onChange={(e) => { setCouponInput(e.target.value.toUpperCase()); setCouponState("idle"); }}
-                    onKeyDown={(e) => e.key === "Enter" && handleApplyCoupon()}
-                    placeholder="Coupon code"
-                    className="w-full pl-8 pr-3 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 transition-colors"
-                  />
-                </div>
-                <button
-                  onClick={handleApplyCoupon}
-                  disabled={couponState === "checking" || !couponInput.trim()}
-                  className="px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 text-white text-sm font-semibold transition-colors shrink-0"
-                >
-                  {couponState === "checking" ? <Loader2 className="w-4 h-4 animate-spin" /> : "Apply"}
-                </button>
-              </div>
-            )}
-            {couponState === "invalid" && (
-              <p className="text-xs text-rose-400 mt-1.5 pl-1">{couponData?.message}</p>
-            )}
-          </div>
-        </div>
-
-        {/* ── Trust strip: substance-based social proof (real, non-stale facts) ── */}
-        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mb-8 text-center">
+        {/* Trust strip */}
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 mb-10 text-center">
           {[
             { icon: Database,   t: "11.5M+ real NSE data points" },
             { icon: TrendingUp, t: "Every expiry since 2016" },
-            { icon: Shield,     t: "Cancel anytime · Secure Razorpay" },
+            { icon: Shield,     t: "No card. No charges. Ever." },
           ].map((x) => (
             <span key={x.t} className="inline-flex items-center gap-1.5 text-xs text-slate-400">
-              <x.icon className="w-3.5 h-3.5 text-indigo-400" /> {x.t}
+              <x.icon className="w-3.5 h-3.5 text-emerald-400" /> {x.t}
             </span>
           ))}
         </div>
 
-        {/* ── Pricing cards ── */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-          {PLANS.map((plan) => {
-            const basePrice = annual ? plan.annualPrice : plan.monthlyPrice;
-            const displayPrice = discountedPrice(basePrice);
-            const isProcessing = processingId === plan.id;
-
-            return (
-              <div
-                key={plan.id}
-                className={`relative rounded-2xl flex flex-col transition-transform hover:-translate-y-1 duration-300 border ${
-                  plan.highlight
-                    ? "bg-gradient-to-b from-indigo-950/60 to-[#0C1221] border-indigo-500/40 shadow-[0_0_40px_rgba(99,102,241,0.12)] ring-1 ring-indigo-500/20"
-                    : "bg-[#0C1221] border-slate-800"
-                } p-7`}
-              >
-                {plan.badge && (
-                  <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-[0.15em] flex items-center gap-1.5 shadow-lg whitespace-nowrap">
-                    <Zap className="w-3 h-3 fill-white" /> {plan.badge}
-                  </div>
-                )}
-
-                {/* Plan name + price */}
-                <div className="mb-6 mt-2">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-bold text-white">{plan.name}</h3>
-                    {plan.id === "free" && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-700 text-slate-300 border border-slate-600">FREE FOREVER</span>
-                    )}
-                  </div>
-                  <div className="flex items-end gap-1 mb-1">
-                    {displayPrice === 0 ? (
-                      <span className="text-5xl font-extrabold text-white">₹0</span>
-                    ) : (
-                      <>
-                        <span className="text-5xl font-extrabold text-white">₹{displayPrice}</span>
-                        <span className="text-slate-500 mb-2 text-sm">/mo</span>
-                        {/* Founding anchor: ₹999 is the real post-launch list price, not a fake was-price */}
-                        {plan.founding && !annual && couponState !== "valid" && (
-                          <span className="text-slate-500 line-through text-lg mb-2 ml-1">₹{plan.listMonthly}</span>
-                        )}
-                        {couponState === "valid" && basePrice !== displayPrice && (
-                          <span className="text-slate-500 line-through text-lg mb-2 ml-1">₹{basePrice}</span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                  {plan.founding && displayPrice > 0 && couponState !== "valid" && (
-                    <p className="text-xs text-amber-400 font-semibold mb-0.5">
-                      🔒 Founding price — locked in for early members{annual ? "" : `; regular ₹${plan.listMonthly}/mo after launch`}
-                    </p>
-                  )}
-                  {couponState === "valid" && basePrice !== displayPrice && (
-                    <p className="text-xs text-emerald-400 font-semibold mb-0.5">
-                      You save ₹{basePrice - displayPrice}/mo with OG30
-                    </p>
-                  )}
-                  {annual && displayPrice > 0 && (
-                    <p className="text-xs text-slate-500">Billed today · ₹{couponState === "valid" && couponData?.discountPct ? Math.round(plan.annualTotal * (1 - couponData.discountPct / 100)) : plan.annualTotal} for 12 months</p>
-                  )}
-                  {!annual && displayPrice > 0 && (
-                    <p className="text-xs text-slate-500">Billed monthly · +18% GST at checkout</p>
-                  )}
-                  {displayPrice === 0 && (
-                    <p className="text-xs text-slate-500">No credit card ever required</p>
-                  )}
-                  <p className="text-sm text-slate-400 mt-2">{plan.description}</p>
+        {/* Tiers */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-left">
+          {TIERS.map((t) => (
+            <div key={t.name} className={`relative rounded-2xl flex flex-col border p-7 ${
+              t.highlight
+                ? "bg-gradient-to-b from-emerald-950/60 to-[#0C1221] border-emerald-500/40 shadow-[0_0_40px_rgba(16,185,129,0.12)]"
+                : "bg-[#0C1221] border-slate-800"
+            }`}>
+              {t.highlight && (
+                <div className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-[10px] font-bold px-4 py-1.5 rounded-full uppercase tracking-[0.15em] flex items-center gap-1.5 shadow-lg whitespace-nowrap">
+                  <Zap className="w-3 h-3 fill-white" /> Most Unlocked
                 </div>
-
-                {/* CTA */}
-                <button
-                  onClick={() => handleSubscribe(plan)}
-                  disabled={isProcessing}
-                  className={`w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all duration-200 mb-6 ${
-                    plan.ctaVariant === "primary"
-                      ? "bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white shadow-lg shadow-indigo-500/20"
-                      : "bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 text-white"
-                  } disabled:opacity-50 disabled:cursor-not-allowed`}
-                >
-                  {isProcessing ? (
-                    <><Loader2 className="w-4 h-4 animate-spin" /> Processing...</>
-                  ) : (
-                    <><Shield className="w-4 h-4" /> {plan.cta}</>
-                  )}
-                </button>
-
-                {/* Features */}
-                <div className="space-y-3 flex-grow">
-                  <FeatureRow text={plan.features.backtests} />
-                  <FeatureRow text={plan.features.data} highlight={plan.highlight} />
-                  <FeatureRow text={plan.features.strategies} />
-                  <FeatureRow text={plan.features.optionChain} />
-                  <FeatureRow text={plan.features.simulator} />
-                  <FeatureRow text={plan.features.builder} />
-                  <FeatureRow text={plan.features.learn} />
-                  {plan.features.export ? (
-                    <FeatureRow text={plan.features.export} />
-                  ) : (
-                    <FeatureRowNo text="CSV Export" />
-                  )}
-                  <FeatureRow text={plan.features.support} />
-                </div>
-
-                {/* Dhan referral — in every plan */}
-                {plan.features.dhan && (
-                  <div className="mt-6 pt-4 border-t border-slate-800">
-                    <a
-                      href={DHAN_REFERRAL_URL}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => trackDhanReferralClick("pricing_plan_card")}
-                      className="flex items-start gap-3 group"
-                    >
-                      <div className="w-8 h-8 rounded-lg bg-orange-500/15 border border-orange-500/25 flex items-center justify-center flex-shrink-0 mt-0.5">
-                        <TrendingUp className="w-4 h-4 text-orange-400" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-semibold text-slate-300 group-hover:text-white transition-colors flex items-center gap-1">
-                          Open free Dhan account <ExternalLink className="w-3 h-3" />
-                        </p>
-                        <p className="text-[10px] text-slate-500 leading-snug mt-0.5">₹0 AMC lifetime · Free Demat · ₹20/order</p>
-                      </div>
-                    </a>
-                    <p className="text-[9px] text-slate-700 mt-2">Referral link · we may earn a commission</p>
-                  </div>
-                )}
+              )}
+              <div className="flex items-center justify-between mb-2 mt-1">
+                <h2 className="text-lg font-bold text-white">{t.name}</h2>
+                <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white/5 text-emerald-300 border border-emerald-500/20">{t.badge}</span>
               </div>
-            );
-          })}
-        </div>
-
-        {/* ── One-time credit pack ── */}
-        <div className="max-w-2xl mx-auto mb-16">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-5 rounded-2xl border border-amber-500/25 bg-amber-500/5">
-            <div>
-              <p className="text-sm font-bold text-white flex items-center gap-2">
-                <Zap className="w-4 h-4 text-amber-400" /> Not ready for a subscription?
-              </p>
-              <p className="text-xs text-slate-400 mt-1">
-                One-time <span className="text-amber-300 font-semibold">₹299 credit pack</span> — 50 extra backtests, no expiry, no auto-renewal. Credits kick in after your free daily limit.
-              </p>
-            </div>
-            <button
-              onClick={handleBuyCredits}
-              disabled={processingId === "credits50"}
-              className="shrink-0 px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-sm font-bold transition-colors disabled:opacity-60"
-            >
-              {processingId === "credits50" ? <Loader2 className="w-4 h-4 animate-spin" /> : "Buy 50 credits — ₹299"}
-            </button>
-          </div>
-        </div>
-
-        {/* ── Social proof strip ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16 max-w-2xl mx-auto">
-          {[
-            { icon: <Users className="w-4 h-4" />, label: "Free to start", sub: "No card needed" },
-            { icon: <Database className="w-4 h-4" />, label: "8+ years data", sub: "Real NSE Bhavcopy" },
-            { icon: <BarChart2 className="w-4 h-4" />, label: "Daily updates", sub: "6:30 PM IST" },
-          ].map((s) => (
-            <div key={s.label} className="text-center p-3 rounded-xl border border-slate-800 bg-slate-900/40">
-              <div className="flex justify-center text-indigo-400 mb-1">{s.icon}</div>
-              <p className="text-xs font-bold text-white">{s.label}</p>
-              <p className="text-[10px] text-slate-500">{s.sub}</p>
+              <div className="text-3xl font-extrabold text-white mb-1">₹0</div>
+              <p className="text-xs text-slate-400 mb-5 leading-relaxed min-h-[3rem]">{t.how}</p>
+              <div className="space-y-2 mb-6 flex-1">
+                {t.features.map((f) => (
+                  <div key={f} className="flex items-start gap-2">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    <span className="text-sm text-slate-300">{f}</span>
+                  </div>
+                ))}
+              </div>
+              <Link href={t.cta.href} className={`w-full py-3 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-colors ${
+                t.highlight ? "bg-emerald-500 hover:bg-emerald-400 text-white" : "bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200"
+              }`}>
+                {t.cta.label} <ArrowRight size={15} />
+              </Link>
             </div>
           ))}
         </div>
+      </section>
 
-        {/* ── Feature comparison table ── */}
-        <div className="mb-16">
-          <h2 className="text-2xl font-bold text-white text-center mb-6">Full Feature Comparison</h2>
-          <div className="overflow-x-auto -mx-4 sm:mx-0 rounded-2xl border border-slate-800">
-            <table className="w-full text-sm min-w-[480px]">
-              <thead>
-                <tr className="border-b border-slate-800 bg-slate-900/60">
-                  <th className="text-left px-5 py-3.5 text-slate-400 font-semibold w-1/3">Feature</th>
-                  <th className="text-center px-4 py-3.5 text-slate-400 font-semibold">Free</th>
-                  <th className="text-center px-4 py-3.5 text-indigo-400 font-bold bg-indigo-950/30">Pro</th>
-                  <th className="text-center px-4 py-3.5 text-slate-400 font-semibold">Elite</th>
-                </tr>
-              </thead>
-              <tbody>
-                {COMPARISON.map((row, i) => (
-                  <tr key={row.label} className={`border-b border-slate-800/50 ${i % 2 === 0 ? "bg-slate-900/20" : ""}`}>
-                    <td className="px-5 py-3 text-slate-300 font-medium">{row.label}</td>
-                    <td className="px-4 py-3 text-center text-slate-400 text-xs">{row.free}</td>
-                    <td className="px-4 py-3 text-center text-indigo-300 text-xs font-semibold bg-indigo-950/20">{row.pro}</td>
-                    <td className="px-4 py-3 text-center text-slate-300 text-xs">{row.elite}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+      {/* How the model works — radical transparency */}
+      <section className="max-w-3xl mx-auto px-4 py-10 border-t border-white/10">
+        <h2 className="text-2xl font-bold text-white mb-4 text-center">How is this sustainable?</h2>
+        <p className="text-slate-400 text-sm leading-relaxed text-center max-w-2xl mx-auto">
+          Simple and honest: when you open a Dhan account through our link, Dhan pays us a one-time referral commission.
+          That commission — not your money — funds everything here. It only works if the tools are good enough that you
+          actually want to trade with them, which keeps our incentives pointed the right way: build tools traders love,
+          recommend a broker we genuinely use. No ads, no selling your data, no paywall games.
+        </p>
+      </section>
+
+      <section className="max-w-3xl mx-auto px-4 py-8 border-t border-white/10">
+        <h2 className="text-2xl font-bold text-white mb-6">Questions</h2>
+        <div className="space-y-4">
+          {FAQ.map((f) => (
+            <div key={f.q} className="rounded-xl border border-white/10 bg-slate-900/40 p-5">
+              <h3 className="font-semibold text-white mb-2">{f.q}</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">{f.a}</p>
+            </div>
+          ))}
         </div>
+      </section>
 
-        {/* ── Dhan full-width CTA ── */}
-        <div className="mb-16 rounded-2xl border border-orange-500/20 bg-gradient-to-r from-orange-950/30 to-amber-950/20 p-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>
-            <p className="font-bold text-white mb-1">Also trading live? Open a Dhan account free</p>
-            <p className="text-sm text-slate-400">
-              ₹0 AMC for lifetime · Zero brokerage on investing · ₹20/order on F&O · Fast execution · Solid support
-            </p>
-            <p className="text-[10px] text-slate-600 mt-1">Referral link — we earn a small commission when you open an account, at no cost to you</p>
-          </div>
-          <a
-            href={DHAN_REFERRAL_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={() => trackDhanReferralClick("pricing_bottom_cta")}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-400 text-white text-sm font-bold transition-colors whitespace-nowrap flex-shrink-0"
-          >
-            Open Free Account <ExternalLink className="w-4 h-4" />
-          </a>
-        </div>
-
-        {/* ── FAQ ── */}
-        <div className="max-w-2xl mx-auto mb-10">
-          <h2 className="text-2xl font-bold text-white text-center mb-6">Frequently Asked Questions</h2>
-          <div className="space-y-3">
-            {FAQ.map((item, i) => (
-              <div
-                key={i}
-                className="border border-slate-800 rounded-xl overflow-hidden bg-slate-900/30"
-              >
-                <button
-                  onClick={() => { const next = openFaq === i ? null : i; setOpenFaq(next); if (next !== null) trackPricingFAQOpen(item.q); }}
-                  className="w-full flex items-center justify-between px-5 py-4 text-left text-slate-200 font-medium text-sm hover:text-white transition-colors"
-                >
-                  {item.q}
-                  <span className="text-slate-500 ml-3 flex-shrink-0">{openFaq === i ? "−" : "+"}</span>
-                </button>
-                {openFaq === i && (
-                  <div className="px-5 pb-4 text-sm text-slate-400 leading-relaxed border-t border-slate-800 pt-3">
-                    {item.a}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-
-      </div>
-
-      <AppModal modal={modal} onClose={() => setModal(null)} />
-    </div>
-  );
-}
-
-function FeatureRow({ text, highlight }) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <div className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 ${highlight ? "bg-indigo-500/20" : "bg-emerald-500/15"}`}>
-        <Check className={`w-2.5 h-2.5 ${highlight ? "text-indigo-400" : "text-emerald-400"}`} />
-      </div>
-      <span className="text-xs text-slate-400 leading-snug">{text}</span>
-    </div>
-  );
-}
-
-function FeatureRowNo({ text }) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <div className="w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5 bg-slate-800">
-        <X className="w-2.5 h-2.5 text-slate-600" />
-      </div>
-      <span className="text-xs text-slate-600 leading-snug">{text}</span>
-    </div>
+      <section className="max-w-3xl mx-auto px-4 pb-16"><DhanReferralBanner /></section>
+    </main>
   );
 }

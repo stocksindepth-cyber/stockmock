@@ -62,7 +62,7 @@ const rows = [
   },
   {
     feature: "Price",
-    og: <span className="text-white font-semibold">₹499/mo</span>,
+    og: <span className="text-white font-semibold">Free (via Dhan)</span>,
     sensibull: <span className="text-white font-semibold">₹800/mo</span>,
     opstra: <span className="text-emerald-400 font-semibold">Free</span>,
     quantsapp: <span className="text-white font-semibold">₹1,499/mo</span>,

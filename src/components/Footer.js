@@ -57,7 +57,7 @@ const LINKS = [
     heading: "Company",
     items: [
       { label: "About Us", href: "/about" },
-      { label: "Pricing", href: "/pricing" },
+      { label: "Go Pro Free", href: "/pricing" },
       { label: "Contact Us", href: "/contact" },
       { label: "Terms of Service", href: "/terms" },
       { label: "Privacy Policy", href: "/privacy" },
@@ -140,10 +140,10 @@ export default function Footer() {
         {/* Bottom bar */}
         <div className="mt-6 pt-5 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-600">
           <p>
-            © {new Date().getFullYear()} OptionsGyani ·{" "}
-            <a href="https://grahaisystems.com" target="_blank" rel="noopener noreferrer" className="hover:text-slate-400 transition-colors">
-              A GrahAI Systems product
-            </a>
+            © {new Date().getFullYear()} OptionsGyani · Built by{" "}
+            <a href="/about" className="hover:text-slate-400 transition-colors underline">
+              Rahul Dubey
+            </a>{" "}— engineer &amp; options trader
           </p>
           <div className="flex flex-wrap items-center gap-4">
             <a href="/about" className="hover:text-slate-400 transition-colors">About</a>

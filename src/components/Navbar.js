@@ -38,7 +38,7 @@ const MORE_LINKS = [
   { href: "/margin-calculator", label: "Margin Calculator", icon: Percent, desc: "SPAN + Exposure estimate — free" },
   { href: "/ltp-calculator",  label: "LTP Calculator", icon: Target,        desc: "Estimate option LTP at a target"  },
   { href: "/features",   label: "Features",      icon: Sparkles,      desc: "What OptionsGyani offers"      },
-  { href: "/pricing",    label: "Pricing",        icon: CreditCard,    desc: "Free & Pro plans"              },
+  { href: "/pricing",    label: "Go Pro Free",    icon: CreditCard,    desc: "No paid plans — unlock via Dhan" },
   { href: "/learn",      label: "Learn Options",  icon: BookOpen,      desc: "Guides from basics to Greeks"  },
   { href: "/strategies", label: "All Strategies", icon: LineChart,     desc: "Iron Condor, Straddle & more"  },
   { href: "/simulator",  label: "Simulator",      icon: RefreshCcw,    desc: "Replay market scenarios"       },
@@ -50,7 +50,7 @@ const MORE_LINKS = [
 const MARKETING_LINKS = [
   { href: "/features",   label: "Features"   },
   { href: "/strategies", label: "Strategies" },
-  { href: "/pricing",    label: "Pricing"    },
+  { href: "/pricing",    label: "Go Pro Free" },
   { href: "/learn",      label: "Learn"      },
 ];
 

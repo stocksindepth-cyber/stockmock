@@ -23,7 +23,7 @@ const TESTIMONIALS = [
     avatar: "PS",
     color: "from-violet-600 to-purple-700",
     stars: 5,
-    text: "I used to pay ₹800/month for Sensibull and still couldn't backtest properly. OptionsGyani at ₹499 gives me everything I need — Greeks, OI analysis, and unlimited backtests. No-brainer switch.",
+    text: "I used to pay ₹800/month for Sensibull and still couldn't backtest properly. OptionsGyani gives me everything free — Greeks, OI analysis, unlimited backtests once I linked my Dhan account. No-brainer switch.",
   },
   {
     name: "Rohit Agarwal",
@@ -46,7 +46,7 @@ const TESTIMONIALS = [
 const STATS = [
   { value: "8+",   label: "Years NSE Data",    sub: "2016 to today" },
   { value: "12+",  label: "Strategies",         sub: "Iron Condor, Straddle & more" },
-  { value: "₹499", label: "Pro Plan / Month",   sub: "vs ₹800 at Sensibull Pro" },
+  { value: "₹0", label: "Paid Plans",   sub: "Pro unlocks free via Dhan" },
   { value: "100%", label: "Real Bhavcopy Data", sub: "No synthetic prices" },
 ];
 
@@ -252,7 +252,7 @@ export default function Home() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {[
-                  ["Price/month",       "₹499",          "₹800",    "₹1,000"],
+                  ["Price/month",       "Free",          "₹800",    "₹1,000"],
                   ["NSE Backtest data", "8+ years real", "Limited", "3 years"],
                   ["IVP / IVR",         "✓",             "✓",       "✓"],
                   ["A/B Comparison",    "✓",             "✗",       "✗"],
@@ -319,7 +319,7 @@ export default function Home() {
             <p className="text-slate-400 text-lg mb-8">No credit card. No trial expiry. 5 free backtests every day, live option chain, full Options Academy — forever free.</p>
             {/* Client island: tracked final CTAs */}
             <FinalCTAs />
-            <p className="text-slate-600 text-xs mt-6">Pro from ₹499/month · 3× cheaper than Sensibull · Cancel anytime</p>
+            <p className="text-slate-600 text-xs mt-6">No paid plans — Pro unlocks free via Dhan · Sensibull charges ₹800/mo for less</p>
           </div>
         </div>
       </section>

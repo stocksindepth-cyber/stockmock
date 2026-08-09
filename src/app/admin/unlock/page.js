@@ -21,13 +21,13 @@ export default function AdminUnlockPage() {
     } catch (e) { setMsg(e.message); setItems(null); } finally { setBusy(false); }
   };
 
-  const act = async (uid, action) => {
+  const act = async (uid, action, plan = "pro") => {
     setMsg("");
     try {
       const r = await fetch("/api/admin/unlock", {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-admin-secret": secret },
-        body: JSON.stringify({ uid, action }),
+        body: JSON.stringify({ uid, action, plan }),
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || "Failed");
@@ -60,13 +60,14 @@ export default function AdminUnlockPage() {
               <div className="text-xs text-slate-400">Dhan Client ID: <strong className="text-slate-200">{x.dhanClientId}</strong> · {String(x.createdAt).slice(0, 16)}</div>
             </div>
             <div className="flex gap-2 shrink-0">
-              <button onClick={() => act(x.uid, "approve")} className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold">Approve</button>
+              <button onClick={() => act(x.uid, "approve", "pro")} className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-white text-xs font-bold">Pro</button>
+              <button onClick={() => act(x.uid, "approve", "elite")} className="px-3 py-1.5 rounded-lg bg-indigo-500 hover:bg-indigo-400 text-white text-xs font-bold">Elite</button>
               <button onClick={() => act(x.uid, "reject")} className="px-3 py-1.5 rounded-lg border border-white/10 text-slate-400 hover:text-white text-xs">Reject</button>
             </div>
           </div>
         ))}
         <p className="text-[11px] text-slate-600 mt-4">
-          Verify each Client ID against Dhan&apos;s affiliate report before approving. Approve grants Pro free for life.
+          Verify the Client ID against Dhan&apos;s affiliate report AND the first-trade snapshot in support@ inbox. Pro = first trade done · Elite = actively trading.
         </p>
       </section>
     </main>

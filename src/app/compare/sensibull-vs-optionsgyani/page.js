@@ -3,12 +3,12 @@ import Link from "next/link";
 export const metadata = {
   title: "Sensibull vs OptionsGyani — Which is Better for NSE Options Trading?",
   description:
-    "Sensibull vs OptionsGyani: honest feature comparison. Sensibull Pro costs ₹800/month and lacks backtesting. OptionsGyani costs ₹499/month with 8+ years of NSE backtest data and paper trading.",
+    "Sensibull vs OptionsGyani: honest feature comparison. Sensibull Pro costs ₹800/month and lacks backtesting. OptionsGyani Pro is free — unlocked by opening a Dhan account — with 8+ years of NSE backtest data and paper trading.",
   alternates: { canonical: "https://www.optionsgyani.com/compare/sensibull-vs-optionsgyani" },
   openGraph: {
     title: "Sensibull vs OptionsGyani — Which is Better for NSE Options Trading?",
     description:
-      "Sensibull vs OptionsGyani: honest feature comparison. Sensibull Pro costs ₹800/month and lacks backtesting. OptionsGyani costs ₹499/month with 8+ years of NSE backtest data and paper trading.",
+      "Sensibull vs OptionsGyani: honest feature comparison. Sensibull Pro costs ₹800/month and lacks backtesting. OptionsGyani Pro is free — unlocked by opening a Dhan account — with 8+ years of NSE backtest data and paper trading.",
     url: "https://www.optionsgyani.com/compare/sensibull-vs-optionsgyani",
     siteName: "OptionsGyani",
     type: "article",
@@ -32,7 +32,7 @@ const jsonLd = {
 };
 
 const tableRows = [
-  { feature: "Price", sensibull: "₹800/month (Pro) · free for Zerodha users", og: "₹499/month" },
+  { feature: "Price", sensibull: "₹800/month (Pro) · free for Zerodha users", og: "Free — Pro unlocks via a Dhan account" },
   { feature: "Annual cost", sensibull: "₹29,988", og: "₹5,988" },
   { feature: "Free tier", sensibull: "No", og: "Yes (3 backtests/day)", ogGood: true },
   { feature: "Options strategies", sensibull: "18+ pre-built", og: "Build custom" },
@@ -166,7 +166,7 @@ export default function SensibullVsOptionsGyaniPage() {
               {[
                 "Backtesting on 8+ years of real NSE tick data — Sensibull has none.",
                 "Live paper trading with real NSE prices — Sensibull has none.",
-                "₹300/month cheaper at the paid tier (₹499 vs ₹800), and our free plan never expires.",
+                "₹800/month cheaper: OptionsGyani Pro is free (unlocked via a Dhan account), and the free plan never expires.",
                 "Broker-agnostic — works with Zerodha, Dhan, Upstox, or any broker.",
                 "IVP displayed directly on the option chain for faster screening.",
                 "Free tier available — 3 backtests per day, no credit card required.",
@@ -236,7 +236,7 @@ export default function SensibullVsOptionsGyaniPage() {
           <div className="glass-card rounded-2xl p-8 text-center border border-blue-500/20">
             <h2 className="text-2xl font-bold text-white mb-3">Try OptionsGyani free</h2>
             <p className="text-slate-400 mb-2">3 free backtests per day. No credit card required.</p>
-            <p className="text-slate-500 text-sm mb-6">Upgrade to paid for unlimited backtests at ₹499/month.</p>
+            <p className="text-slate-500 text-sm mb-6">Unlock unlimited backtests free by opening a Dhan account through us.</p>
             <Link
               href="/signup"
               className="inline-block px-8 py-3 rounded-full bg-blue-600 text-white font-bold hover:bg-blue-500 transition-colors shadow-[0_0_20px_rgba(37,99,235,0.4)]"

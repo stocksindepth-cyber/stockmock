@@ -41,6 +41,7 @@ export async function POST(request) {
 
   const body = await request.json().catch(() => ({}));
   const dhanClientId = String(body.dhanClientId || "").trim();
+  const firstTradeDone = Boolean(body.firstTradeDone);
   // Dhan client IDs are numeric, ~7–12 digits. Basic sanity only.
   if (!/^\d{6,15}$/.test(dhanClientId)) {
     return NextResponse.json({ error: "Enter a valid Dhan Client ID (digits only, from your Dhan profile)." }, { status: 400 });
@@ -64,6 +65,7 @@ export async function POST(request) {
     uid: user.uid,
     email: user.email,
     dhanClientId,
+    firstTradeDone,
     status: "pending",
     createdAt: new Date().toISOString(),
   }, { merge: true });
