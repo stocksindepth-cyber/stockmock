@@ -17,7 +17,6 @@ import Link from "next/link";
 import UpgradeBanner from "@/components/UpgradeBanner";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import DhanReferralBanner from "@/components/DhanReferralBanner";
-import ReferralCard from "@/components/ReferralCard";
 
 // ─── Tooltips ────────────────────────────────────────────────────────────────
 
@@ -554,13 +553,6 @@ function BacktestContent() {
     const limitCheck = await checkAndIncrementSimulationLimit(currentUser?.uid);
     if (!limitCheck.allowed) { setUpgradeOpen(true); return; }
 
-    // Referral: a referred user just ran a backtest → grant the one-time reward
-    // to them and their referrer (server-side, idempotent, non-blocking).
-    if (currentUser && userProfile?.referredBy && !userProfile?.referralRewarded) {
-      import("@/lib/referralClient")
-        .then((m) => m.maybeRewardReferral(currentUser, userProfile))
-        .catch(() => {});
-    }
 
     // Reset all streaming state
     setTrades([]);
@@ -1174,7 +1166,6 @@ function BacktestContent() {
                 {/* Referral share at the emotional peak — only when the result is worth bragging about */}
                 {currentUser && summary.winRate >= 55 && (
                   <div className="mt-6">
-                    <ReferralCard stat={`a ${summary.winRate}% win rate over ${summary.totalTrades} real NSE cycles`} />
                   </div>
                 )}
               </>

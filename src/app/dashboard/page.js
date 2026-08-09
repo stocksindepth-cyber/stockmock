@@ -11,7 +11,6 @@ import { useAuth } from "@/context/AuthContext";
 import { collection, query, orderBy, limit, getDocs, where } from "firebase/firestore";
 import { db } from "@/lib/firebase/config";
 import ProtectedRoute from "@/components/ProtectedRoute";
-import ReferralCard from "@/components/ReferralCard";
 
 // ─── Quick action tiles ──────────────────────────────────────────────────────
 const QUICK_ACTIONS = [
@@ -241,9 +240,6 @@ function DashboardContent() {
             </span>
           </div>
         )}
-
-        {/* ── Referral invite card ── */}
-        <ReferralCard />
 
         {/* ── FTU Onboarding Card ── */}
         {isFTU && (
